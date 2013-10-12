@@ -1,0 +1,9 @@
+data_analysis
+-------------
+
+The data analysis directory is for exploratory data analysis of the cosmic
+database. It will generate statistics and create plots.
+
+ * python -- python scripts for data analysis
+ * results -- contains data files extracted from the cosmic database
+ * plots -- generated plots summarizing the data analysis
