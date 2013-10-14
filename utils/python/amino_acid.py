@@ -156,6 +156,7 @@ class AminoAcid(object):
         Args:
             aa_hgvs (str): amino acid string following HGVS syntax
         """
+        self.is_valid = True  # assume initially the syntax is legitimate
         if self.is_missense:
             self.initial = aa_hgvs[0]
             self.mutated = aa_hgvs[-1]
@@ -198,4 +199,6 @@ class AminoAcid(object):
                 self.stop_pos = int(re.findall('\*>?(\d+)$', aa_hgvs)[0])
             else:
                 self.stop_pos = None
+        else:
+            self.is_valid = False  # did not match any of the possible cases
 

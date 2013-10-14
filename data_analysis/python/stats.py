@@ -10,7 +10,7 @@ def count_mutations(cursor):
     return cursor.fetchone()[0]  # COUNT query returns a tuple
 
 def count_aa_changes(cursor):
-    """Count amino acid change counts.
+    """Count amino acid changes.
 
     Args:
         cursor: mysqldb cursor object
@@ -22,9 +22,9 @@ def count_aa_changes(cursor):
                    FROM `cosmic_aa`""")
     aa_change_counter = {}
     for aachange, occurrences in cursor.fetchall():
-        aa = AminoAcid(amino_acid=aachange,
+        aa = AminoAcid(hgvs=aachange,
                        occurrence=occurrences)
-        if aa.is_valid:
+        if aa.is_valid and not aa.is_missing_info:
             aa_change_counter.setdefault((aa.initial, aa.mutated), 0)
             aa_change_counter[(aa.initial, aa.mutated)] += aa.occurrence
     return aa_change_counter
