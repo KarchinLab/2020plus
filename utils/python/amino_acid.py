@@ -1,5 +1,6 @@
 import re
 
+
 class AminoAcid(object):
     """ The AminoAcid class represents aa changes in the Cosmic Database.
 
@@ -60,7 +61,7 @@ class AminoAcid(object):
     def __set_missense_status(self, hgvs_string):
         """Sets the self.is_missense flag."""
         # set missense status
-        if re.search('^[A-Z?]\d+[A-Z?]$', hgvs_string):
+        if re.search('^[A-Z?*]\d+[A-Z?]$', hgvs_string):
             self.is_missense = True
         else:
             self.is_missense = False
@@ -68,6 +69,10 @@ class AminoAcid(object):
     def __set_frame_shift_status(self):
         """Check for frame shift and set the self.is_frame_shift flag."""
         if 'fs' in self.hgvs_original:
+            self.is_frame_shift = True
+        elif re.search('[*A-Z]\d+[A-Z]+\*', self.hgvs_original):
+            # it looks like some mutations dont follow the convention
+            # of using 'fs' to indicate frame shift
             self.is_frame_shift = True
         else:
             self.is_frame_shift = False
@@ -104,7 +109,6 @@ class AminoAcid(object):
             self.is_deletion = False
             self.is_insertion = False
             self.is_indel = False
-
 
     def __set_unkown_effect(self, hgvs_string):
         """Sets a flag for unkown effect according to HGVS syntax. The
@@ -143,7 +147,6 @@ class AminoAcid(object):
             self.no_protein = True
         else:
             self.no_protein = False
-
 
     def __read_hgvs_syntax(self, aa_hgvs):
         """Convert HGVS syntax for amino acid change into attributes.
@@ -186,19 +189,26 @@ class AminoAcid(object):
                     self.initial = ''
                     self.pos = []
                     self.mutated = ''
-        elif self.is_nonsense_mutation:
-            self.initial = aa_hgvs[0]
-            self.mutated = ''  # there is actually a stop codon
-            self.stop_pos = 0  # indicates same position is stop codon
-            self.pos = aa_hgvs[1:-1]
         elif self.is_frame_shift:
             self.initial = aa_hgvs[0]
             self.mutated = ''
-            self.pos = int(re.findall('[A-Z](\d+)', aa_hgvs)[0])
+            self.pos = int(re.findall('[A-Z*](\d+)', aa_hgvs)[0])
             if self.is_premature_stop_codon:
-                self.stop_pos = int(re.findall('\*>?(\d+)$', aa_hgvs)[0])
+                try:
+                    self.stop_pos = int(re.findall('\*>?(\d+)$', aa_hgvs)[0])
+                except IndexError:
+                    # unconventional usage of frameshifts may cause an index
+                    # error
+                    self.stop_pos = None
             else:
                 self.stop_pos = None
+        elif self.is_nonsense_mutation:
+            self.initial = aa_hgvs[0]
+            self.mutated = '*'  # there is actually a stop codon
+            self.stop_pos = 0  # indicates same position is stop codon
+            self.pos = int(aa_hgvs[1:-1])
+            if self.initial == self.mutated:
+                # classify nonsense-to-nonsense mutations as synonymous
+                self.is_synonymous = True
         else:
             self.is_valid = False  # did not match any of the possible cases
-

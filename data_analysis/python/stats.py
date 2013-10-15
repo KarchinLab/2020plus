@@ -1,8 +1,9 @@
 from utils.python.cosmic_db import get_cosmic_db
 from utils.python.amino_acid import AminoAcid
-import matplotlib.pyplot as plt
+import plot_data
 import csv
 import logging
+
 
 def count_mutations(cursor):
     """Count the number of entries"""
@@ -10,7 +11,8 @@ def count_mutations(cursor):
                    FROM `nucleotide`""")
     return cursor.fetchone()[0]  # COUNT query returns a tuple
 
-def count_aa_changes(cursor):
+
+def count_aa_missense_changes(cursor):
     """Count amino acid changes.
 
     Args:
@@ -33,21 +35,16 @@ def count_aa_changes(cursor):
     logger.info('Finished counting amino acid changes.')
     return aa_change_counter
 
+
 def main():
     conn = get_cosmic_db()
     cursor = conn.cursor()
-    # mycount = count_mutations(cursor)  # count mutations
-    aa_counter = count_aa_changes(cursor)
+    aa_counter = count_aa_missense_changes(cursor)
     header = [['initial', 'mutated', 'count']]
-    aa_list = sorted([[key[0], key[1], val] for key, val in aa_counter.iteritems()])
-    # aa_list = sorted([['=>'.join(key), val] for key, val in aa_counter.iteritems()])
-    csv.writer(open('data_analysis/results/aa_change.txt','wb'),
-               delimiter='\t').writerows( header + aa_list)
-    # change, count = zip(*aa_list)
-    # x = range(len(change))
-    # plt.bar(x, count)
-    # plt.xticks(x, change)
-    # plt.savefig('test.png')
+    aa_list = sorted([[key[0], key[1], val] for key, val in aa_counter.iteritems() if "*" not in key])
+    csv.writer(open('data_analysis/results/aa_change.missense.txt', 'wb'),
+               delimiter='\t').writerows(header + aa_list)
+    plot_data.plot_aa_missense_change()
     conn.close()
 
 if __name__=="__main__":
