@@ -1,6 +1,8 @@
+import utils.python
 from utils.python.cosmic_db import get_cosmic_db
 from utils.python.amino_acid import AminoAcid
 import plot_data
+import pandas as pd
 import csv
 import logging
 
@@ -36,15 +38,43 @@ def count_aa_missense_changes(cursor):
     return aa_change_counter
 
 
+def save_aa_missense_counts(aacounter):
+    """Saves missense mutation counts to file.
+
+    """
+    # save missense mutation counts into a file
+    file_path = 'data_analysis/results/aa_change.missense.txt'  # save file
+    header = [['initial', 'mutated', 'count']]
+    aa_list = sorted([[key[0], key[1], val]
+                      for key, val in aacounter.iteritems() if "*" not in key])
+    csv.writer(open(file_path, 'wb'),
+               delimiter='\t').writerows(header + aa_list)
+
+    # re-slice the mutation data
+    new_file_path = 'data_analysis/results/aa_change.properties.txt'
+    df = pd.read_csv(file_path, sep='\t')
+    # add properties of initial/mutated amino acids
+    df['initial_prop'] = df['initial'].apply(lambda x: utils.python.letter_to_prop[x])
+    df['mutated_prop'] = df['mutated'].apply(lambda x: utils.python.letter_to_prop[x])
+    ptable = pd.pivot_table(df,
+                            values='count',
+                            rows='initial_prop',
+                            cols='mutated_prop',
+                            aggfunc=sum)
+    ptable.to_csv(new_file_path, sep='\t')
+
+
 def main():
     conn = get_cosmic_db()
     cursor = conn.cursor()
+
+    # handle missense mutation data
     aa_counter = count_aa_missense_changes(cursor)
-    header = [['initial', 'mutated', 'count']]
-    aa_list = sorted([[key[0], key[1], val] for key, val in aa_counter.iteritems() if "*" not in key])
-    csv.writer(open('data_analysis/results/aa_change.missense.txt', 'wb'),
-               delimiter='\t').writerows(header + aa_list)
-    plot_data.plot_aa_missense_change()
+    save_aa_missense_counts(aa_counter)
+    plot_data.plot_aa_missense_heatmap()
+    plot_data.plot_aa_property_heatmap()
+    plot_data.plot_aa_property_barplot()
+
     conn.close()
 
 if __name__=="__main__":

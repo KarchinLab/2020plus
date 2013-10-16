@@ -1,14 +1,18 @@
+from __future__ import division  # prevents integer division
 import pandas as pd
+import utils.python
 import utils.python.plot as myplt
+import utils.python.utils as utils
 import logging
 
 
-def plot_aa_missense_change(file_path='data_analysis/results/aa_change.missense.txt',
-                            save_path='data_analysis/plots/aa_heatmap.missense.png'):
+def plot_aa_missense_heatmap(file_path='data_analysis/results/aa_change.missense.txt',
+                             save_path='data_analysis/plots/aa_missense.heatmap.png'):
     """Plot a heatmap for missense mutations.
 
     Rows are normalize in order to sum to 1. Each cell in the heatmap represents
-    the mutation transition probability.
+    the mutation transition probability. The y-axis represents the initial amino
+    acid and the x-axis represents the mutated amino acid.
 
     Kwargs:
         file_path (str): file to data containing missense mutation counts
@@ -45,3 +49,44 @@ def plot_aa_missense_change(file_path='data_analysis/results/aa_change.missense.
                   xlabel='Mutated AA',
                   ylabel='Initial AA')
     logger.info('Finished plotting heatmap.')
+
+
+def plot_aa_property_heatmap(file_path='data_analysis/results/aa_change.properties.txt',
+                             save_path='data_analysis/plots/aa_property.heatmap.png'):
+    """Plot a heatmap for mutation changes in chemical properties.
+
+    """
+    logger = logging.getLogger(__name__)
+    # logger.info('reading in %s ...' % file_path)
+    # df = pd.read_csv(file_path, sep='\t')  # read in data
+    # df = df.set_index('initial_prop')  # set rows as initial property
+    # logger.info('finished reading.')
+    df = utils.read_aa_properties(file_path)
+
+    # normalize rows to sum to 1 (transition prob. matrix)
+    df_norm = (df.T / df.T.sum()).T
+    df_norm.fillna(0)  # fill missing with 0 probability
+
+    # reorder rows/columns to go from non-polar to polar
+    order = ['nonpolar', 'polar', 'basic polar', 'acidic polar']
+    df_norm = df_norm.ix[order]
+    df_norm = df_norm[order]
+
+    # plot and save heatmap figure
+    logger.info('Plotting change in chemical property heatmap (%s) ...' % save_path)
+    myplt.heatmap(df_norm,
+                  file_path=save_path,
+                  xlabel='Mutated AA Properties',
+                  ylabel='Initial AA Properties')
+    logger.info('Finished plotting heatmap of AA chemical properties.')
+
+
+def plot_aa_property_barplot(file_path='data_analysis/results/aa_change.properties.txt',
+                             save_path='data_analysis/plots/aa_property.barplot.png'):
+    logger = logging.getLogger(file_path)
+    df = utils.read_aa_properties(file_path)
+    logger.info('Plotting change in chemical property barplot (%s) ...' % save_path)
+    myplt.barplot(df,
+                  file_path=save_path,
+                  ylabel='Counts')
+    logger.info('Finished plotting heatmap of AA chemical barplot.')
