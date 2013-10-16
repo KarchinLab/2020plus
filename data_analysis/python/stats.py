@@ -104,7 +104,7 @@ def main():
     # count mutation types
     conn = get_cosmic_db()
     mut_cts = count_aa_mutation_types(conn)
-    mut_cts.to_csv('data_analysis/results/aa_mut_type_cts.txt')
+    mut_cts.to_csv('data_analysis/results/aa_mut_type_cts.txt', sep='\t')
     plot_data.plot_aa_mutation_types_barplot(mut_cts)
     conn.close()
 
