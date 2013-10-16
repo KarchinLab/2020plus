@@ -1,6 +1,7 @@
 import utils.python
 from utils.python.cosmic_db import get_cosmic_db
 from utils.python.amino_acid import AminoAcid
+import utils.python.utils as _utils
 import plot_data
 import pandas as pd
 import pandas.io.sql as psql
@@ -27,6 +28,41 @@ def count_aa_mutation_types(cursor):
     mut_type_series = pd.Series(mutation_type)  # list => pd.Series
     unique_cts = mut_type_series.value_counts()  # return counts for unique labels
     return unique_cts
+
+
+def count_onco_aa_mut_types(conn):
+    logger = logging.getLogger(__name__)
+    logger.info('Counting oncogene mutation types . . .')
+
+    # prepare sql statement
+    oncogenes = _utils.read_oncogenes()
+    sql = "SELECT * FROM `nucleotide` WHERE Gene in " + str(oncogenes)
+    logger.debug('Oncogene SQL statement: ' + sql)
+
+    df = psql.frame_query(sql, con=conn)  # execute query
+
+    # count mutation types
+    counts = _utils.count_mutation_types(df['AminoAcid'])
+    logger.info('Finished counting oncogene mutation types.')
+    return counts
+
+
+def count_tsg_aa_mut_types(conn):
+    logger = logging.getLogger(__name__)
+    logger.info('Counting tumor suppressor gene mutation types . . .')
+
+    # prepare sql statement
+    tsgs = _utils.read_tsgs()
+    sql = "SELECT * FROM `nucleotide` WHERE Gene in " + str(tsgs)
+    logger.debug('Oncogene SQL statement: ' + sql)
+
+    df = psql.frame_query(sql, con=conn)  # execute query
+
+    # count mutation types
+    counts = _utils.count_mutation_types(df['AminoAcid'])
+    logger.info('Finished counting tumor suppressor gene mutation types.')
+    return counts
+
 
 
 def count_aa_missense_changes(cursor):
@@ -82,9 +118,23 @@ def save_aa_missense_counts(aacounter):
 def main():
     # count mutation types
     conn = get_cosmic_db()
-    mut_cts = count_aa_mutation_types(conn)
+    mut_cts = count_aa_mutation_types(conn)  # all mutation cts
     mut_cts.to_csv('data_analysis/results/aa_mut_type_cts.txt', sep='\t')
     plot_data.plot_aa_mutation_types_barplot(mut_cts)
+    onco_mut_cts = count_onco_aa_mut_types(conn)  # oncogene mutation cts
+    onco_mut_cts.to_csv('data_analysis/results/aa_onco_mut_type_cts.txt', sep='\t')
+    plot_data.plot_aa_mutation_types_barplot(onco_mut_cts,
+                                             save_path='data_analysis/plots'
+                                             '/aa_onco_mut_types.barplot.png',
+                                             title='Oncogene Protein Mutations'
+                                             ' By Type')
+    tsg_mut_cts = count_tsg_aa_mut_types(conn)
+    tsg_mut_cts.to_csv('data_analysis/results/aa_tsg_mut_type_cts.txt', sep='\t')
+    plot_data.plot_aa_mutation_types_barplot(tsg_mut_cts,
+                                             save_path='data_analysis/plots'
+                                             '/aa_tsg_mut_types.barplot.png',
+                                             title='Tumor Suppressor Protein '
+                                             'Mutations By Type')
     conn.close()
 
     with get_cosmic_db() as cursor:

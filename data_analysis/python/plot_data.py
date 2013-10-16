@@ -2,7 +2,7 @@ from __future__ import division  # prevents integer division
 import pandas as pd
 import utils.python
 import utils.python.plot as myplt
-import utils.python.utils as utils
+import utils.python.utils as _utils
 import logging
 
 
@@ -61,7 +61,7 @@ def plot_aa_property_heatmap(file_path='data_analysis/results/aa_change.properti
     # df = pd.read_csv(file_path, sep='\t')  # read in data
     # df = df.set_index('initial_prop')  # set rows as initial property
     # logger.info('finished reading.')
-    df = utils.read_aa_properties(file_path)
+    df = _utils.read_aa_properties(file_path)
 
     # normalize rows to sum to 1 (transition prob. matrix)
     df_norm = (df.T / df.T.sum()).T
@@ -84,7 +84,7 @@ def plot_aa_property_heatmap(file_path='data_analysis/results/aa_change.properti
 def plot_aa_property_barplot(file_path='data_analysis/results/aa_change.properties.txt',
                              save_path='data_analysis/plots/aa_property.barplot.png'):
     logger = logging.getLogger(__name__)
-    df = utils.read_aa_properties(file_path)
+    df = _utils.read_aa_properties(file_path)
     logger.info('Plotting change in chemical property barplot (%s) ...' % save_path)
     myplt.barplot(df,
                   file_path=save_path,
@@ -94,7 +94,8 @@ def plot_aa_property_barplot(file_path='data_analysis/results/aa_change.properti
 
 
 def plot_aa_mutation_types_barplot(mutation_cts,
-                                   save_path='data_analysis/plots/aa_mut_types.barplot.png'):
+                                   save_path='data_analysis/plots/aa_mut_types.barplot.png',
+                                   title='Protein Mutations by Type'):
     """Create a barplot graphing amino acid mutation type counts.
 
     Currently synonymous, missense, nonsense, frame shift, and indels
@@ -110,6 +111,6 @@ def plot_aa_mutation_types_barplot(mutation_cts,
     logger.info('Plotting AA mutation type counts barplot (%s) . . .' % save_path)
     myplt.barplot(mutation_cts,
                   save_path,
-                  title='Amino Acid Mutations by Type',
+                  title=title,
                   ylabel='Counts')
     logger.info('Finished plotting barplot of AA mutation types.')

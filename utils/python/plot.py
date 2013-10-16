@@ -71,3 +71,4 @@ def barplot(df, file_path, title='', xlabel='', ylabel=''):
     plt.ylabel(ylabel)
     plt.tight_layout()
     plt.savefig(file_path)
+    plt.clf()  # clear figure
