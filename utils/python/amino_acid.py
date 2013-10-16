@@ -1,4 +1,5 @@
 import re
+import logging
 
 
 class AminoAcid(object):
@@ -22,6 +23,7 @@ class AminoAcid(object):
     """
 
     def __init__(self, hgvs='', occurrence=1):
+        self.logger = logging.getLogger(__name__)
         self.hgvs_original = hgvs
         hgvs = hgvs.upper()  # convert everything to upper case
         self.hgvs = hgvs
@@ -160,6 +162,7 @@ class AminoAcid(object):
             aa_hgvs (str): amino acid string following HGVS syntax
         """
         self.is_valid = True  # assume initially the syntax is legitimate
+        self.is_synonymous = False  # assume not synonymous until proven
         if self.is_missense:
             self.initial = aa_hgvs[0]
             self.mutated = aa_hgvs[-1]
@@ -167,8 +170,6 @@ class AminoAcid(object):
             self.stop_pos = None  # not a nonsense mutation
             if self.initial == self.mutated:
                 self.is_synonymous = True
-            else:
-                self.is_synonymous = False
         elif self.is_indel:
             if self.is_insertion:
                 if not self.is_missing_info:
@@ -192,16 +193,21 @@ class AminoAcid(object):
         elif self.is_frame_shift:
             self.initial = aa_hgvs[0]
             self.mutated = ''
-            self.pos = int(re.findall('[A-Z*](\d+)', aa_hgvs)[0])
-            if self.is_premature_stop_codon:
-                try:
+            try:
+                self.pos = int(re.findall('[A-Z*](\d+)', aa_hgvs)[0])
+                if self.is_premature_stop_codon:
                     self.stop_pos = int(re.findall('\*>?(\d+)$', aa_hgvs)[0])
-                except IndexError:
-                    # unconventional usage of frameshifts may cause an index
-                    # error
+                else:
                     self.stop_pos = None
-            else:
+            except IndexError:
+                # unconventional usage of indicating frameshifts will cause
+                # index errors. For example, in some cases 'fs' is not used.
+                # In other cases, either amino acids were not included or
+                # just designated as a '?'
+                self.logger.debug('(Problem) frame shift hgvs string: "%s"' % aa_hgvs)
+                self.pos = None
                 self.stop_pos = None
+                self.is_missing_info = True
         elif self.is_nonsense_mutation:
             self.initial = aa_hgvs[0]
             self.mutated = '*'  # there is actually a stop codon

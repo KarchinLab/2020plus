@@ -3,6 +3,7 @@ from utils.python.cosmic_db import get_cosmic_db
 from utils.python.amino_acid import AminoAcid
 import plot_data
 import pandas as pd
+import pandas.io.sql as psql
 import csv
 import logging
 
@@ -12,6 +13,41 @@ def count_mutations(cursor):
     cursor.execute("""SELECT COUNT(COSMICSampleID)
                    FROM `nucleotide`""")
     return cursor.fetchone()[0]  # COUNT query returns a tuple
+
+
+def count_aa_mutation_types(cursor):
+    """Count the amino acid mutation types (missense, indel, etc.).
+    """
+    df = psql.frame_query("""SELECT * FROM `nucleotide`""", con=cursor)
+
+    mutation_type = []
+    for hgvs_aa in df['AminoAcid']:
+        aa = AminoAcid(hgvs=hgvs_aa)
+        if aa.is_missing_info:
+            # mutation has a ?
+            mutation_type.append('missing')
+        elif not aa.is_valid:
+            # does not correctly fall into a category
+            mutation_type.append('not valid')
+        else:
+            # valid mutation type to be counted
+            if aa.is_synonymous:
+                # synonymous must go before missense since mutations
+                # can be categorized as synonymous and missense. Although
+                # in reality such cases are actually synonymous and not
+                # missense mutations.
+                mutation_type.append('synonymous')
+            elif aa.is_missense:
+                mutation_type.append('missense')
+            elif aa.is_indel:
+                mutation_type.append('indel')
+            elif aa.is_nonsense_mutation:
+                mutation_type.append('nonsense')
+            elif aa.is_frame_shift:
+                mutation_type.append('frame shift')
+    mut_type_series = pd.Series(mutation_type)  # list => pd.Series
+    unique_cts = mut_type_series.value_counts()  # return counts for unique labels
+    return unique_cts
 
 
 def count_aa_missense_changes(cursor):
@@ -65,17 +101,21 @@ def save_aa_missense_counts(aacounter):
 
 
 def main():
+    # count mutation types
     conn = get_cosmic_db()
-    cursor = conn.cursor()
-
-    # handle missense mutation data
-    aa_counter = count_aa_missense_changes(cursor)
-    save_aa_missense_counts(aa_counter)
-    plot_data.plot_aa_missense_heatmap()
-    plot_data.plot_aa_property_heatmap()
-    plot_data.plot_aa_property_barplot()
-
+    mut_cts = count_aa_mutation_types(conn)
+    mut_cts.to_csv('data_analysis/results/aa_mut_type_cts.txt')
+    plot_data.plot_aa_mutation_types_barplot(mut_cts)
     conn.close()
+
+    with get_cosmic_db() as cursor:
+        # handle missense mutation data
+        aa_counter = count_aa_missense_changes(cursor)
+        save_aa_missense_counts(aa_counter)
+        plot_data.plot_aa_missense_heatmap()
+        plot_data.plot_aa_property_heatmap()
+        plot_data.plot_aa_property_barplot()
+
 
 if __name__=="__main__":
     main()

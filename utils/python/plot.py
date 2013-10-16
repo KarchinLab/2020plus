@@ -64,8 +64,10 @@ def heatmap(df, file_path, xlabel='', ylabel='', cmap=plt.cm.Blues):
     plt.savefig(file_path)
 
 
-def barplot(df, file_path, xlabel='', ylabel=''):
+def barplot(df, file_path, title='', xlabel='', ylabel=''):
     df.plot(kind='bar')
+    plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
+    plt.tight_layout()
     plt.savefig(file_path)

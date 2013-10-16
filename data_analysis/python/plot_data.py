@@ -83,10 +83,33 @@ def plot_aa_property_heatmap(file_path='data_analysis/results/aa_change.properti
 
 def plot_aa_property_barplot(file_path='data_analysis/results/aa_change.properties.txt',
                              save_path='data_analysis/plots/aa_property.barplot.png'):
-    logger = logging.getLogger(file_path)
+    logger = logging.getLogger(__name__)
     df = utils.read_aa_properties(file_path)
     logger.info('Plotting change in chemical property barplot (%s) ...' % save_path)
     myplt.barplot(df,
                   file_path=save_path,
+                  title='Amino Acid Missense Mutations by Property',
                   ylabel='Counts')
     logger.info('Finished plotting heatmap of AA chemical barplot.')
+
+
+def plot_aa_mutation_types_barplot(mutation_cts,
+                                   save_path='data_analysis/plots/aa_mut_types.barplot.png'):
+    """Create a barplot graphing amino acid mutation type counts.
+
+    Currently synonymous, missense, nonsense, frame shift, and indels
+    are plotted in the bar graph.
+
+    Args:
+        mutation_cts (pd.Series): unique counts for mutation types
+
+    Kwargs:
+        save_path (str): path to save barplot
+    """
+    logger = logging.getLogger(__name__)
+    logger.info('Plotting AA mutation type counts barplot (%s) . . .' % save_path)
+    myplt.barplot(mutation_cts,
+                  save_path,
+                  title='Amino Acid Mutations by Type',
+                  ylabel='Counts')
+    logger.info('Finished plotting barplot of AA mutation types.')

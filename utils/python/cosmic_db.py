@@ -2,6 +2,7 @@ import MySQLdb
 import ConfigParser
 import os
 
+
 def get_cosmic_db():
     """Return a connection to the cosmic database."""
     cfg_opts = get_config()  # read config file for mysql db
@@ -10,6 +11,7 @@ def get_cosmic_db():
                            passwd=cfg_opts['passwd'],
                            db=cfg_opts['db'])
     return conn
+
 
 def get_config():
     """Returns content of the database config file as a dict."""

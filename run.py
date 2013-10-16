@@ -44,6 +44,7 @@ def _data_analysis():
     if args.stats:
         data_analysis.python.stats.main()
 
+
 if __name__ == '__main__':
     # initializations
     sys.excepthook = handle_uncaught_exceptions  # handle exceptions

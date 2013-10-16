@@ -94,6 +94,7 @@ def test_frame_shift_mutation():
     # test strings
     fs1 = 'p.M1fs'
     fs2 = 'p.W288fs*12'
+    fs3 = 'p.?fs*?'
 
     # case 1 -- frame shift without premature stop codon
     aa = AminoAcid(fs1)
@@ -108,6 +109,13 @@ def test_frame_shift_mutation():
     assert aa.initial == 'W'
     assert aa.pos == 288
     assert aa.stop_pos == 12
+
+    # case 3 -- missing information case
+    aa = AminoAcid(fs3)
+    assert aa.is_frame_shift
+    assert aa.initial == '?'
+    assert aa.pos == None
+    assert aa.stop_pos == None
 
 
 def test_nonsense_mutation():
