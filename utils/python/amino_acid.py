@@ -29,6 +29,42 @@ class AminoAcid(object):
         self.hgvs = hgvs
         self.occurrence = occurrence
         self.set_amino_acid(hgvs)
+        self.set_mutation_type()
+
+    def set_mutation_type(self, mut_type=''):
+        """Sets the mutation type attribute to a single label based on
+        attribute flags.
+
+        Kwargs:
+            mut_type (str): value to set self.mut_type
+        """
+        if mut_type:
+            # user specifies a mutation type
+            self.mutation_type = mut_type
+        else:
+            # mutation type is taken from object attributes
+            if self.is_missing_info:
+                # mutation has a ?
+                self.mutation_type = 'missing'
+            elif not self.is_valid:
+                # does not correctly fall into a category
+                self.mutation_type = 'not valid'
+            else:
+                # valid mutation type to be counted
+                if self.is_synonymous:
+                    # synonymous must go before missense since mutations
+                    # can be categorized as synonymous and missense. Although
+                    # in reality such cases are actually synonymous and not
+                    # missense mutations.
+                    self.mutation_type = 'synonymous'
+                elif self.is_missense:
+                    self.mutation_type = 'missense'
+                elif self.is_indel:
+                    self.mutation_type = 'indel'
+                elif self.is_nonsense_mutation:
+                    self.mutation_type = 'nonsense'
+                elif self.is_frame_shift:
+                    self.mutation_type = 'frame shift'
 
     def set_occurrence(self, occur):
         self.occurrence = occur

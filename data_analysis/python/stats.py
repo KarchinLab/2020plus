@@ -23,28 +23,7 @@ def count_aa_mutation_types(cursor):
     mutation_type = []
     for hgvs_aa in df['AminoAcid']:
         aa = AminoAcid(hgvs=hgvs_aa)
-        if aa.is_missing_info:
-            # mutation has a ?
-            mutation_type.append('missing')
-        elif not aa.is_valid:
-            # does not correctly fall into a category
-            mutation_type.append('not valid')
-        else:
-            # valid mutation type to be counted
-            if aa.is_synonymous:
-                # synonymous must go before missense since mutations
-                # can be categorized as synonymous and missense. Although
-                # in reality such cases are actually synonymous and not
-                # missense mutations.
-                mutation_type.append('synonymous')
-            elif aa.is_missense:
-                mutation_type.append('missense')
-            elif aa.is_indel:
-                mutation_type.append('indel')
-            elif aa.is_nonsense_mutation:
-                mutation_type.append('nonsense')
-            elif aa.is_frame_shift:
-                mutation_type.append('frame shift')
+        mutation_type.append(aa.mutation_type)
     mut_type_series = pd.Series(mutation_type)  # list => pd.Series
     unique_cts = mut_type_series.value_counts()  # return counts for unique labels
     return unique_cts
