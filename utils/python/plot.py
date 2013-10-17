@@ -72,3 +72,16 @@ def barplot(df, file_path, title='', xlabel='', ylabel=''):
     plt.tight_layout()
     plt.savefig(file_path)
     plt.clf()  # clear figure
+
+
+def histogram(df, file_path, title='', xlabel='', ylabel=''):
+    df.hist(bins=range(0, 300, 5), log=True)
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.tight_layout()
+    #plt.semilogy()
+    plt.savefig(file_path)
+    plt.clf()  # clear figure
+
+

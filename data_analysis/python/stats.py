@@ -64,6 +64,19 @@ def count_tsg_aa_mut_types(conn):
     return counts
 
 
+def count_gene_mutations(conn):
+    logger = logging.getLogger(__name__)
+    logger.info('Counting number of mutations for each gene . . .')
+
+    sql = """SELECT Gene, COUNT(*) as count
+          FROM `nucleotide` GROUP BY Gene
+          ORDER BY count DESC;"""
+    logger.debug('Gene mutation count SQL statement: ' + sql)
+
+    df = psql.frame_query(sql, con=conn)  # execute query
+    logger.info('Finished getting gene mutation counts.')
+    return df
+
 
 def count_aa_missense_changes(cursor):
     """Count amino acid changes.
@@ -135,6 +148,11 @@ def main():
                                              '/aa_tsg_mut_types.barplot.png',
                                              title='Tumor Suppressor Protein '
                                              'Mutations By Type')
+
+    # gene mutation counts
+    gene_ct_df = count_gene_mutations(conn)
+    gene_ct_df.set_index('Gene').to_csv('data_analysis/results/gene_mutation_counts.txt', sep='\t')
+    plot_data.plot_gene_mutation_histogram(gene_ct_df['count'])
     conn.close()
 
     with get_cosmic_db() as cursor:

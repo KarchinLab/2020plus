@@ -114,3 +114,15 @@ def plot_aa_mutation_types_barplot(mutation_cts,
                   title=title,
                   ylabel='Counts')
     logger.info('Finished plotting barplot of AA mutation types.')
+
+
+def plot_gene_mutation_histogram(gene_cts,
+                                 save_path='data_analysis/plots/gene_mutations.histogram.png',
+                                 title='Gene Mutation Histogram'):
+    logger = logging.getLogger(__name__)
+    logger.info('Plotting gene mutation histogram (%s) . . .' % save_path)
+    myplt.histogram(gene_cts,
+                    save_path,
+                    title=title,
+                    ylabel='Counts')
+    logger.info('Finished plotting gene mutation histogram.')
