@@ -133,35 +133,36 @@ def main():
     conn = get_cosmic_db()
     mut_cts = count_aa_mutation_types(conn)  # all mutation cts
     mut_cts.to_csv('data_analysis/results/aa_mut_type_cts.txt', sep='\t')
-    plot_data.plot_aa_mutation_types_barplot(mut_cts)
+    plot_data.aa_mutation_types_barplot(mut_cts)
     onco_mut_cts = count_onco_aa_mut_types(conn)  # oncogene mutation cts
     onco_mut_cts.to_csv('data_analysis/results/aa_onco_mut_type_cts.txt', sep='\t')
-    plot_data.plot_aa_mutation_types_barplot(onco_mut_cts,
-                                             save_path='data_analysis/plots'
-                                             '/aa_onco_mut_types.barplot.png',
-                                             title='Oncogene Protein Mutations'
-                                             ' By Type')
+    plot_data.aa_mutation_types_barplot(onco_mut_cts,
+                                        save_path='data_analysis/plots'
+                                        '/aa_onco_mut_types.barplot.png',
+                                        title='Oncogene Protein Mutations'
+                                        ' By Type')
     tsg_mut_cts = count_tsg_aa_mut_types(conn)
     tsg_mut_cts.to_csv('data_analysis/results/aa_tsg_mut_type_cts.txt', sep='\t')
-    plot_data.plot_aa_mutation_types_barplot(tsg_mut_cts,
-                                             save_path='data_analysis/plots'
-                                             '/aa_tsg_mut_types.barplot.png',
-                                             title='Tumor Suppressor Protein '
-                                             'Mutations By Type')
+    plot_data.aa_mutation_types_barplot(tsg_mut_cts,
+                                        save_path='data_analysis/plots'
+                                        '/aa_tsg_mut_types.barplot.png',
+                                        title='Tumor Suppressor Protein '
+                                        'Mutations By Type')
 
     # gene mutation counts
     gene_ct_df = count_gene_mutations(conn)
     gene_ct_df.set_index('Gene').to_csv('data_analysis/results/gene_mutation_counts.txt', sep='\t')
-    plot_data.plot_gene_mutation_histogram(gene_ct_df['count'])
+    plot_data.gene_mutation_histogram(gene_ct_df['count'])
+    plot_data.cumulative_gene_mutation(gene_ct_df['count'])
     conn.close()
 
     with get_cosmic_db() as cursor:
         # handle missense mutation data
         aa_counter = count_aa_missense_changes(cursor)
         save_aa_missense_counts(aa_counter)
-        plot_data.plot_aa_missense_heatmap()
-        plot_data.plot_aa_property_heatmap()
-        plot_data.plot_aa_property_barplot()
+        plot_data.aa_missense_heatmap()
+        plot_data.aa_property_heatmap()
+        plot_data.aa_property_barplot()
 
 
 if __name__=="__main__":

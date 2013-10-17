@@ -85,3 +85,34 @@ def histogram(df, file_path, title='', xlabel='', ylabel=''):
     plt.clf()  # clear figure
 
 
+def line(data, file_path,
+         title='',
+         xlabel='',
+         ylabel='',
+         logx=False,
+         logy=False,
+         vlines=[]):
+    # plot data
+    data.plot(kind='line')
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+
+    # log scale if neccessary
+    if logx:
+        plt.xscale('log')
+    if logy:
+        plt.yscale('log')
+
+    # plot vertical lines
+    ymin, ymax = plt.ylim()  # get plotting range of y-axis
+    for l in vlines:
+        plt.vlines(l, ymin=ymin,
+                   ymax=ymax,
+                   color='red')
+
+    plt.tight_layout()
+    plt.savefig(file_path)
+    plt.clf()  # clear figure
+
+

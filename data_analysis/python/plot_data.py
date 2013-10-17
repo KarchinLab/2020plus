@@ -6,7 +6,7 @@ import utils.python.utils as _utils
 import logging
 
 
-def plot_aa_missense_heatmap(file_path='data_analysis/results/aa_change.missense.txt',
+def aa_missense_heatmap(file_path='data_analysis/results/aa_change.missense.txt',
                              save_path='data_analysis/plots/aa_missense.heatmap.png'):
     """Plot a heatmap for missense mutations.
 
@@ -51,8 +51,8 @@ def plot_aa_missense_heatmap(file_path='data_analysis/results/aa_change.missense
     logger.info('Finished plotting heatmap.')
 
 
-def plot_aa_property_heatmap(file_path='data_analysis/results/aa_change.properties.txt',
-                             save_path='data_analysis/plots/aa_property.heatmap.png'):
+def aa_property_heatmap(file_path='data_analysis/results/aa_change.properties.txt',
+                        save_path='data_analysis/plots/aa_property.heatmap.png'):
     """Plot a heatmap for mutation changes in chemical properties.
 
     """
@@ -81,8 +81,8 @@ def plot_aa_property_heatmap(file_path='data_analysis/results/aa_change.properti
     logger.info('Finished plotting heatmap of AA chemical properties.')
 
 
-def plot_aa_property_barplot(file_path='data_analysis/results/aa_change.properties.txt',
-                             save_path='data_analysis/plots/aa_property.barplot.png'):
+def aa_property_barplot(file_path='data_analysis/results/aa_change.properties.txt',
+                        save_path='data_analysis/plots/aa_property.barplot.png'):
     logger = logging.getLogger(__name__)
     df = _utils.read_aa_properties(file_path)
     logger.info('Plotting change in chemical property barplot (%s) ...' % save_path)
@@ -93,10 +93,10 @@ def plot_aa_property_barplot(file_path='data_analysis/results/aa_change.properti
     logger.info('Finished plotting heatmap of AA chemical barplot.')
 
 
-def plot_aa_mutation_types_barplot(mutation_cts,
-                                   save_path='data_analysis/plots/aa_mut_types.barplot.png',
-                                   title='Protein Mutations by Type'):
-    """Create a barplot graphing amino acid mutation type counts.
+def aa_mutation_types_barplot(mutation_cts,
+                              save_path='data_analysis/plots/aa_mut_types.barplot.png',
+                              title='Protein Mutations by Type'):
+    """Create a barplot graphing counts of amino acid mutation types.
 
     Currently synonymous, missense, nonsense, frame shift, and indels
     are plotted in the bar graph.
@@ -116,13 +116,32 @@ def plot_aa_mutation_types_barplot(mutation_cts,
     logger.info('Finished plotting barplot of AA mutation types.')
 
 
-def plot_gene_mutation_histogram(gene_cts,
-                                 save_path='data_analysis/plots/gene_mutations.histogram.png',
-                                 title='Gene Mutation Histogram'):
+def gene_mutation_histogram(gene_cts,
+                            save_path='data_analysis/plots/gene_mutations.histogram.png',
+                            title='Gene Mutation Histogram'):
     logger = logging.getLogger(__name__)
     logger.info('Plotting gene mutation histogram (%s) . . .' % save_path)
     myplt.histogram(gene_cts,
                     save_path,
                     title=title,
-                    ylabel='Counts')
+                    ylabel='Counts (log)')
     logger.info('Finished plotting gene mutation histogram.')
+
+
+def cumulative_gene_mutation(gene_cts,
+                             save_path='data_analysis/plots/gene_mutation.cumulative.png',
+                             title='Cumulative Gene Mutations'):
+    logger = logging.getLogger(__name__)
+    logger.info('Plotting cumulative gene mutations (%s) . . .' % save_path)
+    df = pd.DataFrame(gene_cts)
+    df['pseudo_count'] = 1  # each gene only counts once
+    my_counts = df.groupby('count')['pseudo_count'].sum()  # numr of genes for each mutation count
+    cumulative_cts = my_counts.cumsum()
+    myplt.line(cumulative_cts,
+               'data_analysis/plots/gene_mutations.cumulative.png',
+               logx=True,
+               title='Cumulative Gene Mutations',
+               ylabel='Number of Genes',
+               xlabel='Number of Gene Mutations (log)',
+               vlines=[7, 18])
+    logger.info('Finished plotting cumulative gene mutations.')
