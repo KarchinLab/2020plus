@@ -56,7 +56,7 @@ def generate_design_matrix(conn):
                                     ['nonsense', 0]])
         for hgvs in tmp_df['AminoAcid']:
             aa = AminoAcid(hgvs)
-            if aa.is_missense:
+            if aa.mutation_type == 'missense':
                 gene_pos_counter.setdefault(aa.pos, 0)
                 gene_pos_counter[aa.pos] += 1
             mut_type_ctr[aa.mutation_type] += 1
