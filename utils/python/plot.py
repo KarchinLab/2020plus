@@ -119,10 +119,11 @@ def line(data, file_path,
 def scatter(x, y,
             file_path,
             colors='blue',
+            size=20,
             title='',
             xlabel='',
             ylabel=''):
-    plt.scatter(x, y, c=colors)
+    plt.scatter(x, y, c=colors, s=size)
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)

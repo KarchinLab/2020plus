@@ -169,17 +169,20 @@ def pca_plot(file_path='data_analysis/results/gene_design_matrix.txt',
     df = df[df.columns.tolist()[1:]]  # remove gene column
     tmp_total_cts = df.T.sum()
     df = (df.T / tmp_total_cts).T
-    df['total_cts'] = tmp_total_cts.T
+    scatter_size = [size if size < 300 else 300 for size in tmp_total_cts]
+    # df['total_cts'] = tmp_total_cts.T
 
     results = PCA(df)
+    first_eigen_value, second_eigen_value = results.fracs[:2]
     xy_data = [[item[0], item[1]] for item in results.Y]  # first two components
     x, y = zip(*xy_data)
     myplt.scatter(x, y,
                   save_path,
                   colors=colors,
+                  size=scatter_size,
                   title='Mutation PCA',
-                  xlabel='1st component',
-                  ylabel='2nd component')
+                  xlabel='1st component (%f)' % first_eigen_value,
+                  ylabel='2nd component (%f)' % second_eigen_value)
 
 
 def all_mut_type_barplot(df,
