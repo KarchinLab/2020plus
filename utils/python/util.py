@@ -48,6 +48,23 @@ def read_tsgs():
     return tsgs
 
 
+def classify_gene(gene):
+    """Return whether the gene is an oncogene, tsg, or other.
+
+    Args:
+        gene (str): Official gene name
+
+    Returns:
+        Str: 'oncogene', 'tsg', or 'other'
+    """
+    if gene in oncogene_set:
+        return 'oncogene'
+    elif gene in tsg_set:
+        return 'tsg'
+    else:
+        return 'other'
+
+
 def get_mutation_types(hgvs_iterable):
     """Classify each protein HGVS mutation as a certain type.
 
@@ -78,3 +95,9 @@ def count_mutation_types(hgvs_iterable):
     unique_cts = mut_type_series.value_counts() # count mutation types
     return unique_cts
 
+
+# set up vogelstein oncogenes/tsgs
+oncogene_list = read_oncogenes()
+tsg_list = read_tsgs()
+oncogene_set = set(oncogene_list)
+tsg_set = set(tsg_list)

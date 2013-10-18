@@ -2,13 +2,13 @@ from __future__ import division  # prevents integer division
 import pandas as pd
 import utils.python
 import utils.python.plot as myplt
-import utils.python.utils as _utils
+import utils.python.util as _utils
 from matplotlib.mlab import PCA
 import logging
 
 
 def aa_missense_heatmap(file_path='data_analysis/results/aa_change.missense.txt',
-                             save_path='data_analysis/plots/aa_missense.heatmap.png'):
+                        save_path='data_analysis/plots/aa_missense.heatmap.png'):
     """Plot a heatmap for missense mutations.
 
     Rows are normalize in order to sum to 1. Each cell in the heatmap represents
@@ -144,7 +144,7 @@ def cumulative_gene_mutation(gene_cts,
                title='Cumulative Gene Mutations',
                ylabel='Number of Genes',
                xlabel='Number of Gene Mutations (log)',
-               vlines=[7, 18])
+               vlines=[7, 18])  # vogelstein curates at between 7-18 counts
     logger.info('Finished plotting cumulative gene mutations.')
 
 
@@ -180,3 +180,18 @@ def pca_plot(file_path='data_analysis/results/gene_design_matrix.txt',
                   title='Mutation PCA',
                   xlabel='1st component',
                   ylabel='2nd component')
+
+
+def all_mut_type_barplot(df,
+                         save_path='data_analysis/plots/all_mut_type.barplot.png',
+                         title='Protein Mutation Types by Gene Label'):
+    logger = logging.getLogger(__name__)
+    logger.info('Plotting protein mutation types by gene type (%s) . . .' % save_path)
+
+    myplt.barplot(df,
+                  save_path,
+                  title='Protein Mutation Type by Gene Type',
+                  ylabel='Counts',
+                  stacked=True)
+
+    logger.info('Finished plotting protein mutation types by gene type.')

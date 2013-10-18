@@ -1,7 +1,7 @@
 import utils.python
 from utils.python.cosmic_db import get_cosmic_db
 from utils.python.amino_acid import AminoAcid
-import utils.python.utils as _utils
+import utils.python.util as _utils
 import plot_data
 import pandas as pd
 import pandas.io.sql as psql
@@ -166,6 +166,22 @@ def save_aa_missense_counts(aacounter):
     ptable.to_csv(new_file_path, sep='\t')
 
 
+def mut_type_cts_by_gene_type(file_path='data_analysis/results/gene_design_matrix.txt'):
+    """Returns protein mutation type counts by gene type (oncogenes, tsg, other).
+
+    Kwargs:
+        file_path (str): path to mutation type cts by gene file
+
+    Returns:
+        pd.DataFrame: mutation type counts by gene type
+    """
+    df = pd.read_csv(file_path, sep='\t')
+    df['gene_type'] = df['gene'].apply(_utils.classify_gene)
+    mut_ct_df = df.iloc[:,1:]  # remove the "gene" column
+    mut_ct_df = mut_ct_df.groupby('gene_type').sum()  # get counts for each gene type
+    return mut_ct_df
+
+
 def main():
     # count mutation types
     conn = get_cosmic_db()
@@ -198,6 +214,11 @@ def main():
     with open('data_analysis/results/gene_design_matrix.txt', 'wb') as handle:
         csv.writer(handle, delimiter='\t').writerows(design_matrix)
     plot_data.pca_plot()
+
+    # plot protein mutation type counts by gene type
+    tmp_mut_df = mut_type_cts_by_gene_type()
+    tmp_mut_df.to_csv('data_analysis/results/gene_mutation_counts_by_gene_type.txt', sep='\t')
+    plot_data.all_mut_type_barplot(tmp_mut_df)
     conn.close()
 
     with get_cosmic_db() as cursor:
