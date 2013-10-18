@@ -48,6 +48,23 @@ def read_tsgs():
     return tsgs
 
 
+def get_mutation_types(hgvs_iterable):
+    """Classify each protein HGVS mutation as a certain type.
+
+    Args:
+        hgvs_iterable (iterable): iterable container with HGVS mutaiton strings
+
+    Returns:
+        pd.Series: container of protein mutation types in same order as input
+    """
+    mut_type = []
+    for hgvs_aa in hgvs_iterable:
+        aa = AminoAcid(hgvs=hgvs_aa)
+        mut_type.append(aa.mutation_type)
+    mut_type_series = pd.Series(mut_type)
+    return mut_type_series
+
+
 def count_mutation_types(hgvs_iterable):
     """Count protein mutation types from HGVS strings (missense, indels, etc.).
 
@@ -57,12 +74,7 @@ def count_mutation_types(hgvs_iterable):
     Returns:
         pd.Series: A pandas series object counting protein mutation types
     """
-    # count mutation types
-    mut_type = []
-    for hgvs_aa in hgvs_iterable:
-        aa = AminoAcid(hgvs=hgvs_aa)
-        mut_type.append(aa.mutation_type)
-    mut_type_series = pd.Series(mut_type)
-    unique_cts = mut_type_series.value_counts()
+    mut_type_series = get_mutation_types(hgvs_iterable)  # get mutation types
+    unique_cts = mut_type_series.value_counts() # count mutation types
     return unique_cts
 

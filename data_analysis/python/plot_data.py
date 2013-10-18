@@ -3,6 +3,7 @@ import pandas as pd
 import utils.python
 import utils.python.plot as myplt
 import utils.python.utils as _utils
+from matplotlib.mlab import PCA
 import logging
 
 
@@ -145,3 +146,37 @@ def cumulative_gene_mutation(gene_cts,
                xlabel='Number of Gene Mutations (log)',
                vlines=[7, 18])
     logger.info('Finished plotting cumulative gene mutations.')
+
+
+def pca_plot(file_path='data_analysis/results/gene_design_matrix.txt',
+             save_path='data_analysis/plots/gene_pca.scatter.png',
+             title='Gene Mutation PCA'):
+    logger = logging.getLogger(__name__)
+    logger.info('Plotting PCA of gene mutations (%s) . . .' % save_path)
+
+    # normalize counts
+    df = pd.read_csv(file_path, sep='\t')
+    oncogenes = set(_utils.read_oncogenes())
+    tsgs = set(_utils.read_tsgs())
+    colors = []
+    for g in df['gene']:
+        if g in oncogenes:
+            colors.append('red')
+        elif g in tsgs:
+            colors.append('purple')
+        else:
+            colors.append('blue')
+    df = df[df.columns.tolist()[1:]]  # remove gene column
+    tmp_total_cts = df.T.sum()
+    df = (df.T / tmp_total_cts).T
+    df['total_cts'] = tmp_total_cts.T
+
+    results = PCA(df)
+    xy_data = [[item[0], item[1]] for item in results.Y]  # first two components
+    x, y = zip(*xy_data)
+    myplt.scatter(x, y,
+                  save_path,
+                  colors=colors,
+                  title='Mutation PCA',
+                  xlabel='1st component',
+                  ylabel='2nd component')

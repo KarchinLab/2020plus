@@ -116,3 +116,16 @@ def line(data, file_path,
     plt.clf()  # clear figure
 
 
+def scatter(x, y,
+            file_path,
+            colors='blue',
+            title='',
+            xlabel='',
+            ylabel=''):
+    plt.scatter(x, y, c=colors)
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.tight_layout()
+    plt.savefig(file_path)
+    plt.clf()  # clear figure
