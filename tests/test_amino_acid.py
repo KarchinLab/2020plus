@@ -140,4 +140,14 @@ def test_nonsense_mutation():
     assert aa.pos == 829
 
 
+def test_synonymous_mutation():
+    """Tests if AminoAcid properly parses synonymous mutations."""
+    syn1 = 'p.A246A'
 
+    # case 1 -- normal synonymous mutation
+    aa = AminoAcid(syn1)
+    assert aa.is_synonymous
+    assert aa.mutation_type == 'synonymous'
+    assert aa.initial == 'A'
+    assert aa.mutated == 'A'
+    assert aa.pos == 246
