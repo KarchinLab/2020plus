@@ -3,26 +3,12 @@ from utils.python.cosmic_db import get_cosmic_db
 from utils.python.amino_acid import AminoAcid
 import utils.python.util as _utils
 import plot_data
+import mutation_types as mt
 import pandas as pd
 import pandas.io.sql as psql
 import csv
 from collections import OrderedDict
 import logging
-
-
-def count_mutations(cursor):
-    """Count the number of entries"""
-    cursor.execute("""SELECT COUNT(COSMICSampleID)
-                   FROM `nucleotide`""")
-    return cursor.fetchone()[0]  # COUNT query returns a tuple
-
-
-def count_aa_mutation_types(cursor):
-    """Count the amino acid mutation types (missense, indel, etc.).
-    """
-    df = psql.frame_query("""SELECT * FROM `nucleotide`""", con=cursor)
-    unique_cts = _utils.count_mutation_types(df['AminoAcid'])
-    return unique_cts
 
 
 def generate_design_matrix(conn):
@@ -66,40 +52,6 @@ def generate_design_matrix(conn):
         design_matrix.append([gene, recurrent_cts] + list(mut_type_ctr.values()))
     header = [['gene', 'recurrent missense'] + list(mut_type_ctr)]
     return header + design_matrix
-
-
-def count_onco_aa_mut_types(conn):
-    logger = logging.getLogger(__name__)
-    logger.info('Counting oncogene mutation types . . .')
-
-    # prepare sql statement
-    oncogenes = _utils.read_oncogenes()
-    sql = "SELECT * FROM `nucleotide` WHERE Gene in " + str(oncogenes)
-    logger.debug('Oncogene SQL statement: ' + sql)
-
-    df = psql.frame_query(sql, con=conn)  # execute query
-
-    # count mutation types
-    counts = _utils.count_mutation_types(df['AminoAcid'])
-    logger.info('Finished counting oncogene mutation types.')
-    return counts
-
-
-def count_tsg_aa_mut_types(conn):
-    logger = logging.getLogger(__name__)
-    logger.info('Counting tumor suppressor gene mutation types . . .')
-
-    # prepare sql statement
-    tsgs = _utils.read_tsgs()
-    sql = "SELECT * FROM `nucleotide` WHERE Gene in " + str(tsgs)
-    logger.debug('Oncogene SQL statement: ' + sql)
-
-    df = psql.frame_query(sql, con=conn)  # execute query
-
-    # count mutation types
-    counts = _utils.count_mutation_types(df['AminoAcid'])
-    logger.info('Finished counting tumor suppressor gene mutation types.')
-    return counts
 
 
 def count_gene_mutations(conn):
@@ -166,36 +118,20 @@ def save_aa_missense_counts(aacounter):
     ptable.to_csv(new_file_path, sep='\t')
 
 
-def mut_type_cts_by_gene_type(file_path='data_analysis/results/gene_design_matrix.txt'):
-    """Returns protein mutation type counts by gene type (oncogenes, tsg, other).
-
-    Kwargs:
-        file_path (str): path to mutation type cts by gene file
-
-    Returns:
-        pd.DataFrame: mutation type counts by gene type
-    """
-    df = pd.read_csv(file_path, sep='\t')
-    df['gene_type'] = df['gene'].apply(_utils.classify_gene)
-    mut_ct_df = df.iloc[:,1:]  # remove the "gene" column
-    mut_ct_df = mut_ct_df.groupby('gene_type').sum()  # get counts for each gene type
-    return mut_ct_df
-
-
 def main():
     # count mutation types
     conn = get_cosmic_db()
-    mut_cts = count_aa_mutation_types(conn)  # all mutation cts
+    mut_cts = mt.count_amino_acids(conn)  # all mutation cts
     mut_cts.to_csv('data_analysis/results/aa_mut_type_cts.txt', sep='\t')
     plot_data.aa_mutation_types_barplot(mut_cts)
-    onco_mut_cts = count_onco_aa_mut_types(conn)  # oncogene mutation cts
+    onco_mut_cts = mt.count_oncogenes(conn)  # oncogene mutation cts
     onco_mut_cts.to_csv('data_analysis/results/aa_onco_mut_type_cts.txt', sep='\t')
     plot_data.aa_mutation_types_barplot(onco_mut_cts,
                                         save_path='data_analysis/plots'
                                         '/aa_onco_mut_types.barplot.png',
                                         title='Oncogene Protein Mutations'
                                         ' By Type')
-    tsg_mut_cts = count_tsg_aa_mut_types(conn)
+    tsg_mut_cts = mt.count_tsg(conn)
     tsg_mut_cts.to_csv('data_analysis/results/aa_tsg_mut_type_cts.txt', sep='\t')
     plot_data.aa_mutation_types_barplot(tsg_mut_cts,
                                         save_path='data_analysis/plots'
@@ -216,7 +152,7 @@ def main():
     plot_data.pca_plot()
 
     # plot protein mutation type counts by gene type
-    tmp_mut_df = mut_type_cts_by_gene_type()
+    tmp_mut_df = mt.count_gene_types()
     tmp_mut_df.to_csv('data_analysis/results/gene_mutation_counts_by_gene_type.txt', sep='\t')
     plot_data.all_mut_type_barplot(tmp_mut_df)
     conn.close()
