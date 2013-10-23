@@ -74,7 +74,7 @@ class AminoAcid(object):
         aa = aa.upper()  # make sure it is upper case
         aa = aa[2:] if aa.startswith('P.') else aa  # strip "p."
         self.__set_mutation_status()  # set flags detailing the type of mutation
-        self.__read_hgvs_syntax(aa)  # read in specific mutations
+        self.__parse_hgvs_syntax(aa)  # read in specific mutations
 
     def __set_mutation_status(self):
         # strip "p." from HGVS protein syntax
@@ -186,7 +186,7 @@ class AminoAcid(object):
         else:
             self.no_protein = False
 
-    def __read_hgvs_syntax(self, aa_hgvs):
+    def __parse_hgvs_syntax(self, aa_hgvs):
         """Convert HGVS syntax for amino acid change into attributes.
 
         Specific details of the mutation are stored in attributes like
@@ -240,7 +240,7 @@ class AminoAcid(object):
                 # index errors. For example, in some cases 'fs' is not used.
                 # In other cases, either amino acids were not included or
                 # just designated as a '?'
-                self.logger.debug('(Problem) frame shift hgvs string: "%s"' % aa_hgvs)
+                self.logger.debug('(Parsing-Problem) frame shift hgvs string: "%s"' % aa_hgvs)
                 self.pos = None
                 self.stop_pos = None
                 self.is_missing_info = True
@@ -254,3 +254,5 @@ class AminoAcid(object):
                 self.is_synonymous = True
         else:
             self.is_valid = False  # did not match any of the possible cases
+            self.logger.debug('(Parsing-Problem) Invalid HGVS Amino Acid '
+                              'syntax: ' + aa_hgvs)

@@ -1,6 +1,7 @@
 """
 The mutation_types module stratifies counts by mutation types
-(missense, indel, frame shift, nonsense, and synonymous).
+for amino acids (missense, indel, frame shift, nonsense, and synonymous)
+and nucleotides (substitution, insertions, and deletions).
 """
 
 import utils.python.util as _utils
@@ -8,11 +9,21 @@ import pandas as pd
 import pandas.io.sql as psql
 import logging
 
-def count_amino_acids(cursor):
+
+def count_amino_acids(conn):
     """Count the amino acid mutation types (missense, indel, etc.).
     """
-    df = psql.frame_query("""SELECT * FROM `nucleotide`""", con=cursor)
+    df = psql.frame_query("""SELECT * FROM `nucleotide`""", con=conn)
     unique_cts = _utils.count_mutation_types(df['AminoAcid'])
+    return unique_cts
+
+
+def count_nucleotides(conn):
+    """Count the nucleotide mutation types (substitution, indels)
+    """
+    sql = "SELECT Nucleotide FROM `nucleotide`"
+    df = psql.frame_query(sql, con=conn)
+    unique_cts = _utils.count_mutation_types(df['Nucleotide'], kind='nucleotide')
     return unique_cts
 
 
@@ -28,9 +39,11 @@ def count_oncogenes(conn):
     df = psql.frame_query(sql, con=conn)  # execute query
 
     # count mutation types
-    counts = _utils.count_mutation_types(df['AminoAcid'])
+    aa_counts = _utils.count_mutation_types(df['AminoAcid'])
+    nuc_counts = _utils.count_mutation_types(df['Nucleotide'],
+                                             kind='nucleotide')
     logger.info('Finished counting oncogene mutation types.')
-    return counts
+    return aa_counts, nuc_counts
 
 
 def count_tsg(conn):
@@ -45,9 +58,11 @@ def count_tsg(conn):
     df = psql.frame_query(sql, con=conn)  # execute query
 
     # count mutation types
-    counts = _utils.count_mutation_types(df['AminoAcid'])
+    aa_counts = _utils.count_mutation_types(df['AminoAcid'])
+    nuc_counts = _utils.count_mutation_types(df['Nucleotide'],
+                                             kind='nucleotide')
     logger.info('Finished counting tumor suppressor gene mutation types.')
-    return counts
+    return aa_counts, nuc_counts
 
 
 def count_gene_types(file_path='data_analysis/results/gene_design_matrix.txt'):

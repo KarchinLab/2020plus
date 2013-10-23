@@ -94,13 +94,13 @@ def aa_property_barplot(file_path='data_analysis/results/aa_change.properties.tx
     logger.info('Finished plotting heatmap of AA chemical barplot.')
 
 
-def aa_mutation_types_barplot(mutation_cts,
-                              save_path='data_analysis/plots/aa_mut_types.barplot.png',
-                              title='Protein Mutations by Type'):
-    """Create a barplot graphing counts of amino acid mutation types.
+def mutation_types_barplot(mutation_cts,
+                           save_path='data_analysis/plots/aa_mut_types.barplot.png',
+                           title='Mutations by Type'):
+    """Create a barplot graphing counts of amino acid/DNA mutation types.
 
     Currently synonymous, missense, nonsense, frame shift, and indels
-    are plotted in the bar graph.
+    are plotted for amino acids in the bar graph.
 
     Args:
         mutation_cts (pd.Series): unique counts for mutation types
@@ -109,12 +109,12 @@ def aa_mutation_types_barplot(mutation_cts,
         save_path (str): path to save barplot
     """
     logger = logging.getLogger(__name__)
-    logger.info('Plotting AA mutation type counts barplot (%s) . . .' % save_path)
+    logger.info('Plotting mutation type counts barplot (%s) . . .' % save_path)
     myplt.barplot(mutation_cts,
                   save_path,
                   title=title,
                   ylabel='Counts')
-    logger.info('Finished plotting barplot of AA mutation types.')
+    logger.info('Finished plotting barplot of mutation types.')
 
 
 def gene_mutation_histogram(gene_cts,

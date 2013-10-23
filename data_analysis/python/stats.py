@@ -1,9 +1,10 @@
 import utils.python
 from utils.python.cosmic_db import get_cosmic_db
 from utils.python.amino_acid import AminoAcid
+from utils.python.nucleotide import Nucleotide
 import utils.python.util as _utils
 import plot_data
-import mutation_types as mt
+import mutation_types as mut_type
 import pandas as pd
 import pandas.io.sql as psql
 import csv
@@ -92,6 +93,13 @@ def count_aa_missense_changes(cursor):
     return aa_change_counter
 
 
+def count_nuc_changes(conn):
+    sql = "SELECT Nucleotide FROM `nucleotide`"
+    df = psql.frame_query(sql, con=conn)
+    for nuc_hgvs in df['Nucleotide']:
+        nuc = Nucleotide(nuc_hgvs)
+
+
 def save_aa_missense_counts(aacounter):
     """Saves missense mutation counts to file.
 
@@ -121,23 +129,49 @@ def save_aa_missense_counts(aacounter):
 def main():
     # count mutation types
     conn = get_cosmic_db()
-    mut_cts = mt.count_amino_acids(conn)  # all mutation cts
-    mut_cts.to_csv('data_analysis/results/aa_mut_type_cts.txt', sep='\t')
-    plot_data.aa_mutation_types_barplot(mut_cts)
-    onco_mut_cts = mt.count_oncogenes(conn)  # oncogene mutation cts
-    onco_mut_cts.to_csv('data_analysis/results/aa_onco_mut_type_cts.txt', sep='\t')
-    plot_data.aa_mutation_types_barplot(onco_mut_cts,
-                                        save_path='data_analysis/plots'
-                                        '/aa_onco_mut_types.barplot.png',
-                                        title='Oncogene Protein Mutations'
-                                        ' By Type')
-    tsg_mut_cts = mt.count_tsg(conn)
-    tsg_mut_cts.to_csv('data_analysis/results/aa_tsg_mut_type_cts.txt', sep='\t')
-    plot_data.aa_mutation_types_barplot(tsg_mut_cts,
-                                        save_path='data_analysis/plots'
-                                        '/aa_tsg_mut_types.barplot.png',
-                                        title='Tumor Suppressor Protein '
-                                        'Mutations By Type')
+    # handle DNA nucleotides
+    mut_nuc_cts = mut_type.count_nucleotides(conn)
+    mut_nuc_cts.to_csv(_utils.result_dir + 'nuc_mut_type_cts.txt', sep='\t')
+    tmp_plot_path = _utils.plot_dir + 'nuc_mut_types.barplot.png'  # plot path
+    plot_data.mutation_types_barplot(mut_nuc_cts,
+                                     save_path= tmp_plot_path,
+                                     title='DNA Mutations by Type')
+
+    # handle amino acids
+    mut_cts = mut_type.count_amino_acids(conn)  # all mutation cts
+    mut_cts.to_csv(_utils.result_dir + 'aa_mut_type_cts.txt', sep='\t')
+    plot_data.mutation_types_barplot(mut_cts,
+                                     title='Protein Mutations by Type')
+
+    # handle oncogene mutation types
+    onco_aa_cts, onco_nuc_cts = mut_type.count_oncogenes(conn)  # oncogene mutation cts
+    onco_aa_cts.to_csv(_utils.result_dir + 'aa_onco_mut_type_cts.txt', sep='\t')
+    onco_nuc_cts.to_csv(_utils.result_dir + 'nuc_onco_mut_type_cts.txt', sep='\t')
+    plot_data.mutation_types_barplot(onco_aa_cts,
+                                     save_path=_utils.plot_dir + \
+                                     '/aa_onco_mut_types.barplot.png',
+                                     title='Oncogene Protein Mutations'
+                                     ' By Type')
+    plot_data.mutation_types_barplot(onco_nuc_cts,
+                                     save_path=_utils.plot_dir + \
+                                     '/nuc_onco_mut_types.barplot.png',
+                                     title='Oncogene DNA Mutations'
+                                     ' By Type')
+
+    # handle tumor suppressor mutation types
+    tsg_aa_cts, tsg_nuc_cts = mut_type.count_tsg(conn)
+    tsg_aa_cts.to_csv(_utils.result_dir + 'aa_tsg_mut_type_cts.txt', sep='\t')
+    tsg_nuc_cts.to_csv(_utils.result_dir + 'nuc_tsg_mut_type_cts.txt', sep='\t')
+    plot_data.mutation_types_barplot(tsg_aa_cts,
+                                     save_path=_utils.plot_dir + \
+                                     '/aa_tsg_mut_types.barplot.png',
+                                     title='Tumor Suppressor Protein '
+                                     'Mutations By Type')
+    plot_data.mutation_types_barplot(tsg_nuc_cts,
+                                     save_path=_utils.plot_dir + \
+                                     '/nuc_tsg_mut_types.barplot.png',
+                                     title='Tumor Suppressor DNA '
+                                     'Mutations By Type')
 
     # gene mutation counts
     gene_ct_df = count_gene_mutations(conn)
@@ -147,13 +181,14 @@ def main():
 
     # get design matrix
     design_matrix = generate_design_matrix(conn)
-    with open('data_analysis/results/gene_design_matrix.txt', 'wb') as handle:
+    with open(_utils.result_dir + 'gene_design_matrix.txt', 'wb') as handle:
         csv.writer(handle, delimiter='\t').writerows(design_matrix)
     plot_data.pca_plot()
 
     # plot protein mutation type counts by gene type
-    tmp_mut_df = mt.count_gene_types()
-    tmp_mut_df.to_csv('data_analysis/results/gene_mutation_counts_by_gene_type.txt', sep='\t')
+    tmp_mut_df = mut_type.count_gene_types()
+    tmp_mut_df.to_csv(_utils.result_dir + 'gene_mutation_counts_by_gene_type.txt',
+                      sep='\t')
     plot_data.all_mut_type_barplot(tmp_mut_df)
     conn.close()
 

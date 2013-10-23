@@ -1,5 +1,6 @@
 import pandas as pd
 from amino_acid import AminoAcid
+from nucleotide import Nucleotide
 import logging
 
 
@@ -65,7 +66,7 @@ def classify_gene(gene):
         return 'other'
 
 
-def get_mutation_types(hgvs_iterable):
+def get_mutation_types(hgvs_iterable, kind='amino acid'):
     """Classify each protein HGVS mutation as a certain type.
 
     Args:
@@ -75,15 +76,21 @@ def get_mutation_types(hgvs_iterable):
         pd.Series: container of protein mutation types in same order as input
     """
     mut_type = []
-    for hgvs_aa in hgvs_iterable:
-        aa = AminoAcid(hgvs=hgvs_aa)
-        mut_type.append(aa.mutation_type)
+    if kind == 'amino acid':
+        for hgvs_aa in hgvs_iterable:
+            aa = AminoAcid(hgvs=hgvs_aa)
+            mut_type.append(aa.mutation_type)
+    elif kind == 'nucleotide':
+        for hgvs_nuc in hgvs_iterable:
+            nuc = Nucleotide(hgvs=hgvs_nuc)
+            mut_type.append(nuc.mutation_type)
     mut_type_series = pd.Series(mut_type)
     return mut_type_series
 
 
-def count_mutation_types(hgvs_iterable):
-    """Count protein mutation types from HGVS strings (missense, indels, etc.).
+def count_mutation_types(hgvs_iterable, kind='amino acid'):
+    """Count mutation types from HGVS protein strings (missense, indels, etc.)
+    and DNA strings (substitutions, indels).
 
     Args:
         hgvs_iterable (iterable): An iterable object containing protein HGVS
@@ -91,7 +98,7 @@ def count_mutation_types(hgvs_iterable):
     Returns:
         pd.Series: A pandas series object counting protein mutation types
     """
-    mut_type_series = get_mutation_types(hgvs_iterable)  # get mutation types
+    mut_type_series = get_mutation_types(hgvs_iterable, kind=kind)  # get mutation types
     unique_cts = mut_type_series.value_counts() # count mutation types
     return unique_cts
 
@@ -101,3 +108,7 @@ oncogene_list = read_oncogenes()
 tsg_list = read_tsgs()
 oncogene_set = set(oncogene_list)
 tsg_set = set(tsg_list)
+
+# setup directory paths
+plot_dir = 'data_analysis/plots/'
+result_dir = 'data_analysis/results/'

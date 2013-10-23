@@ -66,6 +66,7 @@ if __name__ == '__main__':
     log_file = '' if args.log else os.devnull
     start_logging(log_file=log_file)  # start logging
     args.func()
+    logging.info('FINISHED SUCCESSFULLY!')
 
 
     # run program
