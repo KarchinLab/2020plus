@@ -10,6 +10,9 @@ import pandas.io.sql as psql
 import logging
 
 
+logger = logging.getLogger(__name__)  # module logger
+
+
 def count_amino_acids(conn):
     """Count the amino acid mutation types (missense, indel, etc.).
     """
@@ -28,7 +31,6 @@ def count_nucleotides(conn):
 
 
 def count_oncogenes(conn):
-    logger = logging.getLogger(__name__)
     logger.info('Counting oncogene mutation types . . .')
 
     # prepare sql statement
@@ -47,7 +49,6 @@ def count_oncogenes(conn):
 
 
 def count_tsg(conn):
-    logger = logging.getLogger(__name__)
     logger.info('Counting tumor suppressor gene mutation types . . .')
 
     # prepare sql statement

@@ -1,3 +1,9 @@
+"""
+The plot.py does the actual calling of plot commands from matplotlib.
+Essentially, plot.py encapsulates all the minor tweaks needed in matplotlib
+to make a reasonable looking plot.
+"""
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -8,6 +14,8 @@ def heatmap(df, file_path, xlabel='', ylabel='', cmap=plt.cm.Blues):
     Args:
         df (pandas.DataFrame): data for heatmap plotting
         file_path (str): path to save figure (png, pdf, etc.)
+
+    Kwargs:
         xlabel (str): x-axis label
         ylabel (str): y-axis label
         cmap (cm): color scheme for heatmap
@@ -74,18 +82,37 @@ def barplot(df, file_path, title='', xlabel='', ylabel='', stacked=False):
     plt.clf()  # clear figure
 
 
-def histogram(df, file_path, title='', xlabel='', ylabel=''):
-    df.hist(bins=range(0, 300, 5), log=True)
+def histogram(df,
+              file_path,
+              bins,
+              log=False,
+              title='',
+              xlabel='',
+              ylabel=''):
+    """Plots a histogram using matplotlib.
+
+    Args:
+        df (pd.DataFrame): one dimensional data frame or series
+        file_path (str): path to save figure
+        bins (list): bin positions for histogram
+
+    Kwargs:
+        log (Bool): boolean for log scaling y-axis
+        title (str): title of plot
+        xlabel (str): label on x-axis
+        ylabel (str): label on y-axis
+    """
+    df.hist(bins=bins, log=log)
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.tight_layout()
-    #plt.semilogy()
     plt.savefig(file_path)
     plt.clf()  # clear figure
 
 
-def line(data, file_path,
+def line(data,
+         file_path,
          title='',
          xlabel='',
          ylabel='',
@@ -111,8 +138,8 @@ def line(data, file_path,
                    ymax=ymax,
                    color='red')
 
-    plt.tight_layout()
-    plt.savefig(file_path)
+    plt.tight_layout()  # adjust plot margins
+    plt.savefig(file_path)  # save figure
     plt.clf()  # clear figure
 
 

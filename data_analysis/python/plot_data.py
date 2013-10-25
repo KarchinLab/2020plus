@@ -1,3 +1,10 @@
+"""
+Performs necessary tasks prior to plotting data via the
+utils/python/plot.py module. In many cases the plot functions
+read the data from file so that data observed in the results
+directory is always consistent with the actual plots.
+"""
+
 from __future__ import division  # prevents integer division
 import pandas as pd
 import utils.python
@@ -7,8 +14,11 @@ from matplotlib.mlab import PCA
 import logging
 
 
-def aa_missense_heatmap(file_path='data_analysis/results/aa_change.missense.txt',
-                        save_path='data_analysis/plots/aa_missense.heatmap.png'):
+logger = logging.getLogger(__name__)  # logger obj for this module
+
+
+def aa_missense_heatmap(file_path=_utils.result_dir + 'aa_change.missense.txt',
+                        save_path=_utils.plot_dir + 'aa_missense.heatmap.png'):
     """Plot a heatmap for missense mutations.
 
     Rows are normalize in order to sum to 1. Each cell in the heatmap represents
@@ -19,7 +29,6 @@ def aa_missense_heatmap(file_path='data_analysis/results/aa_change.missense.txt'
         file_path (str): file to data containing missense mutation counts
         save_path (str): file name of heatmap figure
     """
-    logger = logging.getLogger(__name__)
     logger.info('reading in %s ...' % file_path)
     df = pd.read_csv(file_path, sep='\t')  # read in data
     logger.info('finished reading.')
@@ -52,16 +61,47 @@ def aa_missense_heatmap(file_path='data_analysis/results/aa_change.missense.txt'
     logger.info('Finished plotting heatmap.')
 
 
+def nuc_substitution_heatmap(file_path=_utils.result_dir + 'nuc_change.substitutions.txt',
+                            save_path=_utils.plot_dir + 'nuc_substitution.heatmap.png'):
+    """Plot a heatmap for DNA substiution mutations.
+
+    Rows are normalize in order to sum to 1 (legal probability). Each cell in the
+    heatmap represents the mutation transition probability. The y-axis represents the
+    initial nucleotide and the x-axis represents the mutated nucleotide.
+
+    Kwargs:
+        file_path (str): file to data containing substiution mutation counts
+        save_path (str): file name of heatmap figure
+    """
+    logger.info('reading in %s ...' % file_path)
+    df = pd.read_csv(file_path, sep='\t')  # read in data
+    logger.info('finished reading.')
+
+    # pivot data to create a mutation count matrix
+    ptable = pd.pivot_table(df,
+                            values='count',
+                            rows='initial',
+                            cols='mutated',
+                            aggfunc=sum)
+
+    # normalize rows to sum to 1 (transition prob. matrix)
+    ptable_norm = (ptable.T / ptable.T.sum()).T
+    ptable_norm.fillna(0)  # fill missing with 0 probability
+
+    # plot and save heatmap figure
+    logger.info('Plotting substitution mutation heatmap (%s) ...' % save_path)
+    myplt.heatmap(ptable_norm,
+                  file_path=save_path,
+                  xlabel='Mutated Base',
+                  ylabel='Initial Base')
+    logger.info('Finished plotting heatmap.')
+
+
 def aa_property_heatmap(file_path='data_analysis/results/aa_change.properties.txt',
                         save_path='data_analysis/plots/aa_property.heatmap.png'):
     """Plot a heatmap for mutation changes in chemical properties.
 
     """
-    logger = logging.getLogger(__name__)
-    # logger.info('reading in %s ...' % file_path)
-    # df = pd.read_csv(file_path, sep='\t')  # read in data
-    # df = df.set_index('initial_prop')  # set rows as initial property
-    # logger.info('finished reading.')
     df = _utils.read_aa_properties(file_path)
 
     # normalize rows to sum to 1 (transition prob. matrix)
@@ -82,9 +122,8 @@ def aa_property_heatmap(file_path='data_analysis/results/aa_change.properties.tx
     logger.info('Finished plotting heatmap of AA chemical properties.')
 
 
-def aa_property_barplot(file_path='data_analysis/results/aa_change.properties.txt',
-                        save_path='data_analysis/plots/aa_property.barplot.png'):
-    logger = logging.getLogger(__name__)
+def aa_property_barplot(file_path=_utils.result_dir + 'aa_change.properties.txt',
+                        save_path=_utils.plot_dir + 'aa_property.barplot.png'):
     df = _utils.read_aa_properties(file_path)
     logger.info('Plotting change in chemical property barplot (%s) ...' % save_path)
     myplt.barplot(df,
@@ -94,8 +133,28 @@ def aa_property_barplot(file_path='data_analysis/results/aa_change.properties.tx
     logger.info('Finished plotting heatmap of AA chemical barplot.')
 
 
+def nuc_substitution_barplot(file_path=_utils.result_dir + 'nuc_change.substitutions.txt',
+                             save_path=_utils.plot_dir + 'nuc_substitution.barplot.png'):
+    df = pd.read_csv(file_path, sep='\t')
+
+    # pivot data to create a mutation count matrix
+    ptable = pd.pivot_table(df,
+                            values='count',
+                            rows='initial',
+                            cols='mutated',
+                            aggfunc=sum)
+
+    logger.info('Plotting substitution barplot (%s) ...' % save_path)
+    myplt.barplot(ptable,
+                  file_path=save_path,
+                  title='Substitution Mutations',
+                  ylabel='Counts',
+                  stacked=True)
+    logger.info('Finished plotting bar plot.')
+
+
 def mutation_types_barplot(mutation_cts,
-                           save_path='data_analysis/plots/aa_mut_types.barplot.png',
+                           save_path=_utils.plot_dir + 'aa_mut_types.barplot.png',
                            title='Mutations by Type'):
     """Create a barplot graphing counts of amino acid/DNA mutation types.
 
@@ -107,8 +166,8 @@ def mutation_types_barplot(mutation_cts,
 
     Kwargs:
         save_path (str): path to save barplot
+        title (str): title for plot
     """
-    logger = logging.getLogger(__name__)
     logger.info('Plotting mutation type counts barplot (%s) . . .' % save_path)
     myplt.barplot(mutation_cts,
                   save_path,
@@ -118,12 +177,13 @@ def mutation_types_barplot(mutation_cts,
 
 
 def gene_mutation_histogram(gene_cts,
-                            save_path='data_analysis/plots/gene_mutations.histogram.png',
+                            save_path=_utils.plot_dir + 'gene_mutations.histogram.png',
                             title='Gene Mutation Histogram'):
-    logger = logging.getLogger(__name__)
     logger.info('Plotting gene mutation histogram (%s) . . .' % save_path)
     myplt.histogram(gene_cts,
                     save_path,
+                    bins=range(0, 300, 5),  # not many genes >300
+                    log=True,  # log scale y-axis
                     title=title,
                     ylabel='Counts (log)')
     logger.info('Finished plotting gene mutation histogram.')
@@ -132,7 +192,6 @@ def gene_mutation_histogram(gene_cts,
 def cumulative_gene_mutation(gene_cts,
                              save_path='data_analysis/plots/gene_mutation.cumulative.png',
                              title='Cumulative Gene Mutations'):
-    logger = logging.getLogger(__name__)
     logger.info('Plotting cumulative gene mutations (%s) . . .' % save_path)
     df = pd.DataFrame(gene_cts)
     df['pseudo_count'] = 1  # each gene only counts once
@@ -148,16 +207,17 @@ def cumulative_gene_mutation(gene_cts,
     logger.info('Finished plotting cumulative gene mutations.')
 
 
-def pca_plot(file_path='data_analysis/results/gene_design_matrix.txt',
-             save_path='data_analysis/plots/gene_pca.scatter.png',
+def pca_plot(file_path=_utils.result_dir + 'gene_design_matrix.txt',
+             save_path=_utils.plot_dir + 'gene_pca.scatter.png',
              title='Gene Mutation PCA'):
-    logger = logging.getLogger(__name__)
     logger.info('Plotting PCA of gene mutations (%s) . . .' % save_path)
 
     # normalize counts
     df = pd.read_csv(file_path, sep='\t')
-    oncogenes = set(_utils.read_oncogenes())
-    tsgs = set(_utils.read_tsgs())
+
+    # plot oncogenes and tumor suppressor genes as different colors
+    oncogenes = set(_utils.read_oncogenes())  # get oncogenes
+    tsgs = set(_utils.read_tsgs())  # get tumor suppressor genes
     colors = []
     for g in df['gene']:
         if g in oncogenes:
@@ -166,12 +226,17 @@ def pca_plot(file_path='data_analysis/results/gene_design_matrix.txt',
             colors.append('purple')
         else:
             colors.append('blue')
+
+    # normalize data for PCA
     df = df[df.columns.tolist()[1:]]  # remove gene column
     tmp_total_cts = df.T.sum()
     df = (df.T / tmp_total_cts).T
-    scatter_size = [size if size < 300 else 300 for size in tmp_total_cts]
-    # df['total_cts'] = tmp_total_cts.T
 
+    # get marker size for scatter plot
+    MAX_SIZE = 300  # some genes take up to much space
+    scatter_size = [size if size < MAX_SIZE else MAX_SIZE for size in tmp_total_cts]
+
+    # perform PCA
     results = PCA(df)
     first_eigen_value, second_eigen_value = results.fracs[:2]
     xy_data = [[item[0], item[1]] for item in results.Y]  # first two components
@@ -183,18 +248,16 @@ def pca_plot(file_path='data_analysis/results/gene_design_matrix.txt',
                   title='Mutation PCA',
                   xlabel='1st component (%f)' % first_eigen_value,
                   ylabel='2nd component (%f)' % second_eigen_value)
+    logger.info('Finished PCA plot.')
 
 
 def all_mut_type_barplot(df,
-                         save_path='data_analysis/plots/all_mut_type.barplot.png',
+                         save_path=_utils.plot_dir + 'all_mut_type.barplot.png',
                          title='Protein Mutation Types by Gene Label'):
-    logger = logging.getLogger(__name__)
     logger.info('Plotting protein mutation types by gene type (%s) . . .' % save_path)
-
     myplt.barplot(df,
                   save_path,
                   title='Protein Mutation Type by Gene Type',
                   ylabel='Counts',
                   stacked=True)
-
     logger.info('Finished plotting protein mutation types by gene type.')

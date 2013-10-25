@@ -108,6 +108,9 @@ class Nucleotide(object):
                     self.intron_pos = [intron_tmp1, intron_tmp2]
                     self.initial = initial
                     self.mutated = mutated
+            else:
+                self.is_valid = False
+                self.logger.debug('(Parsing-Problem) Invalid DNA Substitution: ' + hgvs_str)
         elif self.is_deletion:
             del_pattern = '([0-9?]+([-+]\d+)?(?:_))?([0-9?]+)([-+]\d+)?del([A-Z?0-9]+)$'
             matches = re.findall(del_pattern, hgvs_str)
