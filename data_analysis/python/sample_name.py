@@ -4,7 +4,8 @@ the `COSMIC_nuc` database by using the `nucleotide`.SampleName
 column.
 """
 
-import pandas as pd
+from utils.python.cosmic_db import get_cosmic_db
+import utils.python.util as _utils
 import pandas.io.sql as psql
 
 
@@ -47,3 +48,17 @@ def count_mutations(conn):
     df = psql.frame_query(sql, con=conn)
     df.MutationCounts = df.MutationCounts.astype(int)  # pandas is not auto detecting
     return df
+
+
+def main():
+    conn = get_cosmic_db()  # connect to COSMIC_nuc
+    out_dir = _utils.result_dir  # output directory for text files
+
+    sample_gene_cts = count_mutated_genes(conn)
+    sample_mutation_cts = count_mutations(conn)
+    sample_gene_cts.to_csv(out_dir + 'sample_gene_counts.txt',
+                           sep='\t', index=False)
+    sample_mutation_cts.to_csv(out_dir + 'sample_mutation_counts.txt',
+                               sep='\t', index=False)
+
+    conn.close()

@@ -2,10 +2,11 @@ import utils.python
 from utils.python.cosmic_db import get_cosmic_db
 from utils.python.amino_acid import AminoAcid
 from utils.python.nucleotide import Nucleotide
+import dna_substitutions
 import utils.python.util as _utils
 import plot_data
-import mutation_types as mut_type
-import sample_name as sample
+import mutation_types
+import sample_name
 import pandas as pd
 import pandas.io.sql as psql
 import csv
@@ -94,44 +95,6 @@ def count_aa_missense_changes(cursor):
     return aa_change_counter
 
 
-def count_nuc_substitutions(conn):
-    """Count specific single nucleotide substitutions."""
-    logger = logging.getLogger(__name__)
-    logger.info('Starting to count DNA substitutions . . .')
-
-    # query `nucleotide` table
-    sql = "SELECT Nucleotide FROM `nucleotide`"
-    df = psql.frame_query(sql, con=conn)
-
-    # count DNA substitutions
-    nuc_counter = {}
-    for nuc_change in df['Nucleotide']:
-        nuc = Nucleotide(nuc_change)
-        if nuc.is_valid and not nuc.is_missing_info and nuc.is_substitution:
-            # only take valid substitution events
-            if len(nuc.initial) == 1 and len(nuc.mutated) == 1:
-                # restrict attention to single nucleotide substitutions
-                valid_letters = ['A', 'C', 'G', 'T']
-                if nuc.initial in valid_letters and nuc.mutated in valid_letters:
-                    # unfortunately, there are a couple counts from non DNA
-                    # which need to be filtered
-                    tmp_key = (nuc.initial, nuc.mutated)  # reference => mutated
-                    nuc_counter.setdefault(tmp_key, 0)
-                    nuc_counter[tmp_key] += 1
-    logger.info('Finished counting DNA substitutions.')
-    return nuc_counter
-
-
-def save_nuc_substitutions(nuc_counter):
-    """Saves DNA substitutions to a file."""
-    file_path = _utils.result_dir + 'nuc_change.substitutions.txt'
-    header = [['initial', 'mutated', 'count']]
-    nuc_list = sorted([[key[0], key[1], val]
-                       for key, val in nuc_counter.iteritems()])
-    csv.writer(open(file_path, 'wb'),
-               delimiter='\t').writerows(header + nuc_list)
-
-
 def count_nuc_changes(conn):
     sql = "SELECT Nucleotide FROM `nucleotide`"
     df = psql.frame_query(sql, con=conn)
@@ -168,55 +131,12 @@ def save_aa_missense_counts(aacounter):
 def main():
     # count mutation types
     conn = get_cosmic_db()
-    # handle DNA nucleotides
-    mut_nuc_cts = mut_type.count_nucleotides(conn)
-    mut_nuc_cts.to_csv(_utils.result_dir + 'nuc_mut_type_cts.txt', sep='\t')
-    tmp_plot_path = _utils.plot_dir + 'nuc_mut_types.barplot.png'  # plot path
-    plot_data.mutation_types_barplot(mut_nuc_cts,
-                                     save_path= tmp_plot_path,
-                                     title='DNA Mutations by Type')
 
     # handle DNA substitutions
-    nuc_ctr = count_nuc_substitutions(conn)  # get substitution counts
-    save_nuc_substitutions(nuc_ctr)
-    plot_data.nuc_substitution_heatmap()
-    plot_data.nuc_substitution_barplot()
+    dna_substitutions.main()
 
-    # handle amino acids
-    mut_cts = mut_type.count_amino_acids(conn)  # all mutation cts
-    mut_cts.to_csv(_utils.result_dir + 'aa_mut_type_cts.txt', sep='\t')
-    plot_data.mutation_types_barplot(mut_cts,
-                                     title='Protein Mutations by Type')
-
-    # handle oncogene mutation types
-    onco_aa_cts, onco_nuc_cts = mut_type.count_oncogenes(conn)  # oncogene mutation cts
-    onco_aa_cts.to_csv(_utils.result_dir + 'aa_onco_mut_type_cts.txt', sep='\t')
-    onco_nuc_cts.to_csv(_utils.result_dir + 'nuc_onco_mut_type_cts.txt', sep='\t')
-    plot_data.mutation_types_barplot(onco_aa_cts,
-                                     save_path=_utils.plot_dir + \
-                                     '/aa_onco_mut_types.barplot.png',
-                                     title='Oncogene Protein Mutations'
-                                     ' By Type')
-    plot_data.mutation_types_barplot(onco_nuc_cts,
-                                     save_path=_utils.plot_dir + \
-                                     '/nuc_onco_mut_types.barplot.png',
-                                     title='Oncogene DNA Mutations'
-                                     ' By Type')
-
-    # handle tumor suppressor mutation types
-    tsg_aa_cts, tsg_nuc_cts = mut_type.count_tsg(conn)
-    tsg_aa_cts.to_csv(_utils.result_dir + 'aa_tsg_mut_type_cts.txt', sep='\t')
-    tsg_nuc_cts.to_csv(_utils.result_dir + 'nuc_tsg_mut_type_cts.txt', sep='\t')
-    plot_data.mutation_types_barplot(tsg_aa_cts,
-                                     save_path=_utils.plot_dir + \
-                                     '/aa_tsg_mut_types.barplot.png',
-                                     title='Tumor Suppressor Protein '
-                                     'Mutations By Type')
-    plot_data.mutation_types_barplot(tsg_nuc_cts,
-                                     save_path=_utils.plot_dir + \
-                                     '/nuc_tsg_mut_types.barplot.png',
-                                     title='Tumor Suppressor DNA '
-                                     'Mutations By Type')
+    # handle stats related to mutation types
+    mutation_types.main()
 
     # gene mutation counts
     gene_ct_df = count_gene_mutations(conn)
@@ -231,21 +151,9 @@ def main():
         csv.writer(handle, delimiter='\t').writerows(design_matrix)
     plot_data.pca_plot()
 
-    # plot protein mutation type counts by gene type
-    tmp_mut_df = mut_type.count_gene_types()
-    tmp_mut_df.to_csv(_utils.result_dir + 'gene_mutation_counts_by_gene_type.txt',
-                      sep='\t')
-    plot_data.all_mut_type_barplot(tmp_mut_df)
-
     # get information related to mutations for each sample
-    sample_gene_cts = sample.count_mutated_genes(conn)
-    sample_mutation_cts = sample.count_mutations(conn)
-    sample_gene_cts.to_csv(_utils.result_dir + 'sample_gene_counts.txt',
-                           sep='\t',
-                           index=False)
-    sample_mutation_cts.to_csv(_utils.result_dir + 'sample_mutation_counts.txt',
-                               sep='\t',
-                               index=False)
+    sample_name.main()
+
     conn.close()
 
     with get_cosmic_db() as cursor:
