@@ -89,8 +89,8 @@ def count_tsg_substitutions(conn):
 
 
 def main():
-    conn = get_cosmic_db()  # start MySQLdb connection
     out_dir = _utils.result_dir  # text file output directory
+    conn = get_cosmic_db()  # start MySQLdb connection
 
     # handle all DNA substitutions
     nuc_ctr = count_nuc_substitutions(conn)  # get substitution counts
@@ -99,18 +99,26 @@ def main():
 
     # count oncogene substitutions
     onco_nuc_ctr = count_oncogene_substitutions(conn)
-    count_save_path = out_dir + 'nuc_oncogenes.substitutions.txt'
-    save_nuc_substitutions(onco_nuc_ctr, count_save_path)
+    onco_save_path = out_dir + 'nuc_oncogenes.substitutions.txt'
+    save_nuc_substitutions(onco_nuc_ctr, onco_save_path)
 
     # count oncogene substitutions
     tsg_nuc_ctr = count_tsg_substitutions(conn)
-    count_save_path = out_dir + 'nuc_tsg.substitutions.txt'
-    save_nuc_substitutions(tsg_nuc_ctr, count_save_path)
+    tsg_save_path = out_dir + 'nuc_tsg.substitutions.txt'
+    save_nuc_substitutions(tsg_nuc_ctr, tsg_save_path)
 
     conn.close()  # close MySQLdb connection
 
     # plot results
-    plot_data.nuc_substitution_heatmap()
-    plot_data.nuc_substitution_barplot()
-
+    all_heatmap = _utils.plot_dir + 'nuc_substitution.heatmap.png'
+    plot_data.nuc_substitution_heatmap(count_save_path, all_heatmap)
+    all_barplot = _utils.plot_dir +  'nuc_substitution.barplot.png'
+    plot_data.nuc_substitution_barplot(count_save_path, all_barplot,
+                                       title='All DNA Substitution Mutations')
+    onco_barplot = _utils.plot_dir + 'nuc_onco_substitution.barplot.png'
+    plot_data.nuc_substitution_barplot(onco_save_path, onco_barplot,
+                                       title='Oncogene DNA Substitution Mutations')
+    tsg_barplot = _utils.plot_dir + 'nuc_tsg_substitution.barplot.png'
+    plot_data.nuc_substitution_barplot(tsg_save_path, tsg_barplot,
+                                       title='TSG DNA Substitution Mutations')
 

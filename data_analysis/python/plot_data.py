@@ -13,9 +13,7 @@ import utils.python.util as _utils
 from matplotlib.mlab import PCA
 import logging
 
-
 logger = logging.getLogger(__name__)  # logger obj for this module
-
 
 def aa_missense_heatmap(file_path=_utils.result_dir + 'aa_change.missense.txt',
                         save_path=_utils.plot_dir + 'aa_missense.heatmap.png'):
@@ -61,8 +59,7 @@ def aa_missense_heatmap(file_path=_utils.result_dir + 'aa_change.missense.txt',
     logger.info('Finished plotting heatmap.')
 
 
-def nuc_substitution_heatmap(file_path=_utils.result_dir + 'nuc_change.substitutions.txt',
-                            save_path=_utils.plot_dir + 'nuc_substitution.heatmap.png'):
+def nuc_substitution_heatmap(file_path, save_path):
     """Plot a heatmap for DNA substiution mutations.
 
     Rows are normalize in order to sum to 1 (legal probability). Each cell in the
@@ -133,8 +130,8 @@ def aa_property_barplot(file_path=_utils.result_dir + 'aa_change.properties.txt'
     logger.info('Finished plotting heatmap of AA chemical barplot.')
 
 
-def nuc_substitution_barplot(file_path=_utils.result_dir + 'nuc_change.substitutions.txt',
-                             save_path=_utils.plot_dir + 'nuc_substitution.barplot.png'):
+def nuc_substitution_barplot(file_path, save_path,
+                             title='DNA Substitution Mutations'):
     df = pd.read_csv(file_path, sep='\t')
 
     # pivot data to create a mutation count matrix
@@ -147,7 +144,7 @@ def nuc_substitution_barplot(file_path=_utils.result_dir + 'nuc_change.substitut
     logger.info('Plotting substitution barplot (%s) ...' % save_path)
     myplt.barplot(ptable,
                   file_path=save_path,
-                  title='Substitution Mutations',
+                  title=title,
                   ylabel='Counts',
                   stacked=True)
     logger.info('Finished plotting bar plot.')
