@@ -83,51 +83,53 @@ def count_gene_types(file_path=_utils.result_dir + 'gene_design_matrix.txt'):
 
 
 def main():
-    conn = get_cosmic_db()  # connect to COSMIC_nuc
     out_dir = _utils.result_dir  # output directory for text files
     plot_dir = _utils.plot_dir  # plotting directory
+    cfg_opts = _utils.get_output_config('mutation_types')
+    conn = get_cosmic_db()  # connect to COSMIC_nuc
 
     # handle DNA nucleotides
     mut_nuc_cts = count_nucleotides(conn)
-    mut_nuc_cts.to_csv(out_dir + 'nuc_mut_type_cts.txt', sep='\t')
-    tmp_plot_path = plot_dir + 'nuc_mut_types.barplot.png'  # plot path
+    mut_nuc_cts.to_csv(out_dir + cfg_opts['nuc_type'], sep='\t')
+    tmp_plot_path = plot_dir + cfg_opts['nuc_type_barplot']  # plot path
     plot_data.mutation_types_barplot(mut_nuc_cts,
                                      save_path= tmp_plot_path,
                                      title='DNA Mutations by Type')
 
     # handle amino acids
     mut_cts = count_amino_acids(conn)  # all mutation cts
-    mut_cts.to_csv(out_dir + 'aa_mut_type_cts.txt', sep='\t')
+    mut_cts.to_csv(out_dir + cfg_opts['aa_type'], sep='\t')
     plot_data.mutation_types_barplot(mut_cts,
+                                     save_path=plot_dir + cfg_opts['aa_type_barplot'],
                                      title='Protein Mutations by Type')
 
     # handle oncogene mutation types
     onco_aa_cts, onco_nuc_cts = count_oncogenes(conn)  # oncogene mutation cts
-    onco_aa_cts.to_csv(out_dir + 'aa_onco_mut_type_cts.txt', sep='\t')
-    onco_nuc_cts.to_csv(out_dir + 'nuc_onco_mut_type_cts.txt', sep='\t')
+    onco_aa_cts.to_csv(out_dir + cfg_opts['aa_onco_type'], sep='\t')
+    onco_nuc_cts.to_csv(out_dir + cfg_opts['nuc_onco_type'], sep='\t')
     plot_data.mutation_types_barplot(onco_aa_cts,
                                      save_path=plot_dir + \
-                                     'aa_onco_mut_types.barplot.png',
+                                     cfg_opts['aa_onco_type_barplot'],
                                      title='Oncogene Protein Mutations'
                                      ' By Type')
     plot_data.mutation_types_barplot(onco_nuc_cts,
                                      save_path=plot_dir + \
-                                     'nuc_onco_mut_types.barplot.png',
+                                     cfg_opts['nuc_onco_type_barplot'],
                                      title='Oncogene DNA Mutations'
                                      ' By Type')
 
     # handle tumor suppressor mutation types
     tsg_aa_cts, tsg_nuc_cts = count_tsg(conn)
-    tsg_aa_cts.to_csv(out_dir + 'aa_tsg_mut_type_cts.txt', sep='\t')
-    tsg_nuc_cts.to_csv(out_dir + 'nuc_tsg_mut_type_cts.txt', sep='\t')
+    tsg_aa_cts.to_csv(out_dir + cfg_opts['aa_tsg_type'], sep='\t')
+    tsg_nuc_cts.to_csv(out_dir + cfg_opts['nuc_tsg_type'], sep='\t')
     plot_data.mutation_types_barplot(tsg_aa_cts,
                                      save_path=plot_dir + \
-                                     'aa_tsg_mut_types.barplot.png',
+                                     cfg_opts['aa_tsg_type_barplot'],
                                      title='Tumor Suppressor Protein '
                                      'Mutations By Type')
     plot_data.mutation_types_barplot(tsg_nuc_cts,
                                      save_path=plot_dir + \
-                                     'nuc_tsg_mut_types.barplot.png',
+                                     cfg_opts['nuc_tsg_type_barplot'],
                                      title='Tumor Suppressor DNA '
                                      'Mutations By Type')
 

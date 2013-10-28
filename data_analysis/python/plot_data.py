@@ -15,15 +15,14 @@ import logging
 
 logger = logging.getLogger(__name__)  # logger obj for this module
 
-def aa_missense_heatmap(file_path=_utils.result_dir + 'aa_change.missense.txt',
-                        save_path=_utils.plot_dir + 'aa_missense.heatmap.png'):
+def aa_missense_heatmap(file_path, save_path):
     """Plot a heatmap for missense mutations.
 
     Rows are normalize in order to sum to 1. Each cell in the heatmap represents
     the mutation transition probability. The y-axis represents the initial amino
     acid and the x-axis represents the mutated amino acid.
 
-    Kwargs:
+    Args:
         file_path (str): file to data containing missense mutation counts
         save_path (str): file name of heatmap figure
     """
@@ -94,8 +93,7 @@ def nuc_substitution_heatmap(file_path, save_path):
     logger.info('Finished plotting heatmap.')
 
 
-def aa_property_heatmap(file_path='data_analysis/results/aa_change.properties.txt',
-                        save_path='data_analysis/plots/aa_property.heatmap.png'):
+def aa_property_heatmap(file_path, save_path):
     """Plot a heatmap for mutation changes in chemical properties.
 
     """
@@ -119,8 +117,7 @@ def aa_property_heatmap(file_path='data_analysis/results/aa_change.properties.tx
     logger.info('Finished plotting heatmap of AA chemical properties.')
 
 
-def aa_property_barplot(file_path=_utils.result_dir + 'aa_change.properties.txt',
-                        save_path=_utils.plot_dir + 'aa_property.barplot.png'):
+def aa_property_barplot(file_path, save_path):
     df = _utils.read_aa_properties(file_path)
     logger.info('Plotting change in chemical property barplot (%s) ...' % save_path)
     myplt.barplot(df,

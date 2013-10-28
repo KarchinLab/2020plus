@@ -90,35 +90,36 @@ def count_tsg_substitutions(conn):
 
 def main():
     out_dir = _utils.result_dir  # text file output directory
+    cfg_opts = _utils.get_output_config('dna_substitutions')  # get config
     conn = get_cosmic_db()  # start MySQLdb connection
 
     # handle all DNA substitutions
     nuc_ctr = count_nuc_substitutions(conn)  # get substitution counts
-    count_save_path = out_dir + 'nuc_change.substitutions.txt'
+    count_save_path = out_dir + cfg_opts['sub_out']
     save_nuc_substitutions(nuc_ctr, count_save_path)
 
     # count oncogene substitutions
     onco_nuc_ctr = count_oncogene_substitutions(conn)
-    onco_save_path = out_dir + 'nuc_oncogenes.substitutions.txt'
+    onco_save_path = out_dir + cfg_opts['onco_out']
     save_nuc_substitutions(onco_nuc_ctr, onco_save_path)
 
     # count oncogene substitutions
     tsg_nuc_ctr = count_tsg_substitutions(conn)
-    tsg_save_path = out_dir + 'nuc_tsg.substitutions.txt'
+    tsg_save_path = out_dir + cfg_opts['tsg_out']
     save_nuc_substitutions(tsg_nuc_ctr, tsg_save_path)
 
     conn.close()  # close MySQLdb connection
 
     # plot results
-    all_heatmap = _utils.plot_dir + 'nuc_substitution.heatmap.png'
+    all_heatmap = _utils.plot_dir + cfg_opts['sub_heatmap']
     plot_data.nuc_substitution_heatmap(count_save_path, all_heatmap)
-    all_barplot = _utils.plot_dir +  'nuc_substitution.barplot.png'
+    all_barplot = _utils.plot_dir + cfg_opts['sub_barplot']
     plot_data.nuc_substitution_barplot(count_save_path, all_barplot,
                                        title='All DNA Substitution Mutations')
-    onco_barplot = _utils.plot_dir + 'nuc_onco_substitution.barplot.png'
+    onco_barplot = _utils.plot_dir + cfg_opts['onco_barplot']
     plot_data.nuc_substitution_barplot(onco_save_path, onco_barplot,
                                        title='Oncogene DNA Substitution Mutations')
-    tsg_barplot = _utils.plot_dir + 'nuc_tsg_substitution.barplot.png'
+    tsg_barplot = _utils.plot_dir + cfg_opts['tsg_barplot']
     plot_data.nuc_substitution_barplot(tsg_save_path, tsg_barplot,
                                        title='TSG DNA Substitution Mutations')
 

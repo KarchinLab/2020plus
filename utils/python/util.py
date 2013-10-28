@@ -1,6 +1,7 @@
 import pandas as pd
 from amino_acid import AminoAcid
 from nucleotide import Nucleotide
+import ConfigParser
 import logging
 
 
@@ -101,6 +102,14 @@ def count_mutation_types(hgvs_iterable, kind='amino acid'):
     mut_type_series = get_mutation_types(hgvs_iterable, kind=kind)  # get mutation types
     unique_cts = mut_type_series.value_counts() # count mutation types
     return unique_cts
+
+
+def get_output_config(section):
+    """Returns the config object to output.cfg."""
+    cfg = ConfigParser.ConfigParser()
+    cfg.read('data_analysis/python/output.cfg')
+    cfg_options = dict(cfg.items(section))
+    return cfg_options
 
 
 # set up vogelstein oncogenes/tsgs
