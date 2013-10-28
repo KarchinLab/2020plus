@@ -7,6 +7,7 @@ import plot_data
 import mutation_types
 import sample_name
 import missense
+import tp53
 import pandas.io.sql as psql
 import csv
 from collections import OrderedDict
@@ -73,6 +74,10 @@ def main():
     # count mutation types
     conn = get_cosmic_db()
 
+    # look at TP53
+    tp53.main()
+
+    """
     # get design matrix
     design_matrix = generate_design_matrix(conn)
     with open(_utils.result_dir + 'gene_design_matrix.txt', 'wb') as handle:
@@ -97,7 +102,7 @@ def main():
 
     # handle protein missense mutations
     missense.main()
-
+    """
     conn.close()
 
 
