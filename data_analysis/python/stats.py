@@ -5,6 +5,7 @@ import dna_substitutions
 import utils.python.util as _utils
 import plot_data
 import mutation_types
+import single_gene
 import sample_name
 import missense
 import tp53
@@ -75,7 +76,7 @@ def main():
     conn = get_cosmic_db()
 
     # look at TP53
-    tp53.main()
+    single_gene.main('TP53')
 
     """
     # get design matrix
