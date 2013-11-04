@@ -5,6 +5,7 @@ import sys
 import traceback
 import argparse
 import data_analysis.python.stats
+import classify.python.classifier
 
 # define exit status
 EXCEPTION_EXIT_STATUS = 1
@@ -46,6 +47,11 @@ def _data_analysis():
         data_analysis.python.stats.main()
 
 
+def _classify():
+    """Wrapper function to call scripts in the classify folder."""
+    classify.python.classifier.main()
+
+
 if __name__ == '__main__':
     # initializations
     sys.excepthook = handle_uncaught_exceptions  # handle exceptions
@@ -65,6 +71,10 @@ if __name__ == '__main__':
     parser_data_analysis.add_argument('-s', '--stats',
                                       action='store_true',
                                       help='Generate data analysis stats')
+    parser_classify = subparser.add_parser('classify',
+                                           help='Run classification scripts'
+                                           ' in the classify folder')
+    parser_classify.set_defaults(func=_classify)
 
     args = parser.parse_args()
     log_file = '' if args.log else os.devnull
