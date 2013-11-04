@@ -73,6 +73,15 @@ def heatmap(df, file_path, xlabel='', ylabel='', cmap=plt.cm.Blues):
 
 
 def barplot(df, file_path, title='', xlabel='', ylabel='', stacked=False):
+    """barplot generates/saves a bar plot from a pandas data frame.
+
+    Args:
+        df (pd.DataFrame): data frame for bar plot
+        file_path (str): path to save bar plot figure
+
+    Kwargs:
+        Matplotlib options for plotting
+    """
     df.plot(kind='bar', stacked=stacked)
     plt.title(title)
     plt.xlabel(xlabel)
@@ -150,6 +159,21 @@ def scatter(x, y,
             title='',
             xlabel='',
             ylabel=''):
+    """Create a 2D scatter plot. Many of the optional arguements
+    deal with formatting the plot.
+
+    Args:
+        x (list|array): container for x-axis data
+        y (list|array): container for y-axis data
+        file_path (str): path to save figure
+
+    Kwargs:
+        colors (str|list): either single color (e.g. 'blue') or a list
+        size (int|list): int for marker size or a list of ints
+        title (str): title for plot
+        xlabel (str): x-axis label
+        ylabel (str): y-axis label
+    """
     plt.scatter(x, y, c=colors, s=size)
     plt.title(title)
     plt.xlabel(xlabel)

@@ -8,3 +8,4 @@ database. It will generate statistics and create plots.
  * R -- R scripts for data analysis
  * results -- contains data files extracted from the cosmic database
  * plots -- generated plots summarizing the data analysis
+ * gene_lists -- contains important gene lists obtained from the literature

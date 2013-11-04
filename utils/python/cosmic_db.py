@@ -18,6 +18,6 @@ def get_config():
     cfg = ConfigParser.ConfigParser()
     cfg.read(os.path.join(os.path.dirname(__file__),
                           'db.cfg'))
-    cfg_options = dict(cfg.items('database'))
+    cfg_options = dict(cfg.items('COSMIC_nuc'))
     return cfg_options
 

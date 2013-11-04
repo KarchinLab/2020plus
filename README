@@ -1,0 +1,19 @@
+Usage
+-----
+
+This project has only been tested on python 2.7.5
+
+The requirements.txt file lists the python dependencies I used for developing
+the package.
+
+run.py is the single command line interface for this project.
+Type python run.py --help for details.
+
+Directories
+-----------
+
+* data_analysis -- outputs descriptive plots and results from COSMIC database
+* classify -- analyzes results of classifying genes as oncogenes or tsg
+* log -- contain log files from running run.py
+* utils -- useful miscellaneous code for this package
+* tests -- unit tests to be tested by the python "nose" package

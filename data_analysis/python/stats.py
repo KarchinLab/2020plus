@@ -54,6 +54,7 @@ def generate_design_matrix(conn):
         mut_type_ctr['missense'] -= recurrent_cts  # subtract off the recurrent missense
         design_matrix.append([gene, recurrent_cts] + list(mut_type_ctr.values()))
     header = [['gene', 'recurrent missense'] + list(mut_type_ctr)]
+    logger.info('Finished creating design matrix.')
     return header + design_matrix
 
 
