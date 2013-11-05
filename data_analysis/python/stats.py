@@ -72,7 +72,6 @@ def count_gene_mutations(conn):
 
 
 def main():
-    # count mutation types
     conn = get_cosmic_db()
 
     # get design matrix
@@ -100,8 +99,16 @@ def main():
     # handle protein missense mutations
     missense.main()
 
-    # look at TP53
-    single_gene.main('TP53')
+    # look at individual genes
+    with open('data_analysis/python/single_gene.txt') as handle:
+        for row in handle:
+            gene = row.strip()
+            try:
+                single_gene.main(gene)
+            except:
+                # be careful this catches all exceptions which might
+                # hide other errors
+                logger.debug('(Problem) Gene not found: %s' % gene)
 
     conn.close()  # close COSMIC_nuc connection
 
