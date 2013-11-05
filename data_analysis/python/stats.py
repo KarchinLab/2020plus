@@ -100,7 +100,7 @@ def main():
     missense.main()
 
     # look at individual genes
-    with open('data_analysis/python/single_gene.txt') as handle:
+    with open(_utils.config_dir + 'single_gene.txt') as handle:
         for row in handle:
             gene = row.strip()
             try:

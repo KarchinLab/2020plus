@@ -16,4 +16,5 @@ Directories
 * classify -- analyzes results of classifying genes as oncogenes or tsg
 * log -- contain log files from running run.py
 * utils -- useful miscellaneous code for this package
+* config -- contains configuration files for running code
 * tests -- unit tests to be tested by the python "nose" package

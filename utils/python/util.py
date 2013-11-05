@@ -4,6 +4,10 @@ from nucleotide import Nucleotide
 import ConfigParser
 import logging
 
+# setup directory paths
+plot_dir = 'data_analysis/plots/'
+result_dir = 'data_analysis/results/'
+config_dir = 'config/'
 
 def read_aa_properties(file_path):
     """Read aa property counts from the data_analysis/results folder.
@@ -107,7 +111,7 @@ def count_mutation_types(hgvs_iterable, kind='amino acid'):
 def get_output_config(section):
     """Returns the config object to output.cfg."""
     cfg = ConfigParser.ConfigParser()
-    cfg.read('data_analysis/python/output.cfg')
+    cfg.read(config_dir + 'output.cfg')
     cfg_options = dict(cfg.items(section))
     return cfg_options
 
@@ -117,7 +121,3 @@ oncogene_list = read_oncogenes()
 tsg_list = read_tsgs()
 oncogene_set = set(oncogene_list)
 tsg_set = set(tsg_list)
-
-# setup directory paths
-plot_dir = 'data_analysis/plots/'
-result_dir = 'data_analysis/results/'

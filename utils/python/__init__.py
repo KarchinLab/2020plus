@@ -1,5 +1,6 @@
 import csv
 import os
+import util as _utils
 
 # parent directory of this file
 file_dir = os.path.dirname(os.path.abspath(__file__))
@@ -11,7 +12,9 @@ THREE_LETTER_COL = 2
 PROPERTY_COL = 3
 
 # read in properties of amino acids
-aa_prop = list(csv.reader(open(os.path.join(file_dir, 'aa_properties.txt'), 'r'),
+#aa_prop = list(csv.reader(open(os.path.join(file_dir, 'aa_properties.txt'), 'r'),
+                          #delimiter='\t'))[1:]
+aa_prop = list(csv.reader(open(_utils.config_dir + 'aa_properties.txt', 'r'),
                           delimiter='\t'))[1:]
 
 # convenience dicts for mapping amino acid letter to other atributes

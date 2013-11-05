@@ -1,6 +1,6 @@
 import MySQLdb
 import ConfigParser
-import os
+import util as _utils
 
 
 def get_cosmic_db():
@@ -16,8 +16,7 @@ def get_cosmic_db():
 def get_config():
     """Returns content of the database config file as a dict."""
     cfg = ConfigParser.ConfigParser()
-    cfg.read(os.path.join(os.path.dirname(__file__),
-                          'db.cfg'))
+    cfg.read(_utils.config_dir + 'db.cfg')
     cfg_options = dict(cfg.items('COSMIC_nuc'))
     return cfg_options
 
