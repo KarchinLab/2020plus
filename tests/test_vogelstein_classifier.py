@@ -2,6 +2,7 @@ from ..classify.python.vogelstein_classifier import VogelsteinClassifier
 
 
 def test_oncogene_counts():
+    """Test if VogelsteinClassifier classifies oncogenes by cts correctly."""
     vclf = VogelsteinClassifier()  # get 20/20 rule classifier
 
     # example data
@@ -29,6 +30,7 @@ def test_oncogene_counts():
 
 
 def test_oncogene_pct():
+    """Test if VogelsteinClassifier classifies oncogenes by pct correctly."""
     vclf = VogelsteinClassifier()
 
     # example data
@@ -51,6 +53,7 @@ def test_oncogene_pct():
 
 
 def test_tsg_counts():
+    """Test if VogelsteinClassifier classifies tsg by cts correctly."""
     vclf = VogelsteinClassifier()  # get 20/20 rule classifier
 
     # example data
@@ -78,6 +81,7 @@ def test_tsg_counts():
 
 
 def test_tsg_pct():
+    """Test if VogelsteinClassifier classifies tsg by pct correctly."""
     vclf = VogelsteinClassifier()
 
     # example data
