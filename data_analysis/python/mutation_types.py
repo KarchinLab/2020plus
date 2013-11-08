@@ -66,7 +66,7 @@ def count_tsg(conn):
     return aa_counts, nuc_counts
 
 
-def count_gene_types(file_path=_utils.result_dir + 'gene_design_matrix.txt'):
+def count_gene_types(file_path):
     """Returns protein mutation type counts by gene type (oncogenes, tsg, other).
 
     Kwargs:
@@ -75,10 +75,9 @@ def count_gene_types(file_path=_utils.result_dir + 'gene_design_matrix.txt'):
     Returns:
         pd.DataFrame: mutation type counts by gene type
     """
-    df = pd.read_csv(file_path, sep='\t')
-    df['gene_type'] = df['gene'].apply(_utils.classify_gene)
-    mut_ct_df = df.iloc[:, 1:]  # remove the "gene" column
-    mut_ct_df = mut_ct_df.groupby('gene_type').sum()  # get counts for each gene type
+    df = pd.read_csv(file_path, sep='\t', index_col=0)
+    df['gene_type'] = df.index.to_series().apply(_utils.classify_gene)
+    mut_ct_df = df.groupby('gene_type').sum()  # get counts for each gene type
     return mut_ct_df
 
 
@@ -101,7 +100,8 @@ def main():
     mut_cts.to_csv(out_dir + cfg_opts['aa_type'], sep='\t')
     plot_data.mutation_types_barplot(mut_cts,
                                      save_path=plot_dir + cfg_opts['aa_type_barplot'],
-                                     title='Protein Mutations by Type')
+                                     title='Protein Mutations by Type '
+                                           r'for \textit{nucleotide} Table')
 
     # handle oncogene mutation types
     onco_aa_cts, onco_nuc_cts = count_oncogenes(conn)  # oncogene mutation cts
@@ -134,9 +134,11 @@ def main():
                                      'Mutations By Type')
 
     # plot protein mutation type counts by gene type
-    tmp_mut_df = count_gene_types()
-    tmp_mut_df.to_csv(out_dir + 'gene_mutation_counts_by_gene_type.txt',
+    cfg_opts2 = _utils.get_output_config('stats')  # need to get diff cfg section
+    tmp_mut_df = count_gene_types(out_dir + cfg_opts2['gene_design_matrix'])
+    tmp_mut_df.to_csv(out_dir + cfg_opts['gene_mutation_counts_by_type'],
                       sep='\t')
-    plot_data.all_mut_type_barplot(tmp_mut_df)
+    plot_data.all_mut_type_barplot(tmp_mut_df,
+                                   plot_dir + cfg_opts['all_mut_type_barplot'])
 
     conn.close()  # close connection

@@ -1,6 +1,6 @@
 """
 The sample_name module analyzes characteristics of samples in
-the `COSMIC_nuc` database by using the `nucleotide`.SampleName
+the `COSMIC_nuc` database by using the `nucleotide`. SampleName
 column.
 """
 

@@ -58,7 +58,7 @@ def aa_missense_heatmap(file_path, save_path):
     logger.info('Finished plotting heatmap.')
 
 
-def nuc_substitution_heatmap(file_path, save_path):
+def nuc_substitution_heatmap(file_path, save_path, title=''):
     """Plot a heatmap for DNA substiution mutations.
 
     Rows are normalize in order to sum to 1 (legal probability). Each cell in the
@@ -88,6 +88,7 @@ def nuc_substitution_heatmap(file_path, save_path):
     logger.info('Plotting substitution mutation heatmap (%s) ...' % save_path)
     myplt.heatmap(ptable_norm,
                   file_path=save_path,
+                  title=title,
                   xlabel='Mutated Base',
                   ylabel='Initial Base')
     logger.info('Finished plotting heatmap.')
@@ -201,8 +202,8 @@ def cumulative_gene_mutation(gene_cts,
     logger.info('Finished plotting cumulative gene mutations.')
 
 
-def pca_plot(file_path=_utils.result_dir + 'gene_design_matrix.txt',
-             save_path=_utils.plot_dir + 'gene_pca.scatter.png',
+def pca_plot(file_path,
+             save_path,
              title='Gene Mutation PCA'):
     logger.info('Plotting PCA of gene mutations (%s) . . .' % save_path)
 
@@ -246,7 +247,7 @@ def pca_plot(file_path=_utils.result_dir + 'gene_design_matrix.txt',
 
 
 def all_mut_type_barplot(df,
-                         save_path=_utils.plot_dir + 'all_mut_type.barplot.png',
+                         save_path,
                          title='Protein Mutation Types by Gene Label'):
     logger.info('Plotting protein mutation types by gene type (%s) . . .' % save_path)
     myplt.barplot(df,

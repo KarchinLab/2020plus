@@ -9,6 +9,9 @@ the package.
 run.py is the single command line interface for this project.
 Type python run.py --help for details.
 
+NOTE: Run run.py while in the same directory. Because of package imports,
+running from a different directory may cause an import error.
+
 Directories
 -----------
 

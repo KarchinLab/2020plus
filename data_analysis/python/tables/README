@@ -1,0 +1,4 @@
+Scripts in this directory evaluate the quality of the tables in the
+database. Particularly the COSMIC_nuc database seems not to have consistent
+data across tables. Further COSMIC_nuc has processed data and so it may
+not have representative mutations of the actual COSMIC database.

@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def heatmap(df, file_path, xlabel='', ylabel='', cmap=plt.cm.Blues):
+def heatmap(df, file_path, title='', xlabel='', ylabel='', cmap=plt.cm.Blues):
     """Plot a heatmap from a pandas dataframe.
 
     Args:
@@ -64,6 +64,7 @@ def heatmap(df, file_path, xlabel='', ylabel='', cmap=plt.cm.Blues):
         t.tick2On = False
 
     # handle labels
+    plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.tight_layout()

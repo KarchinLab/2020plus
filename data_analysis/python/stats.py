@@ -6,7 +6,9 @@ import utils.python.util as _utils
 import plot_data
 import mutation_types
 import single_gene
-import sample_name
+import tables.sample_name as sample_name
+import tables.cosmic_aa as cosmic_aa
+import tables.cosmic_genomic as cosmic_genomic
 import missense
 import pandas.io.sql as psql
 import csv
@@ -72,13 +74,20 @@ def count_gene_mutations(conn):
 
 
 def main():
+    cfg_opts = _utils.get_output_config('stats')  # get config
     conn = get_cosmic_db()
+
+    # check info about COSMIC_nuc tables
+    cosmic_aa.main()  # check cosmic_aa table
+    sample_name.main()  # info related to mutations for each sample
+    cosmic_genomic.main()  # check cosmic_genomic table
 
     # get design matrix
     design_matrix = generate_design_matrix(conn)
-    with open(_utils.result_dir + 'gene_design_matrix.txt', 'wb') as handle:
+    with open(_utils.result_dir + cfg_opts['gene_design_matrix'], 'wb') as handle:
         csv.writer(handle, delimiter='\t').writerows(design_matrix)
-    plot_data.pca_plot()
+    plot_data.pca_plot(_utils.result_dir + cfg_opts['gene_design_matrix'],
+                       _utils.plot_dir + cfg_opts['pca_plot'])
 
     # handle DNA substitutions
     dna_substitutions.main()
@@ -92,9 +101,6 @@ def main():
                                         sep='\t')
     plot_data.gene_mutation_histogram(gene_ct_df['count'])
     plot_data.cumulative_gene_mutation(gene_ct_df['count'])
-
-    # get information related to mutations for each sample
-    sample_name.main()
 
     # handle protein missense mutations
     missense.main()
