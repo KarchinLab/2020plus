@@ -124,6 +124,14 @@ def get_input_config(section):
     return cfg_options
 
 
+def get_db_config(section):
+    """Return the config object to db.cfg."""
+    cfg = ConfigParser.ConfigParser()
+    cfg.read(config_dir + 'db.cfg')
+    cfg_options = dict(cfg.items(section))
+    return cfg_options
+
+
 def read_cosmic_tsv_by_gene(gene_name):
     """Reads the stored flat file corresponding to the gene_name.
 
