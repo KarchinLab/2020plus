@@ -35,7 +35,7 @@ def read_oncogenes():
     Returns:
         oncogenes (tuple): tuple of gene names considered oncogenes
     """
-    with open('data_analysis/gene_lists/oncogenes_vogelstein.txt', 'r') as handle:
+    with open('data/gene_lists/oncogenes_vogelstein.txt', 'r') as handle:
         oncogenes = tuple(gene.strip() for gene in handle.readlines())
     return oncogenes
 
@@ -49,7 +49,7 @@ def read_tsgs():
     Returns:
         tsgs (tuple): tuple of gene names considered as tumor suppressors
     """
-    with open('data_analysis/gene_lists/tsg_vogelstein.txt', 'r') as handle:
+    with open('data/gene_lists/tsg_vogelstein.txt', 'r') as handle:
         tsgs = tuple(gene.strip() for gene in handle.readlines())
     return tsgs
 
@@ -114,6 +114,34 @@ def get_output_config(section):
     cfg.read(config_dir + 'output.cfg')
     cfg_options = dict(cfg.items(section))
     return cfg_options
+
+
+def get_input_config(section):
+    """Returns the config object to input.cfg."""
+    cfg = ConfigParser.ConfigParser()
+    cfg.read(config_dir + 'input.cfg')
+    cfg_options = dict(cfg.items(section))
+    return cfg_options
+
+
+def read_cosmic_tsv_by_gene(gene_name):
+    """Reads the stored flat file corresponding to the gene_name.
+
+    NOTE: Assumes cosmic flat files are in cosmic_dir specified by input.cfg
+    and are sorted into alphabetical directories (eg. 'A'...'Z').
+
+    Args:
+        gene_name (str): gene name
+
+    Returns:
+        pd.DataFrame: tsv file as a pandas dataframe
+    """
+    cfg_opt = get_input_config('input')
+    database_dir = cfg_opt['cosmic_dir']  # COSMIC_nuc database directory
+    gene_dir = gene_name[0].upper() + '/'  # gene tsv in alphabetical directory listing
+    tsv_path = database_dir + gene_dir + gene_name + '.tsv'  # path to tsv file
+    df = pd.read_csv(tsv_path, sep='\t')
+    return df
 
 
 # set up vogelstein oncogenes/tsgs

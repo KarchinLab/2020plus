@@ -1,0 +1,8 @@
+data folder
+-----------
+
+* genes.tsv -- tab delimited file that is a concatenation of mutations found
+               in the /databases/COSMIC/ folder.
+* genes.db -- same contents as genes.tsv except as a sqlite database
+* gene_lists/ -- contains list of genes defined as TSG or oncogenes in vogelstein's
+                 science paper

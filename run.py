@@ -6,6 +6,7 @@ import traceback
 import argparse
 import data_analysis.python.stats
 import classify.python.classifier
+import utils.python.gene_tsv
 
 # define exit status
 EXCEPTION_EXIT_STATUS = 1
@@ -52,6 +53,11 @@ def _classify():
     classify.python.classifier.main()
 
 
+def _savedb():
+    """Wrapper function to call gene_tsv's main function"""
+    utils.python.gene_tsv.main()
+
+
 if __name__ == '__main__':
     # initializations
     sys.excepthook = handle_uncaught_exceptions  # handle exceptions
@@ -75,6 +81,12 @@ if __name__ == '__main__':
                                            help='Run classification scripts'
                                            ' in the classify folder')
     parser_classify.set_defaults(func=_classify)
+    help_string = ('Concatenate tab delim gene files found in /databases/COSMIC '
+                   'and then save them to a sqlite database for further use.')
+    parser_savedb = subparser.add_parser('savedb',
+                                         help=help_string)
+    parser_savedb.set_defaults(func=_savedb)
+
 
     args = parser.parse_args()
     log_file = '' if args.log else os.devnull
