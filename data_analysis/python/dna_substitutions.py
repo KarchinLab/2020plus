@@ -40,7 +40,7 @@ def count_nuc_substitutions(conn):
     logger.info('Starting to count DNA substitutions . . .')
 
     # query `nucleotide` table
-    sql = "SELECT Nucleotide FROM `nucleotide`"
+    sql = "SELECT Nucleotide FROM nucleotide"
     df = psql.frame_query(sql, con=conn)
 
     # count DNA substitutions
@@ -64,7 +64,7 @@ def count_oncogene_substitutions(conn):
 
     # prepare sql statement
     oncogenes = _utils.oncogene_list
-    sql = "SELECT Nucleotide FROM `nucleotide` WHERE Gene in " + str(oncogenes)
+    sql = "SELECT Nucleotide FROM nucleotide WHERE Gene in " + str(oncogenes)
     logger.debug('Oncogene SQL statement: ' + sql)
 
     df = psql.frame_query(sql, con=conn)  # execute query
@@ -79,7 +79,7 @@ def count_tsg_substitutions(conn):
 
     # prepare sql statement
     tsgs = _utils.tsg_list
-    sql = "SELECT Nucleotide FROM `nucleotide` WHERE Gene in " + str(tsgs)
+    sql = "SELECT Nucleotide FROM nucleotide WHERE Gene in " + str(tsgs)
     logger.debug('Oncogene SQL statement: ' + sql)
 
     df = psql.frame_query(sql, con=conn)  # execute query
@@ -88,10 +88,10 @@ def count_tsg_substitutions(conn):
     return nuc_count
 
 
-def main():
+def main(conn):
     out_dir = _utils.result_dir  # text file output directory
     cfg_opts = _utils.get_output_config('dna_substitutions')  # get config
-    conn = get_cosmic_db()  # start MySQLdb connection
+    #conn = get_cosmic_db()  # start MySQLdb connection
 
     # handle all DNA substitutions
     nuc_ctr = count_nuc_substitutions(conn)  # get substitution counts
@@ -108,7 +108,7 @@ def main():
     tsg_save_path = out_dir + cfg_opts['tsg_out']
     save_nuc_substitutions(tsg_nuc_ctr, tsg_save_path)
 
-    conn.close()  # close MySQLdb connection
+    #conn.close()  # close MySQLdb connection
 
     # plot results
     all_heatmap = _utils.plot_dir + cfg_opts['sub_heatmap']
@@ -122,4 +122,5 @@ def main():
     tsg_barplot = _utils.plot_dir + cfg_opts['tsg_barplot']
     plot_data.nuc_substitution_barplot(tsg_save_path, tsg_barplot,
                                        title='TSG DNA Substitution Mutations')
+
 

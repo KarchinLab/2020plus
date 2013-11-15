@@ -12,7 +12,7 @@ def count_primary_tissues(gene, conn):
     """Count the number of mutations in a single gene for each primary tissue."""
     logger.info('Counting %s mutations for each primary tissue ...' % gene)
     sql = ("SELECT PrimaryTissue, COUNT(*) as Counts"
-           " FROM `nucleotide` nuc"
+           " FROM nucleotide nuc"
            " WHERE nuc.Gene='%s'"
            " GROUP BY PrimaryTissue"
            " ORDER BY Counts Desc;" % gene)
@@ -25,13 +25,13 @@ def count_primary_tissues(gene, conn):
 
 def count_types_primary_tissue(gene, conn):
     sql = ("SELECT PrimaryTissue, Nucleotide, AminoAcid "
-           "FROM `nucleotide` nuc "
+           "FROM nucleotide nuc "
            "WHERE nuc.Gene='%s' "
            "ORDER BY PrimaryTissue" % gene)
     df = psql.frame_query(sql, con=conn)
 
     sql = ("SELECT PrimaryTissue, COUNT(*) as Counts "
-           "FROM `nucleotide` nuc "
+           "FROM nucleotide nuc "
            "WHERE nuc.Gene='%s' "
            "GROUP BY PrimaryTissue "
            "ORDER BY Counts Desc" % gene)
@@ -52,7 +52,7 @@ def count_types_primary_tissue(gene, conn):
     return aa_df, nuc_df
 
 
-def main(gene_name):
+def main(gene_name, conn):
     cfg_opts = _utils.get_output_config('single_gene')
 
     # set up directory
@@ -63,7 +63,7 @@ def main(gene_name):
     if not os.path.isdir(gene_plot_dir):
         os.mkdir(gene_plot_dir)
 
-    conn = get_cosmic_db()  # open connection to COSMIC_nuc
+    #conn = get_cosmic_db()  # open connection to COSMIC_nuc
     tissue_cts = count_primary_tissues(gene_name, conn)
     tissue_cts.to_csv(gene_result_dir + cfg_opts['primary_tissue'],
                       sep='\t')
@@ -89,4 +89,4 @@ def main(gene_name):
                   ylabel='Counts',
                   title='%s Mutation Counts in Primary Tissues' % gene_name)
 
-    conn.close()
+    #conn.close()

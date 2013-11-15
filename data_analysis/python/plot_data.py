@@ -185,7 +185,7 @@ def gene_mutation_histogram(gene_cts,
 
 
 def cumulative_gene_mutation(gene_cts,
-                             save_path='data_analysis/plots/gene_mutation.cumulative.png',
+                             save_path=_utils.plot_dir + 'gene_mutation.cumulative.png',
                              title='Cumulative Gene Mutations'):
     logger.info('Plotting cumulative gene mutations (%s) . . .' % save_path)
     df = pd.DataFrame(gene_cts)
@@ -193,7 +193,7 @@ def cumulative_gene_mutation(gene_cts,
     my_counts = df.groupby('count')['pseudo_count'].sum()  # numr of genes for each mutation count
     cumulative_cts = my_counts.cumsum()
     myplt.line(cumulative_cts,
-               'data_analysis/plots/gene_mutations.cumulative.png',
+               save_path,
                logx=True,
                title='Cumulative Gene Mutations',
                ylabel='Number of Genes',

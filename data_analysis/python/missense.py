@@ -22,7 +22,7 @@ def count_missense(conn):
     logger.info('Starting to count amino acid changes . . .')
 
     # perform query
-    sql = 'SELECT aachange, occurrences FROM `cosmic_aa`'
+    sql = 'SELECT aachange, occurrences FROM cosmic_aa'
     df = psql.frame_query(sql, con=conn)
 
     # count amino acid missense mutations
@@ -67,11 +67,11 @@ def save_missense(aacounter,
     logger.info('Finished saving protein missense information.')
 
 
-def main():
+def main(conn):
     cfg_opts = _utils.get_output_config('missense')
     result_dir = _utils.result_dir
     plot_dir = _utils.plot_dir
-    conn = get_cosmic_db()  # connect to COSMIC_nuc database
+    #conn = get_cosmic_db()  # connect to COSMIC_nuc database
 
     # handle missense mutation data
     aa_counter = count_missense(conn)
@@ -85,6 +85,6 @@ def main():
     plot_data.aa_property_barplot(result_dir + cfg_opts['property'],
                                   plot_dir + cfg_opts['property_barplot'])
 
-    conn.close()  # close mysqldb connection
+    #conn.close()  # close mysqldb connection
 
 

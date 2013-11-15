@@ -7,6 +7,7 @@ import argparse
 import data_analysis.python.stats
 import classify.python.classifier
 import utils.python.gene_tsv
+import utils.python.util as _utils
 
 # define exit status
 EXCEPTION_EXIT_STATUS = 1
@@ -44,9 +45,16 @@ def handle_uncaught_exceptions(t, ex, tb):
 
 def _data_analysis():
     """Wrapper function to call scripts in the data_analysis folder."""
-    if args.stats:
-        data_analysis.python.stats.main()
+    if args.database == 'cosmic_nuc':
+        # change output dir for COSMIC_nuc
+        _utils.plot_dir = 'data_analysis/plots/cosmic_nuc/'
+        _utils.result_dir = 'data_analysis/results/cosmic_nuc/'
+    elif args.database == 'genes':
+        # change output dir for data/genes.db
+        _utils.plot_dir = 'data_analysis/plots/genes/'
+        _utils.result_dir = 'data_analysis/results/genes/'
 
+    data_analysis.python.stats.main(args.database)  # run code
 
 def _classify():
     """Wrapper function to call scripts in the classify folder."""
@@ -74,9 +82,19 @@ if __name__ == '__main__':
                                                 help='Run scripts in the data'
                                                 ' analysis folder')
     parser_data_analysis.set_defaults(func=_data_analysis)
-    parser_data_analysis.add_argument('-s', '--stats',
-                                      action='store_true',
-                                      help='Generate data analysis stats')
+    parser_data_analysis_grouper = parser_data_analysis.add_mutually_exclusive_group()
+    parser_data_analysis_grouper.add_argument('-cn', '--cosmic_nuc',
+                                              dest='database',
+                                              action='store_const',
+                                              const='cosmic_nuc',
+                                              help='Generate data analysis stats'
+                                              ' on COSMIC_nuc database')
+    parser_data_analysis_grouper.add_argument('-g', '--genes',
+                                              dest='database',
+                                              action='store_const',
+                                              const='genes',
+                                              help='Generate data analysis stats'
+                                              ' on data/genes.db')
     parser_classify = subparser.add_parser('classify',
                                            help='Run classification scripts'
                                            ' in the classify folder')
@@ -87,6 +105,7 @@ if __name__ == '__main__':
                                          help=help_string)
     parser_savedb.set_defaults(func=_savedb)
 
+    parser.set_defaults(database='genes')  # by default work on sqlite db
 
     args = parser.parse_args()
     log_file = '' if args.log else os.devnull

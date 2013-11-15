@@ -11,6 +11,7 @@ import tables.cosmic_aa as cosmic_aa
 import tables.cosmic_genomic as cosmic_genomic
 import missense
 import pandas.io.sql as psql
+import sqlite3
 import csv
 from collections import OrderedDict
 import logging
@@ -28,7 +29,7 @@ def generate_design_matrix(conn):
     """
     logger.info('Creating design matrix . . .')
 
-    df = psql.frame_query("SELECT * FROM `nucleotide`", con=conn)  # get all
+    df = psql.frame_query("SELECT * FROM nucleotide", con=conn)  # get all
     mtypes = _utils.get_mutation_types(df['AminoAcid'])
     df['mut_types'] = mtypes  # add mutation types to SQL output
     gene_to_indexes = df.groupby('Gene').groups
@@ -64,7 +65,7 @@ def count_gene_mutations(conn):
     logger.info('Counting number of mutations for each gene . . .')
 
     sql = """SELECT Gene, COUNT(*) as count
-          FROM `nucleotide` GROUP BY Gene
+          FROM nucleotide GROUP BY Gene
           ORDER BY count DESC;"""
     logger.debug('Gene mutation count SQL statement: ' + sql)
 
@@ -73,7 +74,7 @@ def count_gene_mutations(conn):
     return df
 
 
-def main():
+def cosmic_nuc_main():
     cfg_opts = _utils.get_output_config('stats')  # get config
     conn = get_cosmic_db()
 
@@ -119,5 +120,50 @@ def main():
     conn.close()  # close COSMIC_nuc connection
 
 
-if __name__=="__main__":
-    main()
+def main(db):
+    cfg_opts = _utils.get_output_config('stats')  # get config
+
+    if db == 'cosmic_nuc':
+        conn = get_cosmic_db()  # connect to COSMIC_nuc
+
+        # check info about COSMIC_nuc tables
+        cosmic_aa.main()  # check cosmic_aa table
+        sample_name.main()  # info related to mutations for each sample
+        cosmic_genomic.main()  # check cosmic_genomic table
+    else:
+        # connect to sqlite db at data/genes.db
+        genes_db_path = _utils.get_db_config('genes')['db']
+        conn = sqlite3.connect(genes_db_path)
+
+    # get design matrix
+    design_matrix = generate_design_matrix(conn)
+    with open(_utils.result_dir + cfg_opts['gene_design_matrix'], 'wb') as handle:
+        csv.writer(handle, delimiter='\t').writerows(design_matrix)
+    plot_data.pca_plot(_utils.result_dir + cfg_opts['gene_design_matrix'],
+                       _utils.plot_dir + cfg_opts['pca_plot'])
+
+    # handle DNA substitutions
+    dna_substitutions.main(conn)
+
+    # handle stats related to mutation types
+    mutation_types.main(conn)
+
+    # gene mutation counts
+    gene_ct_df = count_gene_mutations(conn)
+    gene_ct_df.set_index('Gene').to_csv(_utils.result_dir + 'gene_mutation_counts.txt',
+                                        sep='\t')
+    plot_data.gene_mutation_histogram(gene_ct_df['count'])
+    plot_data.cumulative_gene_mutation(gene_ct_df['count'])
+
+    # look at individual genes
+    with open(_utils.config_dir + 'single_gene.txt') as handle:
+        for row in handle:
+            gene = row.strip()
+            try:
+                single_gene.main(gene, conn)
+            except:
+                # be careful this catches all exceptions which might
+                # hide other errors
+                logger.debug('(Problem) Gene not found: %s' % gene)
+
+    conn.close()  # close data/genes.db connection

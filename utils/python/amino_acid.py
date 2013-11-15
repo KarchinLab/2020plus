@@ -24,12 +24,19 @@ class AminoAcid(object):
 
     def __init__(self, hgvs='', occurrence=1):
         self.logger = logging.getLogger(__name__)
-        self.hgvs_original = hgvs
-        hgvs = hgvs.upper()  # convert everything to upper case
-        self.hgvs = hgvs
-        self.occurrence = occurrence
-        self.set_amino_acid(hgvs)
-        self.set_mutation_type()
+        if not (type(hgvs) is str or type(hgvs) is type(u'')):
+            # catches cases where wierd non-string input is used
+            self.is_valid = False
+            self.set_mutation_type()
+            print type(hgvs)
+        else:
+            # expected case of string
+            self.hgvs_original = hgvs
+            hgvs = hgvs.upper().replace('>', '')  # convert everything to upper case
+            self.hgvs = hgvs
+            self.occurrence = occurrence
+            self.set_amino_acid(hgvs)
+            self.set_mutation_type()
 
     def set_mutation_type(self, mut_type=''):
         """Sets the mutation type attribute to a single label based on
@@ -43,12 +50,12 @@ class AminoAcid(object):
             self.mutation_type = mut_type
         else:
             # mutation type is taken from object attributes
-            if self.is_missing_info:
-                # mutation has a ?
-                self.mutation_type = 'missing'
-            elif not self.is_valid:
+            if not self.is_valid:
                 # does not correctly fall into a category
                 self.mutation_type = 'not valid'
+            elif self.is_missing_info:
+                # mutation has a ?
+                self.mutation_type = 'missing'
             else:
                 # valid mutation type to be counted
                 if self.is_synonymous:
@@ -211,7 +218,7 @@ class AminoAcid(object):
                 if not self.is_missing_info:
                     self.initial = re.findall('([A-Z])\d+', aa_hgvs)[:2]  # first two
                     self.pos = map(int, re.findall('[A-Z](\d+)', aa_hgvs)[:2])  # first two
-                    self.mutated = re.findall('(?<=INS)[A-Z0-9?]+', aa_hgvs)[0]
+                    self.mutated = re.findall('(?<=INS)[A-Z0-9?*]+', aa_hgvs)[0]
                     self.mutated = self.mutated.strip('?')  # remove the missing info '?'
                 else:
                     self.initial = ''
@@ -248,7 +255,13 @@ class AminoAcid(object):
             self.initial = aa_hgvs[0]
             self.mutated = '*'  # there is actually a stop codon
             self.stop_pos = 0  # indicates same position is stop codon
-            self.pos = int(aa_hgvs[1:-1])
+            try:
+                self.pos = int(aa_hgvs[1:-1])
+            except ValueError:
+                # wierd error of p.E217>D*
+                self.is_valid = False
+                self.logger.debug('(Parsing-Problem) Invalid HGVS Amino Acid '
+                                'syntax: ' + aa_hgvs)
             if self.initial == self.mutated:
                 # classify nonsense-to-nonsense mutations as synonymous
                 self.is_synonymous = True

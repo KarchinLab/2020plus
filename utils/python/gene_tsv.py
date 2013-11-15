@@ -69,7 +69,7 @@ def concatenate_genes(out_path, cosmic_dir):
                         # add data
                         for line in handle:
                             split_line = line.split('\t')
-                            if split_line[2] or split_line[3]:
+                            if split_line[2] and split_line[3]:
                                 # if line designates a mutation
                                 mywriter.write(gene_name + "\t" + line)  # write with gene name
 
@@ -84,7 +84,7 @@ def concatenate_genes(out_path, cosmic_dir):
                     handle = skip_header(handle)  # skip beginning lines
                     for line in handle:
                         split_line = line.split('\t')
-                        if split_line[2] or split_line[3]:
+                        if split_line[2] and split_line[3]:
                             # if line designates a mutation
                             mywriter.write(gene_name + "\t" + line)  # write with gene name
 
@@ -117,7 +117,7 @@ def save_db(tsv_path, genedb_path):
 
     # save tsv to sqlite3 database
     psql.write_frame(df,  # pandas dataframe
-                     'Nucleotide',  # table name
+                     'nucleotide',  # table name
                      con=conn,  # connection
                      flavor='sqlite',  # use sqlite
                      if_exists='replace')  # drop table if exists

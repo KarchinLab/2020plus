@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)  # module logger
 def count_amino_acids(conn):
     """Count the amino acid mutation types (missense, indel, etc.).
     """
-    df = psql.frame_query("""SELECT * FROM `nucleotide`""", con=conn)
+    df = psql.frame_query("""SELECT * FROM nucleotide""", con=conn)
     unique_cts = _utils.count_mutation_types(df['AminoAcid'])
     return unique_cts
 
@@ -24,7 +24,7 @@ def count_amino_acids(conn):
 def count_nucleotides(conn):
     """Count the nucleotide mutation types (substitution, indels)
     """
-    sql = "SELECT Nucleotide FROM `nucleotide`"
+    sql = "SELECT Nucleotide FROM nucleotide"
     df = psql.frame_query(sql, con=conn)
     unique_cts = _utils.count_mutation_types(df['Nucleotide'], kind='nucleotide')
     return unique_cts
@@ -35,7 +35,7 @@ def count_oncogenes(conn):
 
     # prepare sql statement
     oncogenes = _utils.oncogene_list
-    sql = "SELECT * FROM `nucleotide` WHERE Gene in " + str(oncogenes)
+    sql = "SELECT * FROM nucleotide WHERE Gene in " + str(oncogenes)
     logger.debug('Oncogene SQL statement: ' + sql)
 
     df = psql.frame_query(sql, con=conn)  # execute query
@@ -53,7 +53,7 @@ def count_tsg(conn):
 
     # prepare sql statement
     tsgs = _utils.tsg_list
-    sql = "SELECT * FROM `nucleotide` WHERE Gene in " + str(tsgs)
+    sql = "SELECT * FROM nucleotide WHERE Gene in " + str(tsgs)
     logger.debug('Oncogene SQL statement: ' + sql)
 
     df = psql.frame_query(sql, con=conn)  # execute query
@@ -81,11 +81,11 @@ def count_gene_types(file_path):
     return mut_ct_df
 
 
-def main():
+def main(conn):
     out_dir = _utils.result_dir  # output directory for text files
     plot_dir = _utils.plot_dir  # plotting directory
     cfg_opts = _utils.get_output_config('mutation_types')
-    conn = get_cosmic_db()  # connect to COSMIC_nuc
+    #conn = get_cosmic_db()  # connect to COSMIC_nuc
 
     # handle DNA nucleotides
     mut_nuc_cts = count_nucleotides(conn)
@@ -141,4 +141,4 @@ def main():
     plot_data.all_mut_type_barplot(tmp_mut_df,
                                    plot_dir + cfg_opts['all_mut_type_barplot'])
 
-    conn.close()  # close connection
+    #conn.close()  # close connection
