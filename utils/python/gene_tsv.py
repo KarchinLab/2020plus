@@ -3,14 +3,15 @@ describing gene mutations that form the COSMIC_nuc database. It
 saves the resulting tab delimited file into the data directory.
 It subsequently makes a database from the file.
 
-NOTES
  * only lines with either a nucleotide or amino acid mutation
    are saved.
  * this module in basically just a script
- * it will likely break if paths/conventtions change
- * it is used because the gene name needs to be added to the
-   concatenated file. Otherwise the "cat" command could have
-   been used.
+ * it will likely break if paths/conventions change
+ * mutations for alternative isoforms "_ENST..." are not used
+
+Rows are filtered if:
+ * either the amino acid or nucleotide hgvs column is empty
+ * both columns indicate unkown effect c.? and p.?
 """
 
 import utils.python.util as _utils
@@ -71,7 +72,9 @@ def concatenate_genes(out_path, cosmic_dir):
                             split_line = line.split('\t')
                             if split_line[2] and split_line[3]:
                                 # if line designates a mutation
-                                mywriter.write(gene_name + "\t" + line)  # write with gene name
+                                if split_line[2] != 'p.?' or split_line[3] != 'c.?':
+                                    # not unknown effect for AA and amino acid
+                                    mywriter.write(gene_name + "\t" + line)  # write with gene name
 
         # iterate through genes in the numeric directory
         numeric_dir = cosmic_dir + '0-9/'
@@ -86,7 +89,9 @@ def concatenate_genes(out_path, cosmic_dir):
                         split_line = line.split('\t')
                         if split_line[2] and split_line[3]:
                             # if line designates a mutation
-                            mywriter.write(gene_name + "\t" + line)  # write with gene name
+                            if split_line[2] != 'p.?' or split_line[3] != 'c.?':
+                                # not uknown effect for both AA and nucleotide
+                                mywriter.write(gene_name + "\t" + line)  # write with gene name
 
 
 def save_db(tsv_path, genedb_path):
