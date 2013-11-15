@@ -31,7 +31,10 @@ class Nucleotide(object):
             self.mutation_type = mut_type
         else:
             # interpret mutation type from attributes
-            if self.is_missing_info:
+            if not self.is_valid:
+                # does not correctly fall into a category
+                self.mutation_type = 'not valid'
+            elif self.is_missing_info:
                 self.mutation_type = 'missing'
             elif self.is_substitution:
                 self.mutation_type = 'substitution'
