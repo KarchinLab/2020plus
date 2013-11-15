@@ -6,6 +6,7 @@ def test_substitution():
     sub1 = 'c.1849G>T'
     sub2 = 'c.3082+1G>T'
     sub3 = 'c.1153_1159TGTAAAA>CGAACTTGTAAACTGTAA'
+    sub4 = 'c.788-1_788GG>AT'
 
     # case 1 -- normal single substitution
     nuc = Nucleotide(sub1)
@@ -29,6 +30,14 @@ def test_substitution():
     assert nuc.pos == [1153, 1159]
     assert nuc.initial == 'TGTAAAA'
     assert nuc.mutated == 'CGAACTTGTAAACTGTAA'
+
+    # case 4 -- substitution of more than one base in intron
+    nuc = Nucleotide(sub4)
+    assert nuc.is_substitution
+    assert nuc.pos == [788, 788]
+    assert nuc.intron_pos == [-1, None]
+    assert nuc.initial == 'GG'
+    assert nuc.mutated == 'AT'
 
 
 def test_deletion():
@@ -72,6 +81,7 @@ def test_insertion():
     ins2 = 'c.4248insC'
     ins3 = 'c.?_?ins?'
     ins4 = 'c.2233_2247ins15'
+    ins5 = 'c.459+2_459+3insT'
 
     # case 1 -- more than one nucleotide insertion
     nuc = Nucleotide(ins1)
@@ -99,3 +109,9 @@ def test_insertion():
     nuc = Nucleotide(ins4)
     assert nuc.is_insertion
     assert nuc.mutated == '15'
+
+    # case 5 intronic insertion
+    nuc = Nucleotide(ins5)
+    assert nuc.is_insertion
+    assert nuc.pos == [459, 459]
+    assert nuc.intron_pos == [2, 3], str(nuc.intron_pos) + " != [2, 3]"

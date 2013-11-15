@@ -91,7 +91,8 @@ class Nucleotide(object):
         """
         self.is_valid = True  # assume initially the syntax is valid
         if self.is_substitution:
-            sub_pattern = '(\d+([+-]\d+)?_)?(\d+)([+-]\d+)?([A-Z]+)>([A-Z]+)$'
+            sub_pattern = '(?:(\d+)([+-]\d+)?_)?(\d+)([+-]\d+)?([A-Z]+)>([A-Z]+)$'
+            # old_sub_pattern = '(\d+([+-]\d+)?_)?(\d+)([+-]\d+)?([A-Z]+)>([A-Z]+)$'
             matches = re.findall(sub_pattern, hgvs_str)
             if matches:
                 init_pos, init_intron, reg_pos, reg_intron, initial, mutated = matches[0]
@@ -112,7 +113,8 @@ class Nucleotide(object):
                 self.is_valid = False
                 self.logger.debug('(Parsing-Problem) Invalid DNA Substitution: ' + hgvs_str)
         elif self.is_deletion:
-            del_pattern = '([0-9?]+([-+]\d+)?(?:_))?([0-9?]+)([-+]\d+)?del([A-Z?0-9]+)$'
+            del_pattern = '(?:([0-9?]+)([-+]\d+)?(?:_))?([0-9?]+)([-+]\d+)?del([A-Z?0-9]+)$'
+            # old_del_pattern = '([0-9?]+([-+]\d+)?(?:_))?([0-9?]+)([-+]\d+)?del([A-Z?0-9]+)$'
             matches = re.findall(del_pattern, hgvs_str)
             if matches:
                 init_pos, init_intron, reg_pos, reg_intron, del_nuc = matches[0]
@@ -134,7 +136,8 @@ class Nucleotide(object):
                     self.mutated = ''
                     self.initial = del_nuc
         elif self.is_insertion:
-            ins_pattern = '([0-9?]+([-+]\d+)?(?:_))?([0-9?]+)([-+]\d+)?ins([A-Z?0-9]+)$'
+            ins_pattern = '(?:([0-9?]+)([-+]\d+)?(?:_))?([0-9?]+)([-+]\d+)?ins([A-Z?0-9]+)$'
+            # old_ins_pattern = '([0-9?]+([-+]\d+)?(?:_))?([0-9?]+)([-+]\d+)?ins([A-Z?0-9]+)$'
             matches = re.findall(ins_pattern, hgvs_str)
             if matches:
                 init_pos, init_intron, reg_pos, reg_intron, ins_nuc = matches[0]
