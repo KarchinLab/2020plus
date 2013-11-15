@@ -36,26 +36,35 @@ def generate_design_matrix(conn):
 
     # aggregate info
     design_matrix = []
+    not_used_types = ['not valid',
+                      'missing',
+                      'unknown effect']  # only include known mutations
     for gene, indexes in gene_to_indexes.iteritems():
         tmp_df = df.ix[indexes]
         gene_pos_counter = {}
         mut_type_ctr = OrderedDict([['missense', 0],
                                     ['frame shift', 0],
                                     ['synonymous', 0],
-                                    ['not valid', 0],
+                                    #['not valid', 0],
                                     ['indel', 0],
-                                    ['missing', 0],
+                                    #['missing', 0],
                                     ['nonsense', 0]])
+                                    #['unknown effect', 0]])
         for hgvs in tmp_df['AminoAcid']:
             aa = AminoAcid(hgvs)
-            if aa.mutation_type == 'missense':
-                gene_pos_counter.setdefault(aa.pos, 0)
-                gene_pos_counter[aa.pos] += 1
-            mut_type_ctr[aa.mutation_type] += 1
+            if aa.mutation_type not in not_used_types:
+                # do not use 'missing', 'unkown effect' or 'not valid'
+                if aa.mutation_type == 'missense':
+                    # keep track of missense pos for recurrency
+                    gene_pos_counter.setdefault(aa.pos, 0)
+                    gene_pos_counter[aa.pos] += 1
+                mut_type_ctr[aa.mutation_type] += 1
 
-        recurrent_cts = sum([cts for cts in gene_pos_counter.values() if cts > 1])
-        mut_type_ctr['missense'] -= recurrent_cts  # subtract off the recurrent missense
-        design_matrix.append([gene, recurrent_cts] + list(mut_type_ctr.values()))
+        # needs to have at least one count
+        if sum(mut_type_ctr.values()):
+            recurrent_cts = sum([cts for cts in gene_pos_counter.values() if cts > 1])
+            mut_type_ctr['missense'] -= recurrent_cts  # subtract off the recurrent missense
+            design_matrix.append([gene, recurrent_cts] + list(mut_type_ctr.values()))
     header = [['gene', 'recurrent missense'] + list(mut_type_ctr)]
     logger.info('Finished creating design matrix.')
     return header + design_matrix

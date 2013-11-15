@@ -208,13 +208,15 @@ def pca_plot(file_path,
     logger.info('Plotting PCA of gene mutations (%s) . . .' % save_path)
 
     # normalize counts
-    df = pd.read_csv(file_path, sep='\t')
+    df = pd.read_csv(file_path,  # path
+                     sep='\t',  # tab delim
+                     index_col=0)  # index df by gene name
 
     # plot oncogenes and tumor suppressor genes as different colors
     oncogenes = set(_utils.read_oncogenes())  # get oncogenes
     tsgs = set(_utils.read_tsgs())  # get tumor suppressor genes
     colors = []
-    for g in df['gene']:
+    for g in df.index.tolist():
         if g in oncogenes:
             colors.append('red')
         elif g in tsgs:
@@ -222,14 +224,17 @@ def pca_plot(file_path,
         else:
             colors.append('blue')
 
-    # normalize data for PCA
-    df = df[df.columns.tolist()[1:]]  # remove gene column
-    tmp_total_cts = df.T.sum()
-    df = (df.T / tmp_total_cts).T
+    # normalize data by row for PCA
+    row_sums = df.sum(axis=1)
+    df = df.div(row_sums.astype(float), axis=0)
+
+    # old method for dividing by sum of row
+    # tmp_total_cts = df.T.sum()
+    # df = (df.T / tmp_total_cts).T
 
     # get marker size for scatter plot
     MAX_SIZE = 300  # some genes take up to much space
-    scatter_size = [size if size < MAX_SIZE else MAX_SIZE for size in tmp_total_cts]
+    scatter_size = [size if size < MAX_SIZE else MAX_SIZE for size in row_sums]
 
     # perform PCA
     results = PCA(df)
