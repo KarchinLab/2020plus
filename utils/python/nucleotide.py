@@ -34,6 +34,8 @@ class Nucleotide(object):
             if not self.is_valid:
                 # does not correctly fall into a category
                 self.mutation_type = 'not valid'
+            elif self.unknown_effect:
+                self.mutation_type = 'unknown effect'
             elif self.is_missing_info:
                 self.mutation_type = 'missing'
             elif self.is_substitution:
@@ -162,8 +164,11 @@ class Nucleotide(object):
                     self.initial = ''
                     self.mutated = ins_nuc
         elif self.unknown_effect:
+            # unknown effect for mutation. usually denoted as c.?
             pass
         else:
+            # mutation did not fall into any of the categories. thus it likely
+            # has invalid syntax
             self.is_valid = False
             self.logger.debug('(Parsing-Problem) Invalid HGVS DNA syntax: ' + hgvs_str)
 

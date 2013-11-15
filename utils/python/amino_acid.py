@@ -53,6 +53,8 @@ class AminoAcid(object):
             if not self.is_valid:
                 # does not correctly fall into a category
                 self.mutation_type = 'not valid'
+            elif self.unknown_effect:
+                self.mutation_type = 'unknown effect'
             elif self.is_missing_info:
                 # mutation has a ?
                 self.mutation_type = 'missing'
@@ -206,7 +208,10 @@ class AminoAcid(object):
         """
         self.is_valid = True  # assume initially the syntax is legitimate
         self.is_synonymous = False  # assume not synonymous until proven
-        if self.is_missense:
+        if self.unknown_effect:
+            # unknown effect from mutation. usually denoted as p.?
+            pass
+        elif self.is_missense:
             self.initial = aa_hgvs[0]
             self.mutated = aa_hgvs[-1]
             self.pos = int(aa_hgvs[1:-1])
