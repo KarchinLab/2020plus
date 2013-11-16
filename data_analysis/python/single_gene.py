@@ -1,5 +1,4 @@
 import utils.python.util as _utils
-from utils.python.cosmic_db import get_cosmic_db
 import pandas as pd
 import pandas.io.sql as psql
 import logging
@@ -9,7 +8,13 @@ import os
 logger = logging.getLogger(__name__)
 
 def count_primary_tissues(gene, conn):
-    """Count the number of mutations in a single gene for each primary tissue."""
+    """Count the number of mutations in a single gene for each primary tissue.
+
+    Args:
+        gene (str): gene name
+        conn (sqlite/MySQL connection): connection to database with
+            `nucleotide` table
+    """
     logger.info('Counting %s mutations for each primary tissue ...' % gene)
     sql = ("SELECT PrimaryTissue, COUNT(*) as Counts"
            " FROM nucleotide nuc"
@@ -24,6 +29,13 @@ def count_primary_tissues(gene, conn):
 
 
 def count_types_primary_tissue(gene, conn):
+    """Count mutation types in a single gene for each primary tissue.
+
+    Args:
+        gene (str): gene name
+        conn (sqlite/MySQL connection): connection to database with
+            `nucleotide` table
+    """
     sql = ("SELECT PrimaryTissue, Nucleotide, AminoAcid "
            "FROM nucleotide nuc "
            "WHERE nuc.Gene='%s' "
@@ -63,7 +75,6 @@ def main(gene_name, conn):
     if not os.path.isdir(gene_plot_dir):
         os.mkdir(gene_plot_dir)
 
-    #conn = get_cosmic_db()  # open connection to COSMIC_nuc
     tissue_cts = count_primary_tissues(gene_name, conn)
     tissue_cts.to_csv(gene_result_dir + cfg_opts['primary_tissue'],
                       sep='\t')
@@ -88,5 +99,3 @@ def main(gene_name, conn):
                   stacked=True,
                   ylabel='Counts',
                   title='%s Mutation Counts in Primary Tissues' % gene_name)
-
-    #conn.close()

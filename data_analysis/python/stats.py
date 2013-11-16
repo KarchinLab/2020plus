@@ -137,12 +137,13 @@ def main(db):
 
         # check info about COSMIC_nuc tables
         cosmic_aa.main()  # check cosmic_aa table
-        sample_name.main()  # info related to mutations for each sample
         cosmic_genomic.main()  # check cosmic_genomic table
     else:
         # connect to sqlite db at data/genes.db
         genes_db_path = _utils.get_db_config('genes')['db']
         conn = sqlite3.connect(genes_db_path)
+
+    sample_name.main(conn)  # info related to mutations for each sample
 
     # get design matrix
     design_matrix = generate_design_matrix(conn)
@@ -161,8 +162,10 @@ def main(db):
     gene_ct_df = count_gene_mutations(conn)
     gene_ct_df.set_index('Gene').to_csv(_utils.result_dir + 'gene_mutation_counts.txt',
                                         sep='\t')
-    plot_data.gene_mutation_histogram(gene_ct_df['count'])
-    plot_data.cumulative_gene_mutation(gene_ct_df['count'])
+    plot_data.gene_mutation_histogram(gene_ct_df['count'],
+                                      _utils.plot_dir + 'gene_mutations.histogram.png')
+    plot_data.cumulative_gene_mutation(gene_ct_df['count'],
+                                       _utils.plot_dir + 'gene_mutation.cumulative.png')
 
     # look at individual genes
     with open(_utils.config_dir + 'single_gene.txt') as handle:

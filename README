@@ -16,7 +16,7 @@ Directories
 -----------
 
 * data_analysis -- outputs descriptive plots and results from COSMIC database
-* data -- input data to program not found in COSMIC database
+* data -- input data to program that is not from the COSMIC MySQL database
 * classify -- analyzes results of classifying genes as oncogenes or tsg
 * log -- contain log files from running run.py
 * utils -- useful miscellaneous code for this package

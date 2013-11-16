@@ -1,5 +1,4 @@
 import utils.python.util as _utils
-from utils.python.cosmic_db import get_cosmic_db
 from utils.python.nucleotide import Nucleotide
 import plot_data
 import pandas.io.sql as psql
@@ -91,7 +90,6 @@ def count_tsg_substitutions(conn):
 def main(conn):
     out_dir = _utils.result_dir  # text file output directory
     cfg_opts = _utils.get_output_config('dna_substitutions')  # get config
-    #conn = get_cosmic_db()  # start MySQLdb connection
 
     # handle all DNA substitutions
     nuc_ctr = count_nuc_substitutions(conn)  # get substitution counts
@@ -107,8 +105,6 @@ def main(conn):
     tsg_nuc_ctr = count_tsg_substitutions(conn)
     tsg_save_path = out_dir + cfg_opts['tsg_out']
     save_nuc_substitutions(tsg_nuc_ctr, tsg_save_path)
-
-    #conn.close()  # close MySQLdb connection
 
     # plot results
     all_heatmap = _utils.plot_dir + cfg_opts['sub_heatmap']

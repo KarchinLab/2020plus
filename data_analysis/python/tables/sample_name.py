@@ -50,10 +50,10 @@ def count_mutations(conn):
     return df
 
 
-def main():
+def main(conn):
     out_dir = _utils.result_dir  # output directory for text files
     cfg_opts = _utils.get_output_config('sample_name')
-    conn = get_cosmic_db()  # connect to COSMIC_nuc
+    #conn = get_cosmic_db()  # connect to COSMIC_nuc
 
     sample_gene_cts = count_mutated_genes(conn)
     sample_mutation_cts = count_mutations(conn)
@@ -62,4 +62,4 @@ def main():
     sample_mutation_cts.to_csv(out_dir + cfg_opts['mutation_out'],
                                sep='\t', index=False)
 
-    conn.close()
+    #conn.close()

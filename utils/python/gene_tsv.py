@@ -54,6 +54,7 @@ def concatenate_genes(out_path, cosmic_dir):
                     # not alternative isoforms
                     with open(cosmic_dir + letter + "/" + file_name) as handle:
                         if FIRST_FLAG:
+                            # headers match the `Nucleotide` table in COSMIC_nuc
                             header = ['Gene', 'SampleName', 'COSMICSampleID',
                                       'AminoAcid', 'Nucleotide', 'PrimaryTissue',
                                       'Tissuesubtype1', 'Tissuesubtype2', 'Histology',

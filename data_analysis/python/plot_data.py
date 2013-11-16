@@ -172,12 +172,12 @@ def mutation_types_barplot(mutation_cts,
 
 
 def gene_mutation_histogram(gene_cts,
-                            save_path=_utils.plot_dir + 'gene_mutations.histogram.png',
+                            save_path,
                             title='Gene Mutation Histogram'):
     logger.info('Plotting gene mutation histogram (%s) . . .' % save_path)
     myplt.histogram(gene_cts,
                     save_path,
-                    bins=range(0, 300, 5),  # not many genes >300
+                    bins=range(0, 500, 10),  # not many genes >300
                     log=True,  # log scale y-axis
                     title=title,
                     ylabel='Counts (log)')
@@ -185,7 +185,7 @@ def gene_mutation_histogram(gene_cts,
 
 
 def cumulative_gene_mutation(gene_cts,
-                             save_path=_utils.plot_dir + 'gene_mutation.cumulative.png',
+                             save_path,
                              title='Cumulative Gene Mutations'):
     logger.info('Plotting cumulative gene mutations (%s) . . .' % save_path)
     df = pd.DataFrame(gene_cts)

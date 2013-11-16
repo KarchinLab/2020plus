@@ -129,6 +129,20 @@ def line(data,
          logx=False,
          logy=False,
          vlines=[]):
+    """Plots a line plot using matplotlib.
+
+    Args:
+        data (pd.DataFrame): two column df with x and y values
+        file_path (str): path to save figure
+
+    Kwargs:
+        title (str): graph title
+        xlabel (str): x-axis label
+        ylabel (str): y-axis label
+        logx (bool): log transform x-axis
+        logy (bool): log transform y-axis
+        vlines (list of int): draw vertical lines at positions
+    """
     # plot data
     data.plot(kind='line')
     plt.title(title)
