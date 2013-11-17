@@ -26,6 +26,11 @@ class Nucleotide(object):
         self.__parse_hgvs_syntax(hgvs_tmp)
 
     def set_mutation_type(self, mut_type=''):
+        """Sets a string designating the mutation type.
+
+        Args:
+            mut_type (str): name of mutation type
+        """
         if mut_type:
             # specified mutation type
             self.mutation_type = mut_type
@@ -46,6 +51,14 @@ class Nucleotide(object):
                 self.mutation_type = 'insertion'
 
     def __set_unknown_effect(self, hgvs_str):
+        """Sets a flag for unkown effect (c.? or ?).
+
+        Note: Unavailable information according to HGVS is usually
+        marked with a c.?, ?, or parethesis.
+
+        Args:
+            hgvs_str (str): DNA HGVS string
+        """
         unknown_effect_list = ['c.?', '?']
         if hgvs_str.lower() in unknown_effect_list:
             self.unknown_effect = True
@@ -55,6 +68,11 @@ class Nucleotide(object):
             self.unknown_effect = False
 
     def __set_missing_info(self, hgvs_str):
+        """Sets a flag for missing data (? in HGVS syntax).
+
+        Args:
+            hgvs_str (str): DNA HGVS string
+        """
         if '?' in hgvs_str:
             self.is_missing_info = True
         else:
@@ -93,11 +111,15 @@ class Nucleotide(object):
     def __parse_hgvs_syntax(self, hgvs_str):
         """Parse the HGVS DNA mutation string to set attributes.
 
+        Look at tests/test_nucleotide.py for examples on how
+        specific HGVS strings should be parsed.
+
+        Args:
+            hgvs_str (str): DNA HGVS string
         """
         self.is_valid = True  # assume initially the syntax is valid
         if self.is_substitution:
             sub_pattern = '(?:(\d+)([+-]\d+)?_)?(\d+)([+-]\d+)?([A-Z]+)>([A-Z]+)$'
-            # old_sub_pattern = '(\d+([+-]\d+)?_)?(\d+)([+-]\d+)?([A-Z]+)>([A-Z]+)$'
             matches = re.findall(sub_pattern, hgvs_str)
             if matches:
                 init_pos, init_intron, reg_pos, reg_intron, initial, mutated = matches[0]
@@ -119,7 +141,6 @@ class Nucleotide(object):
                 self.logger.debug('(Parsing-Problem) Invalid DNA Substitution: ' + hgvs_str)
         elif self.is_deletion:
             del_pattern = '(?:([0-9?]+)([-+]\d+)?(?:_))?([0-9?]+)([-+]\d+)?del([A-Z?0-9]+)$'
-            # old_del_pattern = '([0-9?]+([-+]\d+)?(?:_))?([0-9?]+)([-+]\d+)?del([A-Z?0-9]+)$'
             matches = re.findall(del_pattern, hgvs_str)
             if matches:
                 init_pos, init_intron, reg_pos, reg_intron, del_nuc = matches[0]
@@ -142,7 +163,6 @@ class Nucleotide(object):
                     self.initial = del_nuc
         elif self.is_insertion:
             ins_pattern = '(?:([0-9?]+)([-+]\d+)?(?:_))?([0-9?]+)([-+]\d+)?ins([A-Z?0-9]+)$'
-            # old_ins_pattern = '([0-9?]+([-+]\d+)?(?:_))?([0-9?]+)([-+]\d+)?ins([A-Z?0-9]+)$'
             matches = re.findall(ins_pattern, hgvs_str)
             if matches:
                 init_pos, init_intron, reg_pos, reg_intron, ins_nuc = matches[0]
