@@ -7,6 +7,8 @@ import logging
 # setup directory paths
 plot_dir = 'data_analysis/plots/genes/'
 result_dir = 'data_analysis/results/genes/'
+clf_plot_dir = 'classify/plots/'
+clf_result_dir = 'classify/results/'
 config_dir = 'config/'
 
 def read_aa_properties(file_path):

@@ -54,11 +54,14 @@ def _data_analysis():
         _utils.plot_dir = 'data_analysis/plots/genes/'
         _utils.result_dir = 'data_analysis/results/genes/'
 
-    data_analysis.python.stats.main(args.database)  # run code
+    data_analysis.python.stats.main(args.recurrent,
+                                    args.database,
+                                    args.classify_only)  # run code
+
 
 def _classify():
     """Wrapper function to call scripts in the classify folder."""
-    classify.python.classifier.main()
+    classify.python.classifier.main()  # run code
 
 
 def _savedb():
@@ -78,12 +81,25 @@ if __name__ == '__main__':
                         help='Write a log file (--log=DEBUG for debug mode, '
                         '--log=INFO for info mode)')
     subparser = parser.add_subparsers(help='sub-command help')
+
+    # data analysis sub-command
     parser_data_analysis = subparser.add_parser('data_analysis',
                                                 help='Run scripts in the data'
                                                 ' analysis folder')
     parser_data_analysis.set_defaults(func=_data_analysis)
+    parser_data_analysis.add_argument('--classify_only',
+                                      action='store_true',
+                                      default=False,
+                                      help='Only update information that is '
+                                      'pertinent to the classify commands')
+    parser_data_analysis.add_argument('-r', '--recurrent',
+                                      type=int,
+                                      action='store',
+                                      default=2,
+                                      help='Minimum number of mutations at a '
+                                      'recurrent position')
     parser_data_analysis_grouper = parser_data_analysis.add_mutually_exclusive_group()
-    parser_data_analysis_grouper.add_argument('-cn', '--cosmic_nuc',
+    parser_data_analysis_grouper.add_argument('-c', '--cosmic_nuc',
                                               dest='database',
                                               action='store_const',
                                               const='cosmic_nuc',
@@ -95,10 +111,14 @@ if __name__ == '__main__':
                                               const='genes',
                                               help='Generate data analysis stats'
                                               ' on data/genes.db')
+
+    # classify sub-command
     parser_classify = subparser.add_parser('classify',
                                            help='Run classification scripts'
                                            ' in the classify folder')
     parser_classify.set_defaults(func=_classify)
+
+    # savedb sub-command
     help_string = ('Concatenate tab delim gene files found in /databases/COSMIC '
                    'and then save them to a sqlite database for further use.')
     parser_savedb = subparser.add_parser('savedb',
@@ -106,11 +126,13 @@ if __name__ == '__main__':
     parser_savedb.set_defaults(func=_savedb)
 
     parser.set_defaults(database='genes')  # by default work on sqlite db
+    args = parser.parse_args()  # parse the command line options
 
-    args = parser.parse_args()
+    # handle logging
     log_file = '' if args.log else os.devnull
     log_level = args.log
     start_logging(log_file=log_file,
                   log_level=log_level)  # start logging
-    args.func()
+
+    args.func()  # run function corresponding to user's command
     logging.info('FINISHED SUCCESSFULLY!')

@@ -12,6 +12,7 @@ It subsequently makes a database from the file.
 Rows are filtered if:
  * either the amino acid or nucleotide hgvs column is empty
  * both columns indicate unkown effect c.? and p.?
+ * SomaticStatus has word 'unkown'
 """
 
 import utils.python.util as _utils
@@ -75,7 +76,9 @@ def concatenate_genes(out_path, cosmic_dir):
                                 # if line designates a mutation
                                 if split_line[2] != 'p.?' or split_line[3] != 'c.?':
                                     # not unknown effect for AA and amino acid
-                                    mywriter.write(gene_name + "\t" + line)  # write with gene name
+                                    if 'unknown' not in split_line[-9].lower():
+                                        # do not include unknown somatic status mutations
+                                        mywriter.write(gene_name + "\t" + line)  # write with gene name
 
         # iterate through genes in the numeric directory
         numeric_dir = cosmic_dir + '0-9/'
@@ -92,7 +95,9 @@ def concatenate_genes(out_path, cosmic_dir):
                             # if line designates a mutation
                             if split_line[2] != 'p.?' or split_line[3] != 'c.?':
                                 # not uknown effect for both AA and nucleotide
-                                mywriter.write(gene_name + "\t" + line)  # write with gene name
+                                if 'unknown' not in split_line[-9].lower():
+                                    # do not include unknown somatic status mutations
+                                    mywriter.write(gene_name + "\t" + line)  # write with gene name
 
 
 def save_db(tsv_path, genedb_path):

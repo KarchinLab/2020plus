@@ -1,5 +1,4 @@
 from utils.python.amino_acid import AminoAcid
-from utils.python.cosmic_db import get_cosmic_db
 import utils.python
 import utils.python.util as _utils
 import plot_data
@@ -71,7 +70,6 @@ def main(conn):
     cfg_opts = _utils.get_output_config('missense')
     result_dir = _utils.result_dir
     plot_dir = _utils.plot_dir
-    #conn = get_cosmic_db()  # connect to COSMIC_nuc database
 
     # handle missense mutation data
     aa_counter = count_missense(conn)
@@ -84,7 +82,3 @@ def main(conn):
                                   plot_dir + cfg_opts['property_heatmap'])
     plot_data.aa_property_barplot(result_dir + cfg_opts['property'],
                                   plot_dir + cfg_opts['property_barplot'])
-
-    #conn.close()  # close mysqldb connection
-
-

@@ -29,7 +29,7 @@ class VogelsteinClassifier(object):
         self.tsg_threshold = tsg_threshold
 
         # set min count to classify gene
-        self.min_count = 7
+        self.min_count = 10
 
         # labels to classify genes as
         self.onco_label = "oncogene"
@@ -62,10 +62,12 @@ class VogelsteinClassifier(object):
         # sufficient number of counts
         recur_perc = recurrent / total
         del_perc = deleterious / total
-        gene_class = self.predict_by_pct(recur_perc, del_perc)
+        gene_class = self.predict_by_pct(recur_perc,
+                                         del_perc,
+                                         total)
         return gene_class
 
-    def predict_by_pct(self, recur_pct, del_pct, total=7):
+    def predict_by_pct(self, recur_pct, del_pct, total=10):
         """The actual 20/20 rule logic to classify genes."""
         if total < self.min_count:
             # too few mutations case
