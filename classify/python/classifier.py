@@ -1,5 +1,8 @@
 from __future__ import division
 from vogelstein_classifier import VogelsteinClassifier
+from random_forest_clf import RandomForest
+from multinomial_nb_clf import MultinomialNaiveBayes
+from dummy_clf import DummyClf
 import utils.python.util as _utils
 import plot_data
 import pandas as pd
@@ -100,6 +103,19 @@ def main():
                                        title=tmp_title,
                                        ylabel=tmp_ylabel,
                                        xlabel=tmp_xlabel)
+
+    df = pd.read_csv('data_analysis/results/genes/gene_design_matrix.r4.txt',
+                     sep='\t', index_col=0)
+
+    print 'RANDOM FOREST:'
+    rclf = RandomForest(df)
+    rclf.kfold_validation()
+    print 'NAIVE BAYES:'
+    nbclf = MultinomialNaiveBayes(df)
+    nbclf.kfold_validation()
+    print 'DUMMY CLF:'
+    dclf = DummyClf(df, strategy='stratified')
+    dclf.kfold_validation()
 
 
 if __name__ == "__main__":
