@@ -55,6 +55,8 @@ class AminoAcid(object):
                 self.mutation_type = 'not valid'
             elif self.unknown_effect:
                 self.mutation_type = 'unknown effect'
+            elif self.no_protein:
+                self.mutation_type = 'no protein'
             elif self.is_missing_info:
                 # mutation has a ?
                 self.mutation_type = 'missing'
