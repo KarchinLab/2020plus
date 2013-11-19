@@ -3,19 +3,20 @@ describing gene mutations that form the COSMIC_nuc database. It
 saves the resulting tab delimited file into the data directory.
 It subsequently makes a database from the file.
 
- * only lines with either a nucleotide or amino acid mutation
-   are saved.
- * this module in basically just a script
- * it will likely break if paths/conventions change
- * mutations for alternative isoforms "_ENST..." are not used
+Genes are not used if:
+ * mutations for alternative isoforms "_ENST..."
 
 Rows are filtered if:
  * either the amino acid or nucleotide hgvs column is empty
  * both columns indicate unkown effect c.? and p.?
  * SomaticStatus has word 'unkown'
+
+NOTE: This module will likely break if minor details in the
+database, etc. change.
 """
 
 import utils.python.util as _utils
+from collections import namedtuple
 import pandas as pd
 import pandas.io.sql as psql
 import sqlite3
@@ -65,18 +66,20 @@ def concatenate_genes(out_path, cosmic_dir):
                                       'hg18start', 'hg18end', 'hg19chrom',
                                       'hg19start', 'hg19end']
                             mywriter.write('\t'.join(header) + '\n')  # write header
+                            LineTuple = namedtuple('LineTuple', header[1:])  # create namedtuple type
                             FIRST_FLAG = False
 
                         gene_name = file_name[:-4]  # file name before ".tsv"
                         handle = skip_header(handle)  # skip beginning lines
                         # add data
                         for line in handle:
-                            split_line = line.split('\t')
-                            if split_line[2] and split_line[3]:
+                            #split_line = line.split('\t')
+                            split_tuple = LineTuple(*line.split('\t'))  # split
+                            if split_tuple.AminoAcid and split_tuple.Nucleotide:
                                 # if line designates a mutation
-                                if split_line[2] != 'p.?' or split_line[3] != 'c.?':
+                                if split_tuple.AminoAcid != 'p.?' or split_tuple.Nucleotide != 'c.?':
                                     # not unknown effect for AA and amino acid
-                                    if 'unknown' not in split_line[-9].lower():
+                                    if 'unknown' not in split_tuple.SomaticStatus.lower():
                                         # do not include unknown somatic status mutations
                                         mywriter.write(gene_name + "\t" + line)  # write with gene name
 
@@ -90,12 +93,13 @@ def concatenate_genes(out_path, cosmic_dir):
                     gene_name = file_name[:-4]  # file name before ".tsv"
                     handle = skip_header(handle)  # skip beginning lines
                     for line in handle:
-                        split_line = line.split('\t')
-                        if split_line[2] and split_line[3]:
+                        #split_line = line.split('\t')
+                        split_tuple = LineTuple(*line.split('\t'))  # split line
+                        if split_tuple.AminoAcid and split_tuple.Nucleotide:
                             # if line designates a mutation
-                            if split_line[2] != 'p.?' or split_line[3] != 'c.?':
+                            if split_tuple.AminoAcid != 'p.?' or split_tuple.Nucleotide != 'c.?':
                                 # not uknown effect for both AA and nucleotide
-                                if 'unknown' not in split_line[-9].lower():
+                                if 'unknown' not in split_tuple.SomaticStatus.lower():
                                     # do not include unknown somatic status mutations
                                     mywriter.write(gene_name + "\t" + line)  # write with gene name
 
