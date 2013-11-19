@@ -62,10 +62,14 @@ class GenericClassifier(object):
         # evaluate k-fold cross validation
         for train_ix, test_ix in k_fold:
             self.clf.fit(self.x.ix[train_ix], self.y.ix[train_ix])
-            print self.clf.score(self.x.ix[test_ix], self.y.ix[test_ix])
+            # print self.clf.score(self.x.ix[test_ix], self.y.ix[test_ix])
 
             # print 'Feature Importance', self.clf.feature_importances_
-            # y_pred = self.clf.predict(self.x.ix[test_ix])
-            # proba_ = self.clf.predict_proba(self.x.ix[test_ix])
-            # fpr, tpr, thresholds = metrics.roc_curve(self.y.ix[test_ix], proba_[:,1])
-            # print 'ROC AUC', metrics.auc(fpr, tpr)
+            y_pred = self.clf.predict(self.x.ix[test_ix])
+            proba_ = self.clf.predict_proba(self.x.ix[test_ix])
+            fpr, tpr, thresholds = metrics.roc_curve(self.y.ix[test_ix], proba_[:,1])
+            print 'ROC AUC', metrics.auc(fpr, tpr)
+
+    def set_min_count(self, ct):
+        if ct >= 0:
+            self.min_count = ct

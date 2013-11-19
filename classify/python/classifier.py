@@ -11,9 +11,9 @@ import glob
 import re
 
 
-def calc_onco_info(df, onco_pct, tsg_pct):
+def calc_onco_info(df, onco_pct, tsg_pct, min_ct):
     # calculate the number of genes classified as oncogene
-    vclf = VogelsteinClassifier(onco_pct, tsg_pct)
+    vclf = VogelsteinClassifier(onco_pct, tsg_pct, min_ct)
     df['total'] = df.T.sum()
     input_list = ((row['recurrent missense'],
                    row['frame shift'] + row['nonsense'],
@@ -34,7 +34,7 @@ def calc_onco_info(df, onco_pct, tsg_pct):
     return class_cts['oncogene'], pct_onco_found
 
 
-def num_onco_by_recurrent_mutations(onco_pct, tsg_pct):
+def num_onco_by_recurrent_mutations(onco_pct, tsg_pct, min_ct):
     """Count number of oncogenes while varying the definition of recurrency"""
     # calculate counts for oncogenes/tsg with varying the required the number
     # of mutations to define a recurrent position
@@ -43,7 +43,10 @@ def num_onco_by_recurrent_mutations(onco_pct, tsg_pct):
     onco_ct_list, onco_pct_list = [], []  # list of cts/pct for oncogenes
     for file_path in gene_design_matrix_paths:
         tmp_df = pd.read_csv(file_path, sep='\t', index_col=0)
-        tmp_ct, tmp_pct = calc_onco_info(tmp_df, onco_pct=onco_pct, tsg_pct=tsg_pct)
+        tmp_ct, tmp_pct = calc_onco_info(tmp_df,
+                                         onco_pct=onco_pct,  # pct thresh for onco
+                                         tsg_pct=tsg_pct,  # pct thresh for tsg
+                                         min_ct=min_ct)  # min count for a gene
         onco_ct_list.append(tmp_ct)
         onco_pct_list.append(tmp_pct)
 
@@ -58,23 +61,22 @@ def num_onco_by_recurrent_mutations(onco_pct, tsg_pct):
     return mycts, mypct
 
 
-def num_onco_by_pct_threshold():
-    cts, pct = num_onco_by_recurrent_mutations(.2, .2)
+def num_onco_by_pct_threshold(min_ct):
+    cts, pct = num_onco_by_recurrent_mutations(.2, .2, min_ct)
     df_ct = pd.DataFrame(index=cts.index)
     df_pct = pd.DataFrame(index=pct.index)
     for threshold in np.arange(.15, .5, .05):
-        tmp_ct, tmp_pct = num_onco_by_recurrent_mutations(threshold, threshold)
+        tmp_ct, tmp_pct = num_onco_by_recurrent_mutations(threshold, threshold, min_ct)
         df_ct[str(threshold)] = tmp_ct
         df_pct[str(threshold)] = tmp_pct
     return df_ct, df_pct
 
 
-def main():
+def main(minimum_ct):
     cfg_opts = _utils.get_output_config('classifier')
-    input_opts = _utils.get_output_config('stats')
 
     # get oncogene info
-    count_df, pct_df = num_onco_by_pct_threshold()
+    count_df, pct_df = num_onco_by_pct_threshold(minimum_ct)
     count_df = count_df.sort_index()  # sort df by recurrent mutation cts
     pct_df = pct_df.sort_index()  # sort df by recurrent mutation cts
 
@@ -108,13 +110,13 @@ def main():
                      sep='\t', index_col=0)
 
     print 'RANDOM FOREST:'
-    rclf = RandomForest(df)
+    rclf = RandomForest(df, min_ct=minimum_ct)
     rclf.kfold_validation()
     print 'NAIVE BAYES:'
-    nbclf = MultinomialNaiveBayes(df)
+    nbclf = MultinomialNaiveBayes(df, min_ct=minimum_ct)
     nbclf.kfold_validation()
     print 'DUMMY CLF:'
-    dclf = DummyClf(df, strategy='stratified')
+    dclf = DummyClf(df, strategy='most_frequent', min_ct=minimum_ct)
     dclf.kfold_validation()
 
 

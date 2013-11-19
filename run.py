@@ -61,7 +61,7 @@ def _data_analysis():
 
 def _classify():
     """Wrapper function to call scripts in the classify folder."""
-    classify.python.classifier.main()  # run code
+    classify.python.classifier.main(args.min_count)  # run code
 
 
 def _savedb():
@@ -116,6 +116,13 @@ if __name__ == '__main__':
     parser_classify = subparser.add_parser('classify',
                                            help='Run classification scripts'
                                            ' in the classify folder')
+    parser_classify.add_argument('-m', '--min_count',
+                                 type=int,
+                                 action='store',
+                                 default=10,
+                                 help='Minimum number of mutations in a gene '
+                                 'for the gene to be considered in classification.'
+                                 ' (default: 10)')
     parser_classify.set_defaults(func=_classify)
 
     # savedb sub-command

@@ -17,7 +17,8 @@ class VogelsteinClassifier(object):
         http://www.sciencemag.org/content/339/6127/1546.full
     """
 
-    def __init__(self, onco_threshold=.2, tsg_threshold=.2):
+    def __init__(self, onco_threshold=.2, tsg_threshold=.2,
+                 min_count=10):
         # check valid percentage
         if not 0 < onco_threshold < 1:
             raise ValueError("Oncogene threshold is invalid")
@@ -29,7 +30,7 @@ class VogelsteinClassifier(object):
         self.tsg_threshold = tsg_threshold
 
         # set min count to classify gene
-        self.min_count = 10
+        self.min_count = min_count
 
         # labels to classify genes as
         self.onco_label = "oncogene"
