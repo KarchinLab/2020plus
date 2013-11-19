@@ -149,7 +149,7 @@ def nuc_substitution_barplot(file_path, save_path,
 
 
 def mutation_types_barplot(mutation_cts,
-                           save_path=_utils.plot_dir + 'aa_mut_types.barplot.png',
+                           save_path,
                            title='Mutations by Type'):
     """Create a barplot graphing counts of amino acid/DNA mutation types.
 
