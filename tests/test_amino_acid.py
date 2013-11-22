@@ -95,6 +95,7 @@ def test_frame_shift_mutation():
     fs1 = 'p.M1fs'
     fs2 = 'p.W288fs*12'
     fs3 = 'p.?fs*?'
+    fs4 = 'p.E519>D*'
 
     # case 1 -- frame shift without premature stop codon
     aa = AminoAcid(fs1)
@@ -116,6 +117,10 @@ def test_frame_shift_mutation():
     assert aa.initial == '?'
     assert aa.pos == None
     assert aa.stop_pos == None
+
+    # case 4 -- wierd fs with >
+    aa = AminoAcid(fs4)
+    assert aa.is_frame_shift
 
 
 def test_nonsense_mutation():
@@ -151,3 +156,14 @@ def test_synonymous_mutation():
     assert aa.initial == 'A'
     assert aa.mutated == 'A'
     assert aa.pos == 246
+
+
+def test_no_protein():
+    """Tests if AminoAcid properly parses "no protein" mutations."""
+    nop1 = 'p.0?'
+
+    # case 1 -- no protein string
+    aa = AminoAcid(nop1)
+    assert aa.is_no_protein, "Could not detect 'no protein' correctly"
+    assert aa.mutation_type == 'no protein', 'Incorrect mutation type:' + aa.mutation_type
+

@@ -9,7 +9,7 @@ import csv
 
 logger = logging.getLogger(__name__)
 
-def count_missense(conn):
+def count_missense(conn, table):
     """Count amino acid changes.
 
     Args:
@@ -21,15 +21,24 @@ def count_missense(conn):
     logger.info('Starting to count amino acid changes . . .')
 
     # perform query
-    sql = 'SELECT aachange, occurrences FROM cosmic_aa'
+    if table == 'cosmic_aa':
+        sql = 'SELECT aachange, occurrences FROM cosmic_aa'
+    elif table == 'nucleotide':
+        sql = 'SELECT AminoAcid FROM nucleotide'
     df = psql.frame_query(sql, con=conn)
 
     # count amino acid missense mutations
     aa_change_counter = {}
     for i, row in df.iterrows():
-        aa = AminoAcid(hgvs=row['aachange'],
-                       occurrence=row['occurrences'])
-        if aa.is_valid and not aa.is_missing_info:
+        # get amino acid information
+        if table == 'cosmic_aa' :
+            aa = AminoAcid(hgvs=row['aachange'],
+                           occurrence=row['occurrences'])
+        elif table == 'nucleotide':
+            aa = AminoAcid(hgvs=row['AminoAcid'])
+
+        # count amino acid
+        if aa.is_missense and aa.is_valid and not aa.is_missing_info:
             aa_change_counter.setdefault((aa.initial, aa.mutated), 0)
             aa_change_counter[(aa.initial, aa.mutated)] += aa.occurrence
     logger.info('Finished counting amino acid changes.')
@@ -66,13 +75,13 @@ def save_missense(aacounter,
     logger.info('Finished saving protein missense information.')
 
 
-def main(conn):
+def main(conn, table):
     cfg_opts = _utils.get_output_config('missense')
     result_dir = _utils.result_dir
     plot_dir = _utils.plot_dir
 
     # handle missense mutation data
-    aa_counter = count_missense(conn)
+    aa_counter = count_missense(conn, table=table)
     save_missense(aa_counter,
                   missense_save=result_dir + cfg_opts['missense'],
                   property_save=result_dir + cfg_opts['property'])
