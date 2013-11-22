@@ -134,11 +134,9 @@ def main(conn):
                                      'Mutations By Type')
 
     # plot protein mutation type counts by gene type
-    cfg_opts2 = _utils.get_output_config('stats')  # need to get diff cfg section
-    tmp_mut_df = count_gene_types(out_dir + cfg_opts2['gene_design_matrix'])
+    cfg_opts2 = _utils.get_output_config('features')  # need to get diff cfg section
+    tmp_mut_df = count_gene_types(out_dir + cfg_opts2['gene_feature_matrix'])
     tmp_mut_df.to_csv(out_dir + cfg_opts['gene_mutation_counts_by_type'],
                       sep='\t')
     plot_data.all_mut_type_barplot(tmp_mut_df,
                                    plot_dir + cfg_opts['all_mut_type_barplot'])
-
-    #conn.close()  # close connection

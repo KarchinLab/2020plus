@@ -110,7 +110,7 @@ if __name__ == '__main__':
                                               action='store_const',
                                               const='genes',
                                               help='Generate data analysis stats'
-                                              ' on data/genes.db')
+                                              ' on data/genes.db. (Default)')
 
     # classify sub-command
     parser_classify = subparser.add_parser('classify',

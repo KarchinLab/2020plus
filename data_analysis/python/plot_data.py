@@ -204,6 +204,7 @@ def cumulative_gene_mutation(gene_cts,
 
 def pca_plot(file_path,
              save_path,
+             norm_class=False,
              title='Gene Mutation PCA'):
     logger.info('Plotting PCA of gene mutations (%s) . . .' % save_path)
 
@@ -211,6 +212,10 @@ def pca_plot(file_path,
     df = pd.read_csv(file_path,  # path
                      sep='\t',  # tab delim
                      index_col=0)  # index df by gene name
+
+    if norm_class:
+        other_df = df[(df['gene'] not in _utils.oncogene_set) & (df['gene'] not in _utils.tsg_set)]
+        driver_df = df[(df['gene'] in _utils.oncogene_set) | (df['gene'] in _utils.tsg_set)]
 
     # plot oncogenes and tumor suppressor genes as different colors
     oncogenes = set(_utils.read_oncogenes())  # get oncogenes
