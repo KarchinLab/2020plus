@@ -55,7 +55,7 @@ class AminoAcid(object):
                 self.mutation_type = 'not valid'
             elif self.unknown_effect:
                 self.mutation_type = 'unknown effect'
-            elif self.no_protein:
+            elif self.is_no_protein:
                 self.mutation_type = 'no protein'
             elif self.is_missing_info:
                 # mutation has a ?
@@ -186,16 +186,16 @@ class AminoAcid(object):
             self.is_missing_info = False
 
     def __set_no_protein(self, hgvs_string):
-        """Set a flag for no protein expected.
+        """Set a flag for no protein expected. ("p.0" or "p.0?")
 
         Args:
             hgvs_string (str): hgvs syntax with "p." removed
         """
         no_protein_list = ['0', '0?']  # no protein symbols
         if hgvs_string in no_protein_list:
-            self.no_protein = True
+            self.is_no_protein = True
         else:
-            self.no_protein = False
+            self.is_no_protein = False
 
     def __parse_hgvs_syntax(self, aa_hgvs):
         """Convert HGVS syntax for amino acid change into attributes.
@@ -210,7 +210,7 @@ class AminoAcid(object):
         """
         self.is_valid = True  # assume initially the syntax is legitimate
         self.is_synonymous = False  # assume not synonymous until proven
-        if self.unknown_effect:
+        if self.unknown_effect or self.is_no_protein:
             # unknown effect from mutation. usually denoted as p.?
             pass
         elif self.is_missense:

@@ -45,6 +45,7 @@ def generate_feature_matrix(recurrency_threshold,
                                     ['synonymous', 0],
                                     #['not valid', 0],
                                     ['indel', 0],
+                                    ['no protein', 0],
                                     #['missing', 0],
                                     ['nonsense', 0]])
                                     #['unknown effect', 0]])
@@ -82,8 +83,16 @@ def main(recurrent, conn):
     copy_path = feature_path.strip('txt') + 'r%d.txt' % recurrent
     shutil.copy(feature_path, copy_path)  # record a second file with reccurent param in name
 
-    # PCA plot
+    # PCA plots
+    # unnormalized PCA plot
     plot_data.pca_plot(_utils.result_dir + cfg_opts['gene_feature_matrix'],
-                       _utils.plot_dir + cfg_opts['pca_plot'])
-
+                       _utils.plot_dir + cfg_opts['pca_plot'],
+                       title='Protein Mutation Type Composition PCA')
+    # normalized PCA by removing class imbalance
+    plot_data.pca_plot(_utils.result_dir + cfg_opts['gene_feature_matrix'],
+                       _utils.plot_dir + cfg_opts['pca_plot_rand'],
+                       norm_class=True,
+                       low_count_filter=10,
+                       title='Protein Mutation Type Composition PCA Subsampled by '
+                       'Gene Type (3:1)')
 

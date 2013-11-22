@@ -8,6 +8,7 @@ directory is always consistent with the actual plots.
 from __future__ import division  # prevents integer division
 import pandas as pd
 import utils.python
+import numpy as np
 import utils.python.plot as myplt
 import utils.python.util as _utils
 from matplotlib.mlab import PCA
@@ -205,7 +206,24 @@ def cumulative_gene_mutation(gene_cts,
 def pca_plot(file_path,
              save_path,
              norm_class=False,
+             low_count_filter=1,
              title='Gene Mutation PCA'):
+    """Create a PCA plot using features from genes.
+
+    Each point represents one gene. The features for each gene
+    are reduced to two components for plotting.
+
+    Args:
+        file_path (str): path to file for gene feature matrix
+        save_path (str): path to save plot
+
+    Kwargs:
+        norm_class (bool): Default False. flag for subsampling genes to even
+                           unbalanced classes.
+        low_count_filter (int): Default 1. Genes should have at least
+                                low_count_filter number of mutations
+        title (str): title for plot
+    """
     logger.info('Plotting PCA of gene mutations (%s) . . .' % save_path)
 
     # normalize counts
@@ -214,8 +232,18 @@ def pca_plot(file_path,
                      index_col=0)  # index df by gene name
 
     if norm_class:
-        other_df = df[(df['gene'] not in _utils.oncogene_set) & (df['gene'] not in _utils.tsg_set)]
-        driver_df = df[(df['gene'] in _utils.oncogene_set) | (df['gene'] in _utils.tsg_set)]
+        # non-driver genes (i.e. not oncogenes or tsg) heavily
+        # out numbered driver genes. Thus PCA will tend to explain
+        # variance for essentially only the non-driver genes. tolist
+        # counter this effect if "norm_class" is True then non-driver
+        # genes will be sub-sampled
+        driver_list = list(_utils.oncogene_list + _utils.tsg_list)
+        driver_df = df.ix[driver_list]
+        non_driver_list = list(set(df.index) - set(driver_list))
+        other_df = df.ix[non_driver_list]
+        len_driver = len(driver_df)
+        sub_sample = other_df.loc[np.random.choice(other_df.index, 3*len_driver, replace=False)]
+        df = pd.concat([driver_df, sub_sample])  # new df with more equal classes
 
     # plot oncogenes and tumor suppressor genes as different colors
     oncogenes = set(_utils.read_oncogenes())  # get oncogenes
@@ -232,10 +260,8 @@ def pca_plot(file_path,
     # normalize data by row for PCA
     row_sums = df.sum(axis=1)
     df = df.div(row_sums.astype(float), axis=0)
-
-    # old method for dividing by sum of row
-    # tmp_total_cts = df.T.sum()
-    # df = (df.T / tmp_total_cts).T
+    keep_rows = row_sums >= low_count_filter
+    df = df.ix[keep_rows]  # filter low mutation ct genes
 
     # get marker size for scatter plot
     MAX_SIZE = 300  # some genes take up to much space
@@ -250,7 +276,7 @@ def pca_plot(file_path,
                   save_path,
                   colors=colors,
                   size=scatter_size,
-                  title='Mutation PCA',
+                  title=title,
                   xlabel='1st component (%f)' % first_eigen_value,
                   ylabel='2nd component (%f)' % second_eigen_value)
     logger.info('Finished PCA plot.')
