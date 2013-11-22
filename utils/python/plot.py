@@ -93,7 +93,7 @@ def barplot(df, file_path, title='', xlabel='', ylabel='', stacked=False):
 
 
 def histogram(df,
-              file_path,
+              save_path,
               bins,
               log=False,
               title='',
@@ -117,7 +117,7 @@ def histogram(df,
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.tight_layout()
-    plt.savefig(file_path)
+    plt.savefig(save_path)
     plt.clf()  # clear figure
 
 
