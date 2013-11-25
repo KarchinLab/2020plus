@@ -123,6 +123,20 @@ def test_frame_shift_mutation():
     assert aa.is_frame_shift
 
 
+def test_mutated_stop():
+    """Tests if AminoAcid parses changed stop codons"""
+    # test strings
+    ms1 = 'p.*214S'
+
+    # case 1 -- stop codon change
+    aa = AminoAcid(ms1)
+    assert aa.mutation_type == 'mutated stop', 'Invalid type: ' + aa.mutation_type
+    assert aa.is_mutated_stop
+    assert aa.initial == '*'
+    assert aa.mutated == 'S', 'Wrong mutated: ' + aa.mutated
+    assert aa.pos == 214
+
+
 def test_nonsense_mutation():
     """Tests if AminoAcid properly parses nonsense mutations."""
     # test strings

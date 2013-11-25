@@ -62,7 +62,9 @@ class AminoAcid(object):
                 self.mutation_type = 'missing'
             else:
                 # valid mutation type to be counted
-                if self.is_synonymous:
+                if self.is_mutated_stop:
+                    self.mutation_type = 'mutated stop'
+                elif self.is_synonymous:
                     # synonymous must go before missense since mutations
                     # can be categorized as synonymous and missense. Although
                     # in reality such cases are actually synonymous and not
@@ -102,6 +104,7 @@ class AminoAcid(object):
         Args:
             hgvs_string (str): hgvs syntax with "p." removed
         """
+        self.__set_mutated_stop_status(hgvs_string)
         self.__set_missense_status(hgvs_string)  # missense mutations
         self.__set_indel_status()  # indel mutations
         self.__set_frame_shift_status()  # check for fs
@@ -119,12 +122,21 @@ class AminoAcid(object):
         """Check for frame shift and set the self.is_frame_shift flag."""
         if 'fs' in self.hgvs_original:
             self.is_frame_shift = True
-        elif re.search('[*A-Z]\d+[A-Z]+\*', self.hgvs_original):
+        elif re.search('[A-Z]\d+[A-Z]+\*', self.hgvs_original):
             # it looks like some mutations dont follow the convention
             # of using 'fs' to indicate frame shift
             self.is_frame_shift = True
         else:
             self.is_frame_shift = False
+
+    def __set_mutated_stop_status(self, hgvs_string):
+        """Check if the stop codon was mutated to something other than
+        a stop codon."""
+        mutated_stop_pattern = '^\*\d+[A-Z?]+\*?$'
+        if re.search(mutated_stop_pattern, hgvs_string):
+            self.is_mutated_stop = True
+        else:
+            self.is_mutated_stop = False
 
     def __set_premature_stop_codon_status(self, hgvs_string):
         """Set whether there is a premature stop codon."""
@@ -213,6 +225,11 @@ class AminoAcid(object):
         if self.unknown_effect or self.is_no_protein:
             # unknown effect from mutation. usually denoted as p.?
             pass
+        elif self.is_mutated_stop:
+            self.initial = aa_hgvs[0]
+            self.mutated = re.findall('([A-Z?*]+)$', aa_hgvs)[0]
+            self.pos = int(re.findall('^\*(\d+)', aa_hgvs)[0])
+            self.stop_pos = None
         elif self.is_missense:
             self.initial = aa_hgvs[0]
             self.mutated = aa_hgvs[-1]
@@ -220,6 +237,8 @@ class AminoAcid(object):
             self.stop_pos = None  # not a nonsense mutation
             if self.initial == self.mutated:
                 self.is_synonymous = True
+            elif self.mutated == '*':
+                self.is_nonsense_mutation = True
         elif self.is_indel:
             if self.is_insertion:
                 if not self.is_missing_info:

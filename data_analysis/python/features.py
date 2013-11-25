@@ -40,12 +40,14 @@ def generate_feature_matrix(recurrency_threshold,
     for gene, indexes in gene_to_indexes.iteritems():
         tmp_df = df.ix[indexes]
         gene_pos_counter = {}
+        identical_indel = {}
         mut_type_ctr = OrderedDict([['missense', 0],
                                     ['frame shift', 0],
                                     ['synonymous', 0],
                                     #['not valid', 0],
                                     ['indel', 0],
                                     ['no protein', 0],
+                                    ['mutated stop', 0],
                                     #['missing', 0],
                                     ['nonsense', 0]])
                                     #['unknown effect', 0]])
@@ -57,15 +59,22 @@ def generate_feature_matrix(recurrency_threshold,
                     # keep track of missense pos for recurrency
                     gene_pos_counter.setdefault(aa.pos, 0)
                     gene_pos_counter[aa.pos] += 1
+                elif aa.mutation_type == 'indel':
+                    # keep track of missense pos for recurrency
+                    identical_indel.setdefault(aa.hgvs_original, 0)
+                    identical_indel[aa.hgvs_original] += 1
                 mut_type_ctr[aa.mutation_type] += 1
 
         # needs to have at least one count
         if sum(mut_type_ctr.values()):
             recurrent_cts = sum([cts for cts in gene_pos_counter.values()
                                  if cts >= recurrency_threshold])
+            identical_cts = sum([cts for cts in identical_indel.values()
+                                 if cts >= recurrency_threshold])
             mut_type_ctr['missense'] -= recurrent_cts  # subtract off the recurrent missense
-            design_matrix.append([gene, recurrent_cts] + list(mut_type_ctr.values()))
-    header = [['gene', 'recurrent missense'] + list(mut_type_ctr)]
+            mut_type_ctr['indel'] -= identical_cts  # subtract off the recurrent missense
+            design_matrix.append([gene, recurrent_cts, identical_cts] + list(mut_type_ctr.values()))
+    header = [['gene', 'recurrent missense', 'recurrent indel'] + list(mut_type_ctr)]
     logger.info('Finished creating feature matrix.')
     return header + design_matrix
 
