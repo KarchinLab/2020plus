@@ -30,7 +30,7 @@ def count_gene_mutations(conn):
     return df
 
 
-def main(recurrent, db, classify_only):
+def main(recurrent, recurrent_max, db, classify_only):
     cfg_opts = _utils.get_output_config('stats')  # get config
 
     if db == 'cosmic_nuc':
@@ -49,7 +49,7 @@ def main(recurrent, db, classify_only):
         conn = sqlite3.connect(genes_db_path)
         missense.main(conn, 'nucleotide')  # specify different table name
 
-    features.main(recurrent, conn)  # generate feature matrix
+    features.main(recurrent, recurrent_max, conn)  # generate feature matrix
 
     # user can specify a flag to prevent complete updates of the
     # data_analysis results. if classify_only is specified only

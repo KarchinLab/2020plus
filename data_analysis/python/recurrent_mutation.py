@@ -34,25 +34,29 @@ def _count_recurrent_missense(hgvs_iterable):
     return gene_pos_ctr, total_missense_ctr
 
 
-def count_missense_types(hgvs_iterable, recurrent=2):
+def count_missense_types(hgvs_iterable,
+                         recurrent_min=2,
+                         recurrent_max=float('inf')):
     """Count the number of recurrent missense and regular missense
-    mutations given a threshold for recurrency.
+    mutations given a valid recurrency range.
 
     Args:
         hgvs_iterable (iterable): contains HGVS protein strings for a
                                   single gene.
 
     Kwargs:
-        recurrent (int): threshold number of missense mutations to define
-                         a recurrent position. (default=2)
+        recurrent_min (int): minimum number of missense mutations to define
+                             a recurrent position. (default=2)
+        recurrent_max (int): maximum number of missense mutations to define
+                             a recurrent position. (default=infinity)
 
     Returns:
         recurrent_cts (int): number of recurrent missense mutations in a gene
         missense_cts (int): number of regular missense mutations in a gene
     """
     pos_count, total_missense = _count_recurrent_missense(hgvs_iterable)
-    recurrent_cts = sum([cts for cts in pos_count.values()
-                         if cts >= recurrent])  # sum mutations passing theshold
+    recurrent_cts = sum([cts for cts in pos_count.values()  # sum mutations passing theshold
+                         if cts >= recurrent_min and cts <= recurrent_max])
     missense_cts = total_missense - recurrent_cts  # subtract reccurent from total
     return recurrent_cts, missense_cts
 

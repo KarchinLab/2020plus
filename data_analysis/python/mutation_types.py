@@ -4,7 +4,6 @@ for amino acids (missense, indel, frame shift, nonsense, and synonymous)
 and nucleotides (substitution, insertions, and deletions).
 """
 
-from utils.python.cosmic_db import get_cosmic_db
 import utils.python.util as _utils
 import plot_data
 import pandas as pd
@@ -75,9 +74,11 @@ def count_gene_types(file_path):
     Returns:
         pd.DataFrame: mutation type counts by gene type
     """
+    logger.info('Counting mutation types by gene type . . .')
     df = pd.read_csv(file_path, sep='\t', index_col=0)
     df['gene_type'] = df.index.to_series().apply(_utils.classify_gene)
     mut_ct_df = df.groupby('gene_type').sum()  # get counts for each gene type
+    logger.info('Finished counting mutation types.')
     return mut_ct_df
 
 

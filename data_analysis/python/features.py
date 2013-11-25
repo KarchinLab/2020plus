@@ -3,6 +3,7 @@ and features are specified in different columns. The generate_feature_matrix
 function specifies how the feature matrix is constructed.
 """
 from utils.python.amino_acid import AminoAcid
+import recurrent_mutation
 import plot_data
 import pandas.io.sql as psql
 import utils.python.util as _utils
@@ -14,12 +15,16 @@ import logging
 logger = logging.getLogger(__name__)
 
 def generate_feature_matrix(recurrency_threshold,
-                            conn):
+                            conn,
+                            recurrency_cap=float('inf')):
     """Generate a feature matrix potentially useful for classifying genes.
 
     Args:
-        recurrency_threshold (int): number of mutations to define recurrency
+        recurrency_threshold (int): minimum number of mutations to define recurrency
         conn (db connection): database connection to mysql/sqlite
+
+    Kwargs:
+        recurrency_cap (int): maximum number of mutations to define recurrency
 
     Returns:
         pd.DataFrame: feature matrix
@@ -55,35 +60,41 @@ def generate_feature_matrix(recurrency_threshold,
             aa = AminoAcid(hgvs)
             if aa.mutation_type not in not_used_types:
                 # do not use 'missing', 'unkown effect' or 'not valid'
-                if aa.mutation_type == 'missense':
+                # if aa.mutation_type == 'missense':
                     # keep track of missense pos for recurrency
-                    gene_pos_counter.setdefault(aa.pos, 0)
-                    gene_pos_counter[aa.pos] += 1
-                elif aa.mutation_type == 'indel':
+                #    gene_pos_counter.setdefault(aa.pos, 0)
+                #    gene_pos_counter[aa.pos] += 1
+                if aa.mutation_type == 'indel':
                     # keep track of missense pos for recurrency
                     identical_indel.setdefault(aa.hgvs_original, 0)
                     identical_indel[aa.hgvs_original] += 1
                 mut_type_ctr[aa.mutation_type] += 1
 
+        recur_ct, missense_ct = recurrent_mutation.count_missense_types(tmp_df['AminoAcid'],
+                                                                        recurrency_threshold,
+                                                                        recurrency_cap)
+
         # needs to have at least one count
         if sum(mut_type_ctr.values()):
-            recurrent_cts = sum([cts for cts in gene_pos_counter.values()
-                                 if cts >= recurrency_threshold])
+            mut_type_ctr['missense'] = missense_ct
+            #recurrent_cts = sum([cts for cts in gene_pos_counter.values()
+            #                     if cts >= recurrency_threshold])
             identical_cts = sum([cts for cts in identical_indel.values()
                                  if cts >= recurrency_threshold])
-            mut_type_ctr['missense'] -= recurrent_cts  # subtract off the recurrent missense
+            #mut_type_ctr['missense'] -= recurrent_cts  # subtract off the recurrent missense
             mut_type_ctr['indel'] -= identical_cts  # subtract off the recurrent missense
-            design_matrix.append([gene, recurrent_cts, identical_cts] + list(mut_type_ctr.values()))
+            design_matrix.append([gene, recur_ct, identical_cts] + list(mut_type_ctr.values()))
     header = [['gene', 'recurrent missense', 'recurrent indel'] + list(mut_type_ctr)]
     logger.info('Finished creating feature matrix.')
     return header + design_matrix
 
 
-def main(recurrent, conn):
+def main(recurrent, recurrent_max, conn):
     cfg_opts = _utils.get_output_config('features')  # get config
 
     # generate features
-    feature_matrix = generate_feature_matrix(recurrent, conn)
+    feature_matrix = generate_feature_matrix(recurrent, conn,
+                                             recurrency_cap=recurrent_max)
 
     # save features
     feature_path = _utils.result_dir + cfg_opts['gene_feature_matrix']
