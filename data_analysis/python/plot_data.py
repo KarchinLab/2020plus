@@ -292,3 +292,28 @@ def all_mut_type_barplot(df,
                   ylabel='Counts',
                   stacked=True)
     logger.info('Finished plotting protein mutation types by gene type.')
+
+
+def recurrent_missense_pos_line(df,
+                                save_path,
+                                xlim=(2, 25)):
+    logger.info('Plotting number of recurrent missense positions (%s) ...' % save_path)
+    # filter data
+    df = df.fillna(0)  # fill absent counts with zeros
+    df = df[(df.index>=xlim[0]) & (df.index<xlim[1])]  # only include certain range
+
+    # normalized based on number of genes
+    num_onco = len(_utils.oncogene_list)
+    num_tsg = len(_utils.tsg_list)
+    num_other = 19140
+    df['oncogene'] = df['oncogene'] / num_onco
+    df['tsg'] = df['tsg'] / num_tsg
+    df['other'] = df['other'] / num_other
+
+    myplt.line(df,
+               save_path,
+               title='Number of Recurrent Missense Positions per Gene',
+               xlabel='Number of Mutations per Position',
+               ylabel='Number of Recurrent Missense Positions per Gene')
+    logger.info('Finished plotting number of recurrent missense positions')
+
