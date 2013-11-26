@@ -52,7 +52,7 @@ def generate_feature_matrix(recurrency_threshold,
                                     #['not valid', 0],
                                     ['indel', 0],
                                     ['no protein', 0],
-                                    ['mutated stop', 0],
+                                    ['lost stop', 0],
                                     #['missing', 0],
                                     ['nonsense', 0]])
                                     #['unknown effect', 0]])

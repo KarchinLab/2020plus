@@ -62,8 +62,8 @@ class AminoAcid(object):
                 self.mutation_type = 'missing'
             else:
                 # valid mutation type to be counted
-                if self.is_mutated_stop:
-                    self.mutation_type = 'mutated stop'
+                if self.is_lost_stop:
+                    self.mutation_type = 'lost stop'
                 elif self.is_synonymous:
                     # synonymous must go before missense since mutations
                     # can be categorized as synonymous and missense. Although
@@ -104,7 +104,7 @@ class AminoAcid(object):
         Args:
             hgvs_string (str): hgvs syntax with "p." removed
         """
-        self.__set_mutated_stop_status(hgvs_string)
+        self.__set_lost_stop_status(hgvs_string)
         self.__set_missense_status(hgvs_string)  # missense mutations
         self.__set_indel_status()  # indel mutations
         self.__set_frame_shift_status()  # check for fs
@@ -129,14 +129,14 @@ class AminoAcid(object):
         else:
             self.is_frame_shift = False
 
-    def __set_mutated_stop_status(self, hgvs_string):
+    def __set_lost_stop_status(self, hgvs_string):
         """Check if the stop codon was mutated to something other than
         a stop codon."""
-        mutated_stop_pattern = '^\*\d+[A-Z?]+\*?$'
-        if re.search(mutated_stop_pattern, hgvs_string):
-            self.is_mutated_stop = True
+        lost_stop_pattern = '^\*\d+[A-Z?]+\*?$'
+        if re.search(lost_stop_pattern, hgvs_string):
+            self.is_lost_stop = True
         else:
-            self.is_mutated_stop = False
+            self.is_lost_stop = False
 
     def __set_premature_stop_codon_status(self, hgvs_string):
         """Set whether there is a premature stop codon."""
@@ -225,7 +225,7 @@ class AminoAcid(object):
         if self.unknown_effect or self.is_no_protein:
             # unknown effect from mutation. usually denoted as p.?
             pass
-        elif self.is_mutated_stop:
+        elif self.is_lost_stop:
             self.initial = aa_hgvs[0]
             self.mutated = re.findall('([A-Z?*]+)$', aa_hgvs)[0]
             self.pos = int(re.findall('^\*(\d+)', aa_hgvs)[0])
