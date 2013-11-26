@@ -47,7 +47,9 @@ def main(recurrent, recurrent_max, db, classify_only):
         # connect to sqlite db at data/genes.db
         genes_db_path = _utils.get_db_config('genes')['db']
         conn = sqlite3.connect(genes_db_path)
-        missense.main(conn, 'nucleotide')  # specify different table name
+
+        if not classify_only:
+            missense.main(conn, 'nucleotide')  # specify different table name
 
     features.main(recurrent, recurrent_max, conn)  # generate feature matrix
 
