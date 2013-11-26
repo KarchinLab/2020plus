@@ -98,13 +98,13 @@ if __name__ == '__main__':
                                       action='store',
                                       default=2,
                                       help='Minimum number of mutations at a '
-                                      'recurrent position. (default=2)')
+                                      'recurrent position. (default: 2)')
     parser_data_analysis.add_argument('-rm', '--recurrent-max',
                                       type=int,
                                       action='store',
                                       default=float('inf'),
                                       help='Maximum number of mutations at a '
-                                      'recurrent position. (Defualt=infinity)')
+                                      'recurrent position. (Defualt: infinity)')
     parser_data_analysis_grouper = parser_data_analysis.add_mutually_exclusive_group()
     parser_data_analysis_grouper.add_argument('-c', '--cosmic_nuc',
                                               dest='database',
