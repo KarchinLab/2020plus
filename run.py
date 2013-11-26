@@ -88,7 +88,7 @@ if __name__ == '__main__':
                                                 help='Run scripts in the data'
                                                 ' analysis folder')
     parser_data_analysis.set_defaults(func=_data_analysis)
-    parser_data_analysis.add_argument('--classify_only',
+    parser_data_analysis.add_argument('--classify-only',
                                       action='store_true',
                                       default=False,
                                       help='Only update information that is '
@@ -123,7 +123,7 @@ if __name__ == '__main__':
     parser_classify = subparser.add_parser('classify',
                                            help='Run classification scripts'
                                            ' in the classify folder')
-    parser_classify.add_argument('-m', '--min_count',
+    parser_classify.add_argument('-m', '--min-count',
                                  type=int,
                                  action='store',
                                  default=10,
