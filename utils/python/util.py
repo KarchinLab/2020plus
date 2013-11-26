@@ -1,6 +1,8 @@
 import pandas as pd
 from amino_acid import AminoAcid
 from nucleotide import Nucleotide
+from cosmic_db import get_cosmic_db
+import sqlite3
 import ConfigParser
 import logging
 
@@ -169,6 +171,33 @@ def read_cosmic_tsv_by_gene(gene_name):
     tsv_path = database_dir + gene_dir + gene_name + '.tsv'  # path to tsv file
     df = pd.read_csv(tsv_path, sep='\t')
     return df
+
+
+def drop_table(tbl_name,
+               kind='sqlite'):
+    """Drop a table from database if exists.
+
+    Note: This function was written because pandas has a bug.
+    If pandas was working then the write_frame method could just
+    replace existing contents with out the need for me to drop the
+    table. The bug is found here:
+        https://github.com/pydata/pandas/issues/2971
+
+    Args:
+        tbl_name (str): name of table to drop
+
+    Kwargs:
+        kind (str): ['sqlite' | 'mysql']
+    """
+    genes_db_path = get_db_config('genes')['db']
+    if kind == 'sqlite':
+        with sqlite3.connect(genes_db_path) as cur:
+            sql = "DROP TABLE IF EXISTS %s" % tbl_name
+            cur.execute(sql)
+    elif kind == 'mysql':
+        with get_cosmic_db() as cur:
+            sql = "DROP TABLE IF EXISTS %s" % tbl_name
+            cur.execute(sql)
 
 
 # set up vogelstein oncogenes/tsgs

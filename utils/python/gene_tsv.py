@@ -104,7 +104,38 @@ def concatenate_genes(out_path, cosmic_dir):
                                     mywriter.write(gene_name + "\t" + line)  # write with gene name
 
 
-def save_db(tsv_path, genedb_path):
+def filter_hypermutators(hypermutator_count, conn):
+    """Query database to find hypermutator samples so they can
+    be excluded from further analysis.
+
+    """
+    sql = ("SELECT *"
+          " FROM nucleotide"
+          " WHERE SampleName in ("
+          "     SELECT y.SampleName"
+          "     FROM ("
+          "         SELECT x.SampleName, SUM(x.mut_indicator) as MutationCounts"
+          "         FROM ( "
+          "             SELECT SampleName, 1 as mut_indicator"
+          "             FROM nucleotide"
+          "         ) x "
+          "         GROUP BY SampleName"
+          "     ) y"
+          "     WHERE y.MutationCounts<%d"
+          " )" % hypermutator_count)
+
+    df = psql.frame_query(sql, conn)  # get non hypermutator mutations
+
+    _utils.drop_table('nucleotide', kind='sqlite')
+
+    psql.write_frame(df,
+                     'nucleotide',
+                     conn,
+                     flavor='sqlite',
+                     if_exists='replace')
+
+
+def save_db(hypermutator_ct, tsv_path, genedb_path):
     """Saves tab delim gene mutation file to a sqlite3 db.
 
     NOTE: Uses pandas to store all contents in memory and then
@@ -128,6 +159,9 @@ def save_db(tsv_path, genedb_path):
     df['hg18end'] = df['hg18end'].astype(int)
     df['hg19end'] = df['hg19end'].astype(int)
 
+    # drop table if already exists
+    _utils.drop_table('nucleotide', kind='sqlite')
+
     conn = sqlite3.connect(genedb_path)  # open connection
 
     # save tsv to sqlite3 database
@@ -137,10 +171,13 @@ def save_db(tsv_path, genedb_path):
                      flavor='sqlite',  # use sqlite
                      if_exists='replace')  # drop table if exists
 
+    # drop table and re-insert data without hypermutators
+    filter_hypermutators(hypermutator_ct, conn)
+
     conn.close()  # close
 
 
-def main():
+def main(hypermutator_count):
     """Concatenates all the mutation data from tab delmited files in
     the cosmic directory. Next, saves the results to a sqlite db."""
     # get input/output configurations
@@ -153,4 +190,4 @@ def main():
 
     # save info into a txt file and sqlite3 database
     concatenate_genes(out_path, cosmic_dir)  # concatenate all gene files
-    save_db(out_path, out_db)  # save concatenate file to sqlite database
+    save_db(hypermutator_count, out_path, out_db)  # save concatenate file to sqlite database

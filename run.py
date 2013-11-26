@@ -67,7 +67,7 @@ def _classify():
 
 def _savedb():
     """Wrapper function to call gene_tsv's main function"""
-    utils.python.gene_tsv.main()
+    utils.python.gene_tsv.main(args.hypermutator)
 
 
 if __name__ == '__main__':
@@ -138,6 +138,14 @@ if __name__ == '__main__':
     parser_savedb = subparser.add_parser('savedb',
                                          help=help_string)
     parser_savedb.set_defaults(func=_savedb)
+    parser_savedb.add_argument('-m', '--hypermutator',
+                                    type=int,
+                                    action='store',
+                                    default=500,
+                                    help='Number of mutations to define a sample '
+                                    'as a hypermutator. Hypermutator samples are filtered '
+                                    ' from further analysis. (default: 500)')
+
 
     parser.set_defaults(database='genes')  # by default work on sqlite db
     args = parser.parse_args()  # parse the command line options
