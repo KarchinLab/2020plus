@@ -15,8 +15,8 @@ def calc_onco_info(df, onco_pct, tsg_pct, min_ct):
     # calculate the number of genes classified as oncogene
     vclf = VogelsteinClassifier(onco_pct, tsg_pct, min_ct)
     df['total'] = df.T.sum()
-    input_list = ((row['recurrent missense'],
-                   row['frame shift'] + row['nonsense'],
+    input_list = ((row['recurrent missense'] + row['recurrent indel'],
+                   row['frame shift'] + row['nonsense'] + row['lost stop'] + row['no protein'],
                    row['total'])
                   for i, row in df.iterrows())
     df['2020 class'] = vclf.predict_list(input_list)
@@ -38,7 +38,7 @@ def num_onco_by_recurrent_mutations(onco_pct, tsg_pct, min_ct):
     """Count number of oncogenes while varying the definition of recurrency"""
     # calculate counts for oncogenes/tsg with varying the required the number
     # of mutations to define a recurrent position
-    file_match_pattern = './data_analysis/results/genes/gene_design_matrix.r*.txt'
+    file_match_pattern = './data_analysis/results/genes/gene_feature_matrix.r*.txt'
     gene_design_matrix_paths = glob.glob(file_match_pattern)
     onco_ct_list, onco_pct_list = [], []  # list of cts/pct for oncogenes
     for file_path in gene_design_matrix_paths:
@@ -62,9 +62,12 @@ def num_onco_by_recurrent_mutations(onco_pct, tsg_pct, min_ct):
 
 
 def num_onco_by_pct_threshold(min_ct):
+    # initialization of dataframe
     cts, pct = num_onco_by_recurrent_mutations(.2, .2, min_ct)
     df_ct = pd.DataFrame(index=cts.index)
     df_pct = pd.DataFrame(index=pct.index)
+
+    # test different percentage thresholds
     for threshold in np.arange(.15, .5, .05):
         tmp_ct, tmp_pct = num_onco_by_recurrent_mutations(threshold, threshold, min_ct)
         df_ct[str(threshold)] = tmp_ct
@@ -87,7 +90,7 @@ def main(minimum_ct):
     # plot results
     # plot number of predicted oncogenes while varying parameters
     tmp_save_path = _utils.clf_plot_dir + cfg_opts['number_oncogenes_plot']
-    tmp_title = 'Vogelstein\'s Classifier Predicted Oncogenes'
+    tmp_title = r"Vogelstein's Classifier Predicted Oncogenes (recurrent missense \textgreater 10)"
     tmp_ylabel = 'Number of Oncogenes'
     tmp_xlabel = 'Number of Mutations Required for Recurrency'
     plot_data.onco_mutations_parameter(count_df,
@@ -106,7 +109,7 @@ def main(minimum_ct):
                                        ylabel=tmp_ylabel,
                                        xlabel=tmp_xlabel)
 
-    df = pd.read_csv('data_analysis/results/genes/gene_design_matrix.r4.txt',
+    df = pd.read_csv('data_analysis/results/genes/gene_feature_matrix.r2.txt',
                      sep='\t', index_col=0)
 
     print 'RANDOM FOREST:'
