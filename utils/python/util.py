@@ -56,6 +56,23 @@ def read_tsgs():
     return tsgs
 
 
+def read_smg():
+    """Reads in the significantly mutated genes from kandoth et al's
+    nature paper.
+
+    The paper was from the Pan-Cancer effort from TCGA.
+
+    SMGs from supplementary:
+    http://www.nature.com/nature/journal/v502/n7471/full/nature12634.html
+
+    Returns:
+        smgs (tuple): tuple of gene names considered as significantly mutated
+    """
+    with open('data/gene_lists/smg_kandoth.txt', 'r') as handle:
+        smgs = tuple(gene.strip() for gene in handle.readlines())
+    return smgs
+
+
 def classify_gene(gene):
     """Return whether the gene is an oncogene, tsg, or other.
 
@@ -159,3 +176,7 @@ oncogene_list = read_oncogenes()
 tsg_list = read_tsgs()
 oncogene_set = set(oncogene_list)
 tsg_set = set(tsg_list)
+
+# significantly mutate genes from kandoth et al
+smg_list = read_smg()
+smg_set = set(smg_list)
