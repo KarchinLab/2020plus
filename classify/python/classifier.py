@@ -1,4 +1,5 @@
 from __future__ import division
+import matplotlib.pyplot as plt
 from vogelstein_classifier import VogelsteinClassifier
 from random_forest_clf import RandomForest
 from multinomial_nb_clf import MultinomialNaiveBayes
@@ -112,15 +113,30 @@ def main(minimum_ct):
     df = pd.read_csv('data_analysis/results/genes/gene_feature_matrix.r2.txt',
                      sep='\t', index_col=0)
 
-    print 'RANDOM FOREST:'
+    # random forest
     rclf = RandomForest(df, min_ct=minimum_ct)
-    rclf.kfold_validation()
-    print 'NAIVE BAYES:'
+    rclf_mean_tpr, rclf_mean_fpr, rclf_mean_auc = rclf.kfold_validation()
+    mean_df = rclf.mean_importance
+    std_df = rclf.std_importance
+    plot_data.feature_importance_barplot(mean_df,
+                                         std_df,
+                                         _utils.clf_plot_dir + 'feature_importance.png')
+
+    # multinomial naive bayes
     nbclf = MultinomialNaiveBayes(df, min_ct=minimum_ct)
-    nbclf.kfold_validation()
-    print 'DUMMY CLF:'
+    nbclf_mean_tpr, nbclf_mean_fpr, nbclf_mean_auc = nbclf.kfold_validation()
+
+    # dummy classifier, predict most frequent
     dclf = DummyClf(df, strategy='most_frequent', min_ct=minimum_ct)
-    dclf.kfold_validation()
+    dclf_mean_tpr, dclf_mean_fpr, dclf_mean_auc = dclf.kfold_validation()
+
+    # plot roc figure
+    df = pd.DataFrame({'random forest (AUC = %0.2f)' % rclf_mean_auc: rclf_mean_tpr,
+                       'naive bayes (AUC = %0.2f)' % nbclf_mean_auc: nbclf_mean_tpr,
+                       'dummy (AUC = %0.2f)' % dclf_mean_auc: dclf_mean_tpr},
+                      index= rclf_mean_fpr)
+    df.plot(kind='line')
+    plt.savefig(_utils.clf_plot_dir + 'roc.png')
 
 
 if __name__ == "__main__":

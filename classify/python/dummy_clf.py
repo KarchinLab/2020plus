@@ -11,8 +11,15 @@ class DummyClf(GenericClassifier):
 
         # process data
         df = self._filter_rows(df)  # filter out low count rows
-        self.x = self._random_sort(df)  # randomly sort data
-        self.y = self.x.index.to_series().apply(self._label_gene)  # get gene labels
+        #self.x = self._random_sort(df)  # randomly sort data
+        #self.y = self.x.index.to_series().apply(self._label_gene)  # get gene labels
+        self.x, self.y = self._randomize(df)
 
         # setup classifier
         self.clf = DummyClassifier(strategy=strategy)
+
+    def _update_metrics(self):
+        self.num_pred += 1
+
+    def _on_finish(self):
+        pass

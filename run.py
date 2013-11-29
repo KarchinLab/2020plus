@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import logging
 import datetime
 import os
@@ -145,7 +146,6 @@ if __name__ == '__main__':
                                     help='Number of mutations to define a sample '
                                     'as a hypermutator. Hypermutator samples are filtered '
                                     ' from further analysis. (default: 500)')
-
 
     parser.set_defaults(database='genes')  # by default work on sqlite db
     args = parser.parse_args()  # parse the command line options

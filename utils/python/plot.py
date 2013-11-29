@@ -73,7 +73,15 @@ def heatmap(df, file_path, title='', xlabel='', ylabel='', cmap=plt.cm.Blues):
     plt.savefig(file_path)
 
 
-def barplot(df, file_path, title='', xlabel='', ylabel='', stacked=False):
+def barplot(df,
+            file_path,
+            kind='bar',
+            yerr=None,
+            xerr=None,
+            title='',
+            xlabel='',
+            ylabel='',
+            stacked=False):
     """barplot generates/saves a bar plot from a pandas data frame.
 
     Args:
@@ -81,9 +89,14 @@ def barplot(df, file_path, title='', xlabel='', ylabel='', stacked=False):
         file_path (str): path to save bar plot figure
 
     Kwargs:
+        kind (str): ['bar' | 'barh'] vertical or horizontal bar chart
+        stderror (list): stdev of each bar
         Matplotlib options for plotting
     """
-    df.plot(kind='bar', stacked=stacked)
+    if yerr is not None:
+        df.plot(kind=kind, yerr=yerr, stacked=stacked)
+    elif xerr is not None:
+        df.plot(kind=kind, xerr=xerr, stacked=stacked)
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
