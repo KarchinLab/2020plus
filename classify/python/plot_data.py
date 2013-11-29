@@ -27,6 +27,7 @@ def feature_importance_barplot(mean_df,
                   save_path,
                   kind='barh',
                   xerr=std_df,
+                  ecolor='#00008B',  # dark blue
                   title='Feature Importance in Random Forest',
                   xlabel='Feature Importance')
     logger.info('Finished plotting feature importance bar plot.')

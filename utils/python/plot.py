@@ -78,6 +78,7 @@ def barplot(df,
             kind='bar',
             yerr=None,
             xerr=None,
+            ecolor=None,
             title='',
             xlabel='',
             ylabel='',
@@ -94,9 +95,9 @@ def barplot(df,
         Matplotlib options for plotting
     """
     if yerr is not None:
-        df.plot(kind=kind, yerr=yerr, stacked=stacked)
+        df.plot(kind=kind, yerr=yerr, ecolor=ecolor, stacked=stacked)
     elif xerr is not None:
-        df.plot(kind=kind, xerr=xerr, stacked=stacked)
+        df.plot(kind=kind, xerr=xerr, ecolor=ecolor, stacked=stacked)
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
