@@ -30,6 +30,15 @@ def count_nucleotides(conn):
 
 
 def count_oncogenes(conn):
+    """Count both DNA and protein mutation types for oncogenes.
+
+    Args:
+      | conn (MySQL/Sqlite connection): connection to database
+
+    Returns:
+      | aa_counts (pd.Series): mutation type counts for proteins
+      | nuc_counts (pd.Series): mutation type counts for DNA
+    """
     logger.info('Counting oncogene mutation types . . .')
 
     # prepare sql statement
@@ -48,6 +57,15 @@ def count_oncogenes(conn):
 
 
 def count_tsg(conn):
+    """Count both DNA and protein mutation types for Tumor Suppressor Genes.
+
+    Args:
+      | conn (MySQL/Sqlite connection): connection to database
+
+    Returns:
+      | aa_counts (pd.Series): mutation type counts for proteins.
+      | nuc_counts (pd.Series): mutation type counts for DNA.
+    """
     logger.info('Counting tumor suppressor gene mutation types . . .')
 
     # prepare sql statement
@@ -69,10 +87,10 @@ def count_gene_types(file_path):
     """Returns protein mutation type counts by gene type (oncogenes, tsg, other).
 
     Kwargs:
-        file_path (str): path to mutation type cts by gene file
+      | file_path (str): path to mutation type cts by gene file
 
     Returns:
-        pd.DataFrame: mutation type counts by gene type
+      | pd.DataFrame: mutation type counts by gene type
     """
     logger.info('Counting mutation types by gene type . . .')
     df = pd.read_csv(file_path, sep='\t', index_col=0)
@@ -83,10 +101,17 @@ def count_gene_types(file_path):
 
 
 def main(conn):
+    """Counts and plots mutations by mutational type.
+
+    The main function uses other functions within the module to count
+    mutations and the plot_data module to plot results.
+
+    Args:
+      | conn (MySQL/Sqlite connection): connection to database
+    """
     out_dir = _utils.result_dir  # output directory for text files
     plot_dir = _utils.plot_dir  # plotting directory
     cfg_opts = _utils.get_output_config('mutation_types')
-    #conn = get_cosmic_db()  # connect to COSMIC_nuc
 
     # handle DNA nucleotides
     mut_nuc_cts = count_nucleotides(conn)

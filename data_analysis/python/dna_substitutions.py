@@ -11,10 +11,10 @@ def count_substitutions(hgvs_iterable):
     """Count nucleotide substitutions from HGVS strings.
 
     Args:
-        hgvs_iterable (iterable): iterable container of HGVS DNA strings
+      | hgvs_iterable (iterable): iterable container of HGVS DNA strings
 
     Returns:
-        dict: keys are substitutions and values are counts
+      | dict: keys are substitutions and values are counts
     """
     # count DNA substitutions
     nuc_counter = {}  # {(initial, mutated): count,...}
