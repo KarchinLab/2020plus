@@ -110,7 +110,7 @@ def main(minimum_ct):
                                        ylabel=tmp_ylabel,
                                        xlabel=tmp_xlabel)
 
-    df = pd.read_csv('data_analysis/results/genes/gene_feature_matrix.r2.txt',
+    df = pd.read_csv(_utils.result_dir + cfg_opts['gene_feature'],
                      sep='\t', index_col=0)
 
     # random forest
@@ -120,7 +120,7 @@ def main(minimum_ct):
     std_df = rclf.std_importance
     plot_data.feature_importance_barplot(mean_df,
                                          std_df,
-                                         _utils.clf_plot_dir + 'feature_importance.png')
+                                         _utils.clf_plot_dir + cfg_opts['feature_importance_plot'])
 
     # multinomial naive bayes
     nbclf = MultinomialNaiveBayes(df, min_ct=minimum_ct)
@@ -136,7 +136,7 @@ def main(minimum_ct):
                        'dummy (AUC = %0.2f)' % dclf_mean_auc: dclf_mean_tpr},
                       index= rclf_mean_fpr)
     df.plot(kind='line')
-    plt.savefig(_utils.clf_plot_dir + 'roc.png')
+    plt.savefig(_utils.clf_plot_dir + cfg_opts['roc_plot'])
 
 
 if __name__ == "__main__":
