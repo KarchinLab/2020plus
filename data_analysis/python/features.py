@@ -20,14 +20,14 @@ def generate_feature_matrix(recurrency_threshold,
     """Generate a feature matrix potentially useful for classifying genes.
 
     Args:
-        recurrency_threshold (int): minimum number of mutations to define recurrency
-        conn (db connection): database connection to mysql/sqlite
+      | recurrency_threshold (int): minimum number of mutations to define recurrency
+      | conn (db connection): database connection to mysql/sqlite
 
     Kwargs:
-        recurrency_cap (int): maximum number of mutations to define recurrency
+      | recurrency_cap (int): maximum number of mutations to define recurrency
 
     Returns:
-        pd.DataFrame: feature matrix
+      | pd.DataFrame: feature matrix
     """
     logger.info('Creating design matrix . . .')
 

@@ -13,12 +13,12 @@ def _count_recurrent_missense(hgvs_iterable):
     counts according to position.
 
     Args:
-        hgvs_iterable (iterable): container object with HGVS protein strings
+      | hgvs_iterable (iterable): container object with HGVS protein strings
 
     Returns:
-        gene_pos_ctr (dict): counts missense mutations by position.
-                             {mutation_position: count, ...}
-        total_missense_ctr (int): total missense mutation count
+      | gene_pos_ctr (dict): counts missense mutations by position.
+      |                      {mutation_position: count, ...}
+      | total_missense_ctr (int): total missense mutation count
 
     NOTE: This function requires the input HGVS container to contain
     mutations only for a single gene.
@@ -41,18 +41,18 @@ def count_missense_types(hgvs_iterable,
     mutations given a valid recurrency range.
 
     Args:
-        hgvs_iterable (iterable): contains HGVS protein strings for a
+      | hgvs_iterable (iterable): contains HGVS protein strings for a
                                   single gene.
 
     Kwargs:
-        recurrent_min (int): minimum number of missense mutations to define
-                             a recurrent position. (default=2)
-        recurrent_max (int): maximum number of missense mutations to define
-                             a recurrent position. (default=infinity)
+      | recurrent_min (int): minimum number of missense mutations to define
+      |                      a recurrent position. (default=2)
+      | recurrent_max (int): maximum number of missense mutations to define
+      |                      a recurrent position. (default=infinity)
 
     Returns:
-        recurrent_cts (int): number of recurrent missense mutations in a gene
-        missense_cts (int): number of regular missense mutations in a gene
+      | recurrent_cts (int): number of recurrent missense mutations in a gene
+      | missense_cts (int): number of regular missense mutations in a gene
     """
     pos_count, total_missense = _count_recurrent_missense(hgvs_iterable)
     recurrent_cts = sum([cts for cts in pos_count.values()  # sum mutations passing theshold

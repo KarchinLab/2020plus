@@ -11,9 +11,9 @@ def count_primary_tissues(gene, conn):
     """Count the number of mutations in a single gene for each primary tissue.
 
     Args:
-        gene (str): gene name
-        conn (sqlite/MySQL connection): connection to database with
-            `nucleotide` table
+      | gene (str): gene name
+      | conn (sqlite/MySQL connection): connection to database with
+      |     `nucleotide` table
     """
     logger.info('Counting %s mutations for each primary tissue ...' % gene)
     sql = ("SELECT PrimaryTissue, COUNT(*) as Counts"
@@ -32,9 +32,9 @@ def count_types_primary_tissue(gene, conn):
     """Count mutation types in a single gene for each primary tissue.
 
     Args:
-        gene (str): gene name
-        conn (sqlite/MySQL connection): connection to database with
-            `nucleotide` table
+      | gene (str): gene name
+      | conn (sqlite/MySQL connection): connection to database with
+      |     `nucleotide` table
     """
     sql = ("SELECT PrimaryTissue, Nucleotide, AminoAcid "
            "FROM nucleotide nuc "

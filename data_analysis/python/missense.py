@@ -13,10 +13,10 @@ def count_missense(conn, table):
     """Count amino acid changes.
 
     Args:
-        conn: mysqldb connection object
+      | conn: mysqldb connection object
 
     Returns:
-        dict. containing counts eg. {('aa1', 'aa2'): 4}
+      | dict. containing counts eg. {('aa1', 'aa2'): 4}
     """
     logger.info('Starting to count amino acid changes . . .')
 
@@ -49,7 +49,6 @@ def save_missense(aacounter,
                   missense_save,
                   property_save):
     """Saves missense mutation counts to file.
-
     """
     logger.info('Saving protein missense mutation information . . .')
 
