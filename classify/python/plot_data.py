@@ -31,3 +31,21 @@ def feature_importance_barplot(mean_df,
                   title='Feature Importance in Random Forest',
                   xlabel='Feature Importance')
     logger.info('Finished plotting feature importance bar plot.')
+
+
+def precision_recall_curve(df, save_path):
+    logger.info('Plotting precision-recall curve (%s) ...' % save_path)
+    myplt.line(df, save_path,
+               title='Precision-Recall Curve',
+               xlabel='Recall',
+               ylabel='Precision')
+    logger.info('Finished plotting PR curve.')
+
+
+def receiver_operator_curve(df, save_path):
+    logger.info('Plotting receiver operator curve (%s) ...' % save_path)
+    myplt.line(df, save_path,
+               title='ROC Curve',
+               xlabel='False-Positive Rate',
+               ylabel='True-Positive Rate')
+    logger.info('Finished plotting ROC curve.')

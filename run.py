@@ -127,10 +127,10 @@ if __name__ == '__main__':
     parser_classify.add_argument('-m', '--min-count',
                                  type=int,
                                  action='store',
-                                 default=10,
+                                 default=0,
                                  help='Minimum number of mutations in a gene '
                                  'for the gene to be considered in classification.'
-                                 ' (default: 10)')
+                                 ' (default: 0)')
     parser_classify.set_defaults(func=_classify)
 
     # savedb sub-command
@@ -140,12 +140,12 @@ if __name__ == '__main__':
                                          help=help_string)
     parser_savedb.set_defaults(func=_savedb)
     parser_savedb.add_argument('-m', '--hypermutator',
-                                    type=int,
-                                    action='store',
-                                    default=500,
-                                    help='Number of mutations to define a sample '
-                                    'as a hypermutator. Hypermutator samples are filtered '
-                                    ' from further analysis. (default: 500)')
+                               type=int,
+                               action='store',
+                               default=500,
+                               help='Number of mutations to define a sample '
+                               'as a hypermutator. Hypermutator samples are filtered '
+                               ' from further analysis. (default: 500)')
 
     parser.set_defaults(database='genes')  # by default work on sqlite db
     args = parser.parse_args()  # parse the command line options

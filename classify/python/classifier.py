@@ -114,8 +114,11 @@ def main(minimum_ct):
                      sep='\t', index_col=0)
 
     # random forest
+    print 'Random forest'
     rclf = RandomForest(df, min_ct=minimum_ct)
-    rclf_mean_tpr, rclf_mean_fpr, rclf_mean_auc = rclf.kfold_validation()
+    rclf.kfold_validation()
+    rclf_mean_tpr, rclf_mean_fpr, rclf_mean_roc_auc = rclf.get_roc_metrics()
+    rclf_mean_precision, rclf_mean_recall, rclf_mean_pr_auc = rclf.get_pr_metrics()
     mean_df = rclf.mean_importance
     std_df = rclf.std_importance
     plot_data.feature_importance_barplot(mean_df,
@@ -123,20 +126,34 @@ def main(minimum_ct):
                                          _utils.clf_plot_dir + cfg_opts['feature_importance_plot'])
 
     # multinomial naive bayes
+    print 'naive bayes'
     nbclf = MultinomialNaiveBayes(df, min_ct=minimum_ct)
-    nbclf_mean_tpr, nbclf_mean_fpr, nbclf_mean_auc = nbclf.kfold_validation()
+    nbclf.kfold_validation()
+    nbclf_mean_tpr, nbclf_mean_fpr, nbclf_mean_roc_auc = nbclf.get_roc_metrics()
+    nbclf_mean_precision, nbclf_mean_recall, nbclf_mean_pr_auc = nbclf.get_pr_metrics()
 
     # dummy classifier, predict most frequent
+    print 'dummy'
     dclf = DummyClf(df, strategy='most_frequent', min_ct=minimum_ct)
-    dclf_mean_tpr, dclf_mean_fpr, dclf_mean_auc = dclf.kfold_validation()
+    dclf.kfold_validation()
+    dclf_mean_tpr, dclf_mean_fpr, dclf_mean_roc_auc = dclf.get_roc_metrics()
+    dclf_mean_precision, dclf_mean_recall, dclf_mean_pr_auc = dclf.get_pr_metrics()
 
     # plot roc figure
-    df = pd.DataFrame({'random forest (AUC = %0.2f)' % rclf_mean_auc: rclf_mean_tpr,
-                       'naive bayes (AUC = %0.2f)' % nbclf_mean_auc: nbclf_mean_tpr,
-                       'dummy (AUC = %0.2f)' % dclf_mean_auc: dclf_mean_tpr},
-                      index= rclf_mean_fpr)
-    df.plot(kind='line')
-    plt.savefig(_utils.clf_plot_dir + cfg_opts['roc_plot'])
+    df = pd.DataFrame({'random forest (AUC = %0.3f)' % rclf_mean_roc_auc: rclf_mean_tpr,
+                       'naive bayes (AUC = %0.3f)' % nbclf_mean_roc_auc: nbclf_mean_tpr,
+                       'dummy (AUC = %0.3f)' % dclf_mean_roc_auc: dclf_mean_tpr},
+                      index=rclf_mean_fpr)
+    save_path = _utils.clf_plot_dir + cfg_opts['roc_plot']
+    plot_data.receiver_operator_curve(df, save_path)
+
+    # plot pr figure
+    df = pd.DataFrame({'random forest (AUC = %0.3f)' % rclf_mean_pr_auc: rclf_mean_precision,
+                       'naive bayes (AUC = %0.3f)' % nbclf_mean_pr_auc: nbclf_mean_precision,
+                       'dummy (AUC = %0.3f)' % dclf_mean_pr_auc: dclf_mean_precision},
+                      index=rclf_mean_recall)
+    save_path = _utils.clf_plot_dir + 'pr.png'
+    plot_data.precision_recall_curve(df, save_path)
 
 
 if __name__ == "__main__":

@@ -1,25 +1,23 @@
 from sklearn.dummy import DummyClassifier
+import sklearn.metrics as metrics
 from generic_classifier import GenericClassifier
+import numpy as np
+import logging
+
 
 class DummyClf(GenericClassifier):
 
     def __init__(self, df,
                  strategy='most_frequent',
                  min_ct=10):
+        self.logger = logging.getLogger(__name__)
         super(DummyClf, self).__init__()  # call base constructor
         self.set_min_count(min_ct)
 
         # process data
         df = self._filter_rows(df)  # filter out low count rows
-        #self.x = self._random_sort(df)  # randomly sort data
-        #self.y = self.x.index.to_series().apply(self._label_gene)  # get gene labels
         self.x, self.y = self._randomize(df)
 
         # setup classifier
         self.clf = DummyClassifier(strategy=strategy)
 
-    def _update_metrics(self):
-        self.num_pred += 1
-
-    def _on_finish(self):
-        pass
