@@ -101,7 +101,7 @@ def main(minimum_ct):
                                        xlabel=tmp_xlabel)
     # plot percentage of vogelstein's oncogenes recovered
     tmp_title = 'Percentage of Vogelstein\'s Oncogenes Recovered'
-    tmp_ylabel = 'Fraction of Oncogenes'
+    tmp_ylabel = 'Oncogene Recall'
     tmp_xlabel = 'Number of Mutations Required for Recurrency'
     tmp_save_path = _utils.clf_plot_dir + cfg_opts['pct_oncogenes_plot']
     plot_data.onco_mutations_parameter(pct_df,
@@ -153,7 +153,8 @@ def main(minimum_ct):
                        'dummy (AUC = %0.3f)' % dclf_mean_pr_auc: dclf_mean_precision},
                       index=rclf_mean_recall)
     save_path = _utils.clf_plot_dir + 'pr.png'
-    plot_data.precision_recall_curve(df, save_path)
+    plot_data.precision_recall_curve(df, save_path,
+                                     title='Oncogene Precision-Recall Curve')
 
 
 if __name__ == "__main__":

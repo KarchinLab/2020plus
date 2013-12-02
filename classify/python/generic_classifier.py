@@ -100,14 +100,7 @@ class GenericClassifier(object):
         # compute Precision-Recall curve metrics
         p, r, thresh = metrics.precision_recall_curve(y_true, prob)
         p, r = p[::-1], r[::-1]  # reverse order of results
-        plt.plot(r, p)
-        plt.savefig('tmp.pr.png')
         self.mean_precision += interp(self.mean_recall, r, p)
-        #print interp(self.mean_recall, r, p)
-        #print p
-        #print r
-        # self.mean_precision += p
-        # self.mean_recall += r
 
     def _on_finish(self):
         self.confusion_matrix /= self.num_pred
