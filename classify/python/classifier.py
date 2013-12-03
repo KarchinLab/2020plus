@@ -1,5 +1,4 @@
 from __future__ import division
-import matplotlib.pyplot as plt
 from vogelstein_classifier import VogelsteinClassifier
 from random_forest_clf import RandomForest
 from multinomial_nb_clf import MultinomialNaiveBayes
@@ -140,20 +139,32 @@ def main(minimum_ct):
     dclf_mean_precision, dclf_mean_recall, dclf_mean_pr_auc = dclf.get_pr_metrics()
 
     # plot roc figure
-    df = pd.DataFrame({'random forest (AUC = %0.3f)' % rclf_mean_roc_auc: rclf_mean_tpr,
-                       'naive bayes (AUC = %0.3f)' % nbclf_mean_roc_auc: nbclf_mean_tpr,
-                       'dummy (AUC = %0.3f)' % dclf_mean_roc_auc: dclf_mean_tpr},
+    random_forest_str = 'random forest (AUC = %0.3f)' % rclf_mean_roc_auc
+    naive_bayes_str = 'naive bayes (AUC = %0.3f)' % nbclf_mean_roc_auc
+    dummy_str = 'dummy (AUC = %0.3f)' % dclf_mean_roc_auc
+    df = pd.DataFrame({random_forest_str: rclf_mean_tpr,
+                       naive_bayes_str: nbclf_mean_tpr,
+                       dummy_str: dclf_mean_tpr},
                       index=rclf_mean_fpr)
+    line_style = {dummy_str: '--',
+                  random_forest_str: '-',
+                  naive_bayes_str:'-'}
     save_path = _utils.clf_plot_dir + cfg_opts['roc_plot']
-    plot_data.receiver_operator_curve(df, save_path)
+    plot_data.receiver_operator_curve(df, save_path, line_style)
 
     # plot pr figure
-    df = pd.DataFrame({'random forest (AUC = %0.3f)' % rclf_mean_pr_auc: rclf_mean_precision,
-                       'naive bayes (AUC = %0.3f)' % nbclf_mean_pr_auc: nbclf_mean_precision,
-                       'dummy (AUC = %0.3f)' % dclf_mean_pr_auc: dclf_mean_precision},
+    random_forest_str = 'random forest (AUC = %0.3f)' % rclf_mean_pr_auc
+    naive_bayes_str = 'naive bayes (AUC = %0.3f)' % nbclf_mean_pr_auc
+    dummy_str = 'dummy (AUC = %0.3f)' % dclf_mean_pr_auc
+    df = pd.DataFrame({random_forest_str: rclf_mean_precision,
+                       naive_bayes_str: nbclf_mean_precision,
+                       dummy_str: dclf_mean_precision},
                       index=rclf_mean_recall)
+    line_style = {dummy_str: '--',
+                  random_forest_str: '-',
+                  naive_bayes_str:'-'}
     save_path = _utils.clf_plot_dir + 'pr.png'
-    plot_data.precision_recall_curve(df, save_path,
+    plot_data.precision_recall_curve(df, save_path, line_style,
                                      title='Oncogene Precision-Recall Curve')
 
 

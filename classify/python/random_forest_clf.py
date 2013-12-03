@@ -1,16 +1,14 @@
 from __future__ import division
 from sklearn.ensemble import RandomForestClassifier
-import sklearn.metrics as metrics
 from generic_classifier import GenericClassifier
 import pandas as pd
-import numpy as np
 import logging
 
 
 class RandomForest(GenericClassifier):
 
     def __init__(self, df,
-                 min_ct=10):
+                 min_ct=0):
         self.logger = logging.getLogger(__name__)
         super(RandomForest, self).__init__()  # call base constructor
         self.set_min_count(min_ct)
@@ -23,7 +21,7 @@ class RandomForest(GenericClassifier):
         df = df.div(row_sums, axis=0)  # normalize each row
         df['recurrent count'] = recurrent_mutation
         df['deleterious count'] = deleterious_mutation
-        df.to_csv('tmp.rclf.txt', sep='\t')
+        #df.to_csv('tmp.rclf.txt', sep='\t')
         self.x, self.y = self._randomize(df)
 
         # setup classifier

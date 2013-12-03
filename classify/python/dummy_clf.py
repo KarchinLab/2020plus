@@ -1,7 +1,5 @@
 from sklearn.dummy import DummyClassifier
-import sklearn.metrics as metrics
 from generic_classifier import GenericClassifier
-import numpy as np
 import logging
 
 
@@ -20,4 +18,3 @@ class DummyClf(GenericClassifier):
 
         # setup classifier
         self.clf = DummyClassifier(strategy=strategy)
-

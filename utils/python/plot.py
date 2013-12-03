@@ -137,6 +137,7 @@ def histogram(df,
 
 def line(data,
          file_path,
+         style=[],
          title='',
          xlabel='',
          ylabel='',
@@ -158,7 +159,7 @@ def line(data,
         vlines (list of int): draw vertical lines at positions
     """
     # plot data
-    data.plot(kind='line')
+    data.plot(kind='line', style=style)
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
