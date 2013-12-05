@@ -1,4 +1,5 @@
 import utils.python.util as _utils
+import recurrent_mutation as recur
 import pandas as pd
 import pandas.io.sql as psql
 import logging
@@ -28,7 +29,7 @@ def count_primary_tissues(gene, conn):
     return df
 
 
-def count_types_primary_tissue(gene, conn):
+def count_types_primary_tissue(gene, recurrent_min, conn):
     """Count mutation types in a single gene for each primary tissue.
 
     Args:
@@ -54,6 +55,10 @@ def count_types_primary_tissue(gene, conn):
     aa, nuc = {}, {}
     for k, v in groups.iteritems():
         aa_types = _utils.count_mutation_types(df.ix[v]['AminoAcid'])
+        recur_ct, missense_ct = recur.count_missense_types(df.ix[v]['AminoAcid'],
+                                                           recurrent_min=recurrent_min)
+        aa_types = aa_types.set_value('missense', missense_ct)
+        aa_types = aa_types.set_value('recurrent missense', recur_ct)
         nuc_types = _utils.count_mutation_types(df.ix[v]['Nucleotide'],
                                                 kind='nucleotide')
         k = k.replace('_', ' ')
@@ -64,7 +69,7 @@ def count_types_primary_tissue(gene, conn):
     return aa_df, nuc_df
 
 
-def main(gene_name, conn):
+def main(gene_name, recurrent_count, conn):
     cfg_opts = _utils.get_output_config('single_gene')
 
     # set up directory
@@ -84,7 +89,7 @@ def main(gene_name, conn):
                   title='%s Mutation Counts in Primary Tissues' % gene_name)
 
     # stratify by mutation types
-    aa_df, nuc_df = count_types_primary_tissue(gene_name, conn)
+    aa_df, nuc_df = count_types_primary_tissue(gene_name, recurrent_count, conn)
     aa_df.to_csv(gene_result_dir + cfg_opts['aa_type_primary_tissue'],
                  sep='\t')
     nuc_df.to_csv(gene_result_dir + cfg_opts['nuc_type_primary_tissue'],

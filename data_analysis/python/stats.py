@@ -57,6 +57,21 @@ def main(recurrent, recurrent_max, db, classify_only):
     # data_analysis results. if classify_only is specified only
     # the pertinent information for classification is updated.
     if not classify_only:
+
+
+        # look at individual genes
+        with open(_utils.config_dir + 'single_gene.txt') as handle:
+            for row in handle:
+                gene = row.strip()
+                try:
+                    single_gene.main(gene, recurrent, conn)
+                except:
+                    raise
+                    # be careful this catches all exceptions which might
+                    # hide other errors
+                    logger.debug('(Problem) Gene not found: %s' % gene)
+
+
         recurrent_mutation.main(conn)
 
         sample_name.main(conn)  # info related to mutations for each sample
@@ -76,15 +91,5 @@ def main(recurrent, recurrent_max, db, classify_only):
         plot_data.cumulative_gene_mutation(gene_ct_df['count'],
                                         _utils.plot_dir + cfg_opts['cumulative_gene_mutation'])
 
-        # look at individual genes
-        with open(_utils.config_dir + 'single_gene.txt') as handle:
-            for row in handle:
-                gene = row.strip()
-                try:
-                    single_gene.main(gene, conn)
-                except:
-                    # be careful this catches all exceptions which might
-                    # hide other errors
-                    logger.debug('(Problem) Gene not found: %s' % gene)
 
     conn.close()  # close data/genes.db connection
