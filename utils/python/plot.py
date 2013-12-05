@@ -71,6 +71,7 @@ def heatmap(df, file_path, title='', xlabel='', ylabel='', cmap=plt.cm.Blues):
 
     # save figure
     plt.savefig(file_path)
+    plt.close()
 
 
 def barplot(df,
@@ -95,15 +96,21 @@ def barplot(df,
         Matplotlib options for plotting
     """
     if yerr is not None:
+        # error bars for y-axis
         df.plot(kind=kind, yerr=yerr, ecolor=ecolor, stacked=stacked)
     elif xerr is not None:
+        # error bars for x-axis
         df.plot(kind=kind, xerr=xerr, ecolor=ecolor, stacked=stacked)
+    else:
+        # normal bar plot
+        df.plot(kind=kind, stacked=stacked)
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.tight_layout()
     plt.savefig(file_path)
     plt.clf()  # clear figure
+    plt.close()
 
 
 def histogram(df,
@@ -133,6 +140,7 @@ def histogram(df,
     plt.tight_layout()
     plt.savefig(save_path)
     plt.clf()  # clear figure
+    plt.close()
 
 
 def line(data,
@@ -180,6 +188,7 @@ def line(data,
     plt.tight_layout()  # adjust plot margins
     plt.savefig(file_path)  # save figure
     plt.clf()  # clear figure
+    plt.close()
 
 
 def scatter(x, y,
@@ -211,3 +220,4 @@ def scatter(x, y,
     plt.tight_layout()
     plt.savefig(file_path)
     plt.clf()  # clear figure
+    plt.close()
