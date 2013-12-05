@@ -17,13 +17,20 @@ class VogelsteinClassifier(object):
         http://www.sciencemag.org/content/339/6127/1546.full
     """
 
-    def __init__(self, onco_threshold=.2, tsg_threshold=.2,
-                 min_count=10):
+    def __init__(self,
+                 onco_threshold=.2,
+                 tsg_threshold=.2,
+                 kind='vogelstein',
+                 min_count=0,
+                 tsg_min=7,
+                 onco_min=10):
         # check valid percentage
         if not 0 < onco_threshold < 1:
             raise ValueError("Oncogene threshold is invalid")
         if not 0 < tsg_threshold < 1:
             raise ValueError("TSG threshold is invalid")
+
+        self.kind = kind  # either 'vogelstein' or 'min'
 
         # assign percentage thresholds
         self.onco_threshold = onco_threshold
@@ -31,6 +38,8 @@ class VogelsteinClassifier(object):
 
         # set min count to classify gene
         self.min_count = min_count
+        self.tsg_min = tsg_min
+        self.onco_min = onco_min
 
         # labels to classify genes as
         self.onco_label = "oncogene"
@@ -68,23 +77,42 @@ class VogelsteinClassifier(object):
                                          total)
         return gene_class
 
-    def predict_by_pct(self, recur_pct, del_pct, total=10):
+    def predict_by_pct(self, recur_pct, del_pct, total):
         """The actual 20/20 rule logic to classify genes."""
-        if total < self.min_count:
-            # too few mutations case
-            return self.other_label
-        elif recur_pct >= self.onco_threshold:
-            # high number of recurrent missense case
-            if recur_pct >= del_pct:
-                return self.onco_label
-            else:
+        # calc counts
+        recur_ct = recur_pct * total
+        del_ct = del_pct * total
+
+        # 20/20 rule logic
+        if self.kind == 'vogelstein':
+            if recur_pct >= self.onco_threshold and recur_ct >= self.onco_min:
+                if del_pct <= .05:
+                    return self.onco_label
+                elif del_ct >= self.tsg_min:
+                    return self.tsg_label
+                else:
+                    return self.other_label
+            elif del_pct >= self.tsg_threshold and del_ct >= self.tsg_min:
                 return self.tsg_label
-        elif del_pct >= self.tsg_threshold:
-            # high number of deleterious mutations case
-            return self.tsg_label
-        else:
-            # doesn't classify as oncogene or tsg
-            return self.other_label
+            else:
+                return self.other_label
+        elif self.kind == 'min':
+            if total < self.min_count:
+                # too few mutations case
+                return self.other_label
+            # if recur_pct >= self.onco_threshold and (total*recur_pct) >= self.min_count:
+            elif recur_pct >= self.onco_threshold:
+                # high number of recurrent missense case
+                if recur_pct >= del_pct:
+                    return self.onco_label
+                else:
+                    return self.tsg_label
+            elif del_pct >= self.tsg_threshold:
+                # high number of deleterious mutations case
+                return self.tsg_label
+            else:
+                # doesn't classify as oncogene or tsg
+                return self.other_label
 
     def set_onco_threshold(self, threshold):
         """Setter for percentage threshold for recurrent missense mutations

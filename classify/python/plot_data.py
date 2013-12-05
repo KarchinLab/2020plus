@@ -57,3 +57,21 @@ def receiver_operator_curve(df, save_path, style,
                xlabel='False-Positive Rate',
                ylabel='True-Positive Rate')
     logger.info('Finished plotting ROC curve.')
+
+
+def vogelstein_score_scatter(df, min_count, save_path):
+    df['total'] = df.sum(axis=1)
+    df = df[df.total > min_count]  # filter low counts
+    df['recurrent count'] = df['recurrent missense'] + df['recurrent indel']
+    df['deleterious count'] = df['frame shift'] + df['nonsense'] + df['lost stop'] + df['no protein']
+    df = df[(df['deleterious count']>=7) | (df['recurrent count']>=10)]
+    df['oncogene score'] = df['recurrent count'].div(df['total'].astype(float))
+    df['tsg score'] = df['deleterious count'].div(df['total'].astype(float))
+    myplt.scatter(df['oncogene score'],
+                  df['tsg score'],
+                  save_path,
+                  size=30,
+                  title='Oncogene score vs TSG score',
+                  xlabel='Oncogene score',
+                  ylabel='TSG score')
+

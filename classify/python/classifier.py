@@ -9,11 +9,12 @@ import pandas as pd
 import numpy as np
 import glob
 import re
+import utils.python.plot as myplt
 
 
 def calc_onco_info(df, onco_pct, tsg_pct, min_ct):
     # calculate the number of genes classified as oncogene
-    vclf = VogelsteinClassifier(onco_pct, tsg_pct, min_ct)
+    vclf = VogelsteinClassifier(onco_pct, tsg_pct, min_count=min_ct)
     df['total'] = df.T.sum()
     input_list = ((row['recurrent missense'] + row['recurrent indel'],
                    row['frame shift'] + row['nonsense'] + row['lost stop'] + row['no protein'],
@@ -112,6 +113,11 @@ def main(minimum_ct):
     df = pd.read_csv(_utils.result_dir + cfg_opts['gene_feature'],
                      sep='\t', index_col=0)
 
+    # plot the 20/20 rule scores
+    plot_data.vogelstein_score_scatter(df,
+                                       minimum_ct,
+                                       _utils.clf_plot_dir + '2020.scatter.png')
+
     # random forest
     print 'Random forest . . .'
     rclf = RandomForest(df, min_ct=minimum_ct)
@@ -134,8 +140,9 @@ def main(minimum_ct):
     tmp_df['onco prob class'] = onco_prob
     tmp_df['tsg prob class'] = tsg_prob
     tmp_df = tmp_df.fillna(0)
-    tmp_df = tmp_df.sort(['onco prob class'], ascending=False)
+    tmp_df = tmp_df.sort(['onco prob class', 'tsg prob class'], ascending=False)
     tmp_df.to_csv('random_forest_prediction.txt', sep='\t')
+    myplt.scatter(tmp_df['onco prob class'], tmp_df['tsg prob class'], 'prob.png')
 
     # multinomial naive bayes
     print 'Naive Bayes . . .'
