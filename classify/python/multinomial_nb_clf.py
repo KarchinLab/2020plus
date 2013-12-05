@@ -11,8 +11,8 @@ class MultinomialNaiveBayes(GenericClassifier):
 
         # process data
         df = self._filter_rows(df)  # filter out low count rows
-        row_sums = df.sum(axis=1).astype(float)
-        df = df.div(row_sums, axis=0)  # normalize each row
+        # row_sums = df.sum(axis=1).astype(float)
+        # df = df.div(row_sums, axis=0)  # normalize each row
         # df = df.mul(100)
         # df.to_csv('tmp.nbclf.txt', sep='\t')
         self.x, self.y = self._randomize(df)

@@ -1,5 +1,6 @@
 from __future__ import division
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import ExtraTreesClassifier
 from generic_classifier import GenericClassifier
 import pandas as pd
 import logging
@@ -26,9 +27,18 @@ class RandomForest(GenericClassifier):
 
         # setup classifier
         self.clf = RandomForestClassifier(n_estimators=100)
+        #self.clf = ExtraTreesClassifier(n_estimators=1000,
+                                        #max_features=2,
+                                        #n_jobs=4)
 
-    def _update_metrics(self, y_true, y_pred, prob):
-        super(RandomForest, self)._update_metrics(y_true, y_pred, prob)
+    def _update_onco_metrics(self, y_true, y_pred, prob):
+        super(RandomForest, self)._update_onco_metrics(y_true, y_pred, prob)
+
+        # evaluate feature importance for random forest
+        self.feature_importance.append(self.clf.feature_importances_)
+
+    def _update_tsg_metrics(self, y_true, y_pred, prob):
+        super(RandomForest, self)._update_tsg_metrics(y_true, y_pred, prob)
 
         # evaluate feature importance for random forest
         self.feature_importance.append(self.clf.feature_importances_)
