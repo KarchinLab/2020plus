@@ -21,6 +21,10 @@ class GenericClassifier(object):
         self.vogelsteins_oncogenes = _utils.oncogene_set
         self.vogelsteins_tsg = _utils.tsg_set
 
+        # gene's categorized by the significantly mutate gene
+        # list from the pan-cancer nature paper
+        self.smg_list = _utils.smg_list
+
     def _init_metrics(self):
         """Initialize classification diagnostric metrics."""
         self.feature_importance = []
@@ -35,6 +39,7 @@ class GenericClassifier(object):
         self.onco_mean_fpr = np.linspace(0, 1, 100)
         self.onco_mean_precision = 0.0
         self.onco_mean_recall = np.linspace(0, 1, 100)
+        self.onco_mean_threshold = 0.0
 
         # tsg metrics
         self.tsg_f1_score = 0.0
@@ -51,15 +56,22 @@ class GenericClassifier(object):
         filtered_df = df[row_sums > self.min_count]
         return filtered_df
 
-    def _label_gene(self, gene):
+    def _label_gene(self, gene,
+                    kind='vogelstein'):
         """Label a gene according to Vogelstein's list of oncogenes
         and tsg."""
-        if gene in self.vogelsteins_oncogenes:
-            return self.onco_num
-        elif gene in self.vogelsteins_tsg:
-            return self.tsg_num
-        else:
-            return self.other_num
+        if kind == 'vogelstein':
+            if gene in self.vogelsteins_oncogenes:
+                return self.onco_num
+            elif gene in self.vogelsteins_tsg:
+                return self.tsg_num
+            else:
+                return self.other_num
+        elif kind == 'smg':
+            if gene in self.smg_list:
+                return self.smg_num
+            else:
+                return self.other_num
 
     def _random_sort(self, df):
         """Randomly sort a data frame.
@@ -106,7 +118,9 @@ class GenericClassifier(object):
         # compute Precision-Recall curve metrics
         p, r, thresh = metrics.precision_recall_curve(y_true, prob)
         p, r, thresh = p[::-1], r[::-1], thresh[::-1]  # reverse order of results
+        thresh = np.insert(thresh, 0, 1.0)
         self.onco_mean_precision += interp(self.onco_mean_recall, r, p)
+        self.onco_mean_threshold += interp(self.onco_mean_recall, r, thresh)
 
     def _update_tsg_metrics(self, y_true, y_pred, prob):
 
@@ -152,6 +166,8 @@ class GenericClassifier(object):
         # Precision-Recall curve metrics
         self.onco_mean_precision /= self.num_pred
         self.onco_mean_pr_auc = metrics.auc(self.onco_mean_recall, self.onco_mean_precision)
+        self.onco_mean_threshold /= self.num_pred
+        print self.onco_mean_threshold
         self.tsg_mean_precision /= self.num_pred
         self.tsg_mean_pr_auc = metrics.auc(self.tsg_mean_recall, self.tsg_mean_precision)
 
@@ -215,9 +231,11 @@ class GenericClassifier(object):
             self.num_pred += 1
         onco_prob /= self.num_pred
         tsg_prob /= self.num_pred
+        other_prob = 1 - (onco_prob + tsg_prob)
+
 
         # return prediction.astype(int), prob
-        return onco_prob, tsg_prob
+        return onco_prob, tsg_prob, other_prob
 
     def get_onco_roc_metrics(self):
         return self.onco_mean_tpr, self.onco_mean_fpr, self.onco_mean_roc_auc
@@ -245,6 +263,9 @@ class GenericClassifier(object):
             self.num_classes = 2
             self.onco_num = 1 if oncogene else 0
             self.tsg_num = 1 if tsg else 0
+
+        # significantly mutated genes
+        self.smg_num = 1
 
     def set_min_count(self, ct):
         if ct >= 0:

@@ -91,7 +91,7 @@ def main(minimum_ct):
     # plot results
     # plot number of predicted oncogenes while varying parameters
     tmp_save_path = _utils.clf_plot_dir + cfg_opts['number_oncogenes_plot']
-    tmp_title = r"Vogelstein's Classifier Predicted Oncogenes (recurrent missense \textgreater 10)"
+    tmp_title = r"Vogelstein's Classifier Predicted Oncogenes"
     tmp_ylabel = 'Number of Oncogenes'
     tmp_xlabel = 'Number of Mutations Required for Recurrency'
     plot_data.onco_mutations_parameter(count_df,
@@ -114,7 +114,7 @@ def main(minimum_ct):
                      sep='\t', index_col=0)
 
     # plot the 20/20 rule scores
-    plot_data.vogelstein_score_scatter(df,
+    plot_data.vogelstein_score_scatter(df.copy(),
                                        minimum_ct,
                                        _utils.clf_plot_dir + '2020.scatter.png')
 
@@ -132,17 +132,23 @@ def main(minimum_ct):
                                          std_df,
                                          _utils.clf_plot_dir + cfg_opts['feature_importance_plot'])
     # pred, prob = rclf.kfold_prediction()
-    onco_prob, tsg_prob = rclf.kfold_prediction()
+    onco_prob, tsg_prob, other_prob = rclf.kfold_prediction()
     true_class = rclf.y
     tmp_df = df.copy()
     tmp_df['true class'] = true_class
     # tmp_df['predicted class'] = pred
     tmp_df['onco prob class'] = onco_prob
     tmp_df['tsg prob class'] = tsg_prob
+    tmp_df['other prob class'] = other_prob
     tmp_df = tmp_df.fillna(0)
     tmp_df = tmp_df.sort(['onco prob class', 'tsg prob class'], ascending=False)
     tmp_df.to_csv('random_forest_prediction.txt', sep='\t')
-    myplt.scatter(tmp_df['onco prob class'], tmp_df['tsg prob class'], 'prob.png')
+    myplt.scatter(tmp_df['onco prob class'],
+                  tmp_df['tsg prob class'],
+                  _utils.clf_plot_dir + 'random_forest_prob.png',
+                  xlabel='Oncogene Probability',
+                  ylabel='TSG Probability',
+                  title='Random Forest Predictions')
 
     # multinomial naive bayes
     print 'Naive Bayes . . .'

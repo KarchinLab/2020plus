@@ -75,6 +75,10 @@ if __name__ == '__main__':
     # initializations
     sys.excepthook = handle_uncaught_exceptions  # handle exceptions
 
+    # force working directory to be the location of this script
+    sys.path.append(os.path.abspath(os.path.dirname(__file__)))
+
+    # parse command line arguments
     parser = argparse.ArgumentParser(description='Run scripts')
     parser.add_argument('-l', '--log',
                         type=str,

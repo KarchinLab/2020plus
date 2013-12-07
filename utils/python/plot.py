@@ -193,7 +193,7 @@ def line(data,
 
 def scatter(x, y,
             file_path,
-            colors='blue',
+            colors='',
             size=20,
             title='',
             xlabel='',
@@ -213,7 +213,12 @@ def scatter(x, y,
         xlabel (str): x-axis label
         ylabel (str): y-axis label
     """
-    plt.scatter(x, y, c=colors, s=size)
+    if colors:
+        # plot user's color if supplied
+        plt.scatter(x, y, c=colors, s=size)
+    else:
+        # otherwise rely on default color
+        plt.scatter(x, y, s=size)
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)

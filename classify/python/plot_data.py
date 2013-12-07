@@ -10,6 +10,7 @@ def onco_mutations_parameter(df,
                              ylabel=''):
     logger.info('Plotting oncogene mutations while varying recurrent '
                 'parameter')
+    # df.index.name = 'Oncogene Score'
     myplt.line(df, save_path,
                title=title,
                ylabel=ylabel,

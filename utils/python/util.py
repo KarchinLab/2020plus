@@ -19,7 +19,7 @@ def get_input_config(section):
     return cfg_options
 
 # setup directory paths
-_opts = get_input_config('input')
+_opts = get_input_config('result')
 plot_dir = _opts['plot_dir']
 result_dir = _opts['result_dir']
 clf_plot_dir = _opts['clf_plot_dir']
