@@ -3,15 +3,27 @@ from amino_acid import AminoAcid
 from nucleotide import Nucleotide
 from cosmic_db import get_cosmic_db
 import sqlite3
+import pandas.io.sql as psql
 import ConfigParser
 import logging
 
-# setup directory paths
-plot_dir = 'data_analysis/plots/genes/'
-result_dir = 'data_analysis/results/genes/'
-clf_plot_dir = 'classify/plots/'
-clf_result_dir = 'classify/results/'
+logger = logging.getLogger(__name__)
+
 config_dir = 'config/'
+
+def get_input_config(section):
+    """Returns the config object to input.cfg."""
+    cfg = ConfigParser.ConfigParser()
+    cfg.read(config_dir + 'input.cfg')
+    cfg_options = dict(cfg.items(section))
+    return cfg_options
+
+# setup directory paths
+_opts = get_input_config('input')
+plot_dir = _opts['plot_dir']
+result_dir = _opts['result_dir']
+clf_plot_dir = _opts['clf_plot_dir']
+clf_result_dir = _opts['clf_result_dir']
 
 def read_aa_properties(file_path):
     """Read aa property counts from the data_analysis/results folder.
@@ -39,7 +51,8 @@ def read_oncogenes():
     Returns:
         oncogenes (tuple): tuple of gene names considered oncogenes
     """
-    with open('data/gene_lists/oncogenes_vogelstein.txt', 'r') as handle:
+    cfg_opts = get_input_config('input')
+    with open(cfg_opts['oncogene'], 'r') as handle:
         oncogenes = tuple(gene.strip() for gene in handle.readlines())
     return oncogenes
 
@@ -53,7 +66,8 @@ def read_tsgs():
     Returns:
         tsgs (tuple): tuple of gene names considered as tumor suppressors
     """
-    with open('data/gene_lists/tsg_vogelstein.txt', 'r') as handle:
+    cfg_opts = get_input_config('input')
+    with open(cfg_opts['tsg'], 'r') as handle:
         tsgs = tuple(gene.strip() for gene in handle.readlines())
     return tsgs
 
@@ -70,9 +84,25 @@ def read_smg():
     Returns:
         smgs (tuple): tuple of gene names considered as significantly mutated
     """
-    with open('data/gene_lists/smg_kandoth.txt', 'r') as handle:
+    cfg_opts = get_input_config('input')
+    with open(cfg_opts['smg'], 'r') as handle:
         smgs = tuple(gene.strip() for gene in handle.readlines())
-    return smgs
+
+    # open connection
+    gene_db_path = get_db_config('genes')['db']
+    conn = sqlite3.connect(gene_db_path)
+
+    sql = ("SELECT DISTINCT Gene"
+          " FROM nucleotide"
+          " WHERE Gene in " + str(smgs))
+    df = psql.frame_query(sql, con=conn)
+    conn.close()  # close connection
+
+    # get significantly mutated genes found in database
+    smgs_in_database = tuple(df['Gene'])
+    logger.info('There are only %d/%d significantly mutated genes found in the database.'
+                % (len(smgs_in_database), len(smgs)))
+    return smgs_in_database
 
 
 def classify_gene(gene):
@@ -133,14 +163,6 @@ def get_output_config(section):
     """Returns the config object to output.cfg."""
     cfg = ConfigParser.ConfigParser()
     cfg.read(config_dir + 'output.cfg')
-    cfg_options = dict(cfg.items(section))
-    return cfg_options
-
-
-def get_input_config(section):
-    """Returns the config object to input.cfg."""
-    cfg = ConfigParser.ConfigParser()
-    cfg.read(config_dir + 'input.cfg')
     cfg_options = dict(cfg.items(section))
     return cfg_options
 
