@@ -226,3 +226,42 @@ def scatter(x, y,
     plt.savefig(file_path)
     plt.clf()  # clear figure
     plt.close()
+
+
+def line_fill_between(data, sem,
+                      save_path,
+                      title='',
+                      xlabel='',
+                      ylabel=''):
+    """Plot a line graph from data but also add a fill between effect
+    base on the standard error of the mean (sem).
+
+    Args:
+      | data (pd.DataFrame): data for one to multiple lines
+      | sem (pd.DataFrame): sem for each point in data
+      | save_path (str): file path for saving
+
+    Kwargs:
+      | title (str): title of figure
+      | xlabel (str): x-axis label
+      | ylabel (str): y-axis label
+    """
+    # plot lines
+    ax = data.plot(kind='line')
+
+    # plot fill between which indicates the standard error of the mean
+    line_colors = [x.get_color() for x in ax.get_lines()]
+    x = data.index.values  # x values for plotting
+    for i in len(line_colors):
+        y = data.iloc[:, i]
+        color = line_colors[i]  # get matching line color
+        tmp_sem = sem.iloc[:, i]  # get a single column
+        plt.fill_between(x, y-tmp_sem, y+tmp_sem, alpha=.5, facecolor=color)
+
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.tight_layout()
+    plt.savefig(save_path)
+    plt.clf()
+    plt.close()
