@@ -252,7 +252,7 @@ def line_fill_between(data, sem,
     # plot fill between which indicates the standard error of the mean
     line_colors = [x.get_color() for x in ax.get_lines()]
     x = data.index.values  # x values for plotting
-    for i in len(line_colors):
+    for i in range(len(line_colors)):
         y = data.iloc[:, i]
         color = line_colors[i]  # get matching line color
         tmp_sem = sem.iloc[:, i]  # get a single column
