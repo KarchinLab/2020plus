@@ -5,4 +5,5 @@ data folder
                in the /databases/COSMIC/ folder.
 * genes.db -- same contents as genes.tsv except as a sqlite database
 * gene_lists/ -- contains list of genes defined as TSG or oncogenes in vogelstein's
-                 science paper
+                 science paper. In addition, contains gene information from the
+                 MutSigCV paper.

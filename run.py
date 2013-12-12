@@ -8,6 +8,7 @@ import argparse
 import data_analysis.python.stats
 import classify.python.classifier
 import utils.python.gene_tsv
+import utils.python.gene_features
 import utils.python.util as _utils
 
 # define exit status
@@ -67,8 +68,14 @@ def _classify():
 
 
 def _savedb():
-    """Wrapper function to call gene_tsv's main function"""
-    utils.python.gene_tsv.main(args.hypermutator)
+    """Wrapper function to call gene_tsv/gene_features main function.
+
+    Saves information mostly from COSMIC into a database. Additional
+    information from the MutSigCV paper is also stored in the gene_features
+    table.
+    """
+    utils.python.gene_features.main()  # populate the gene_features table
+    utils.python.gene_tsv.main(args.hypermutator)  # populate the nucleotide table
 
 
 if __name__ == '__main__':

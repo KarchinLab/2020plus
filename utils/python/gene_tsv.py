@@ -10,6 +10,7 @@ Rows are filtered if:
  * either the amino acid or nucleotide hgvs column is empty
  * both columns indicate unkown effect c.? and p.?
  * SomaticStatus has word 'unkown'
+ * row is a part of a sample defined as a hypermutator (>500)
 
 NOTE: This module will likely break if minor details in the
 database, etc. change.
@@ -190,4 +191,4 @@ def main(hypermutator_count):
 
     # save info into a txt file and sqlite3 database
     concatenate_genes(out_path, cosmic_dir)  # concatenate all gene files
-    save_db(hypermutator_count, out_path, out_db)  # save concatenate file to sqlite database
+    save_db(hypermutator_count, out_path, out_db)  # save file to sqlite database
