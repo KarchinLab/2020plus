@@ -230,6 +230,7 @@ def scatter(x, y,
 
 def line_fill_between(data, sem,
                       save_path,
+                      style=[],
                       title='',
                       xlabel='',
                       ylabel=''):
@@ -247,7 +248,7 @@ def line_fill_between(data, sem,
       | ylabel (str): y-axis label
     """
     # plot lines
-    ax = data.plot(kind='line')
+    ax = data.plot(kind='line', style=style)
 
     # plot fill between which indicates the standard error of the mean
     line_colors = [x.get_color() for x in ax.get_lines()]
