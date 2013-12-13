@@ -100,6 +100,7 @@ def main():
     gene_length_series = pd.Series(lengths, index=genes)
     df = pd.read_csv(in_opts['mutsigcv_features'], sep='\t', index_col=0)
     df['gene length'] = gene_length_series
+    df['gene'] = df.index  # add gene names as a column (not just an index)
     logger.info('Finished processing features for gene_features table.')
 
     # save database
