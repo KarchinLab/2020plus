@@ -9,10 +9,13 @@ import logging
 class RandomForest(GenericClassifier):
 
     def __init__(self, df,
+                 total_iter=5,
+                 weight=True,
                  min_ct=0):
         self.logger = logging.getLogger(__name__)
-        super(RandomForest, self).__init__()  # call base constructor
+        super(RandomForest, self).__init__(total_iter)  # call base constructor
         self.set_min_count(min_ct)
+        self.is_weighted_sample = weight
 
         # process data
         df = self._filter_rows(df)  # filter out low count rows
@@ -26,7 +29,7 @@ class RandomForest(GenericClassifier):
         self.x, self.y = self._randomize(df)
 
         # setup classifier
-        self.clf = RandomForestClassifier(n_estimators=100)
+        self.clf = RandomForestClassifier(n_estimators=250)
         #self.clf = ExtraTreesClassifier(n_estimators=1000,
                                         #max_features=2,
                                         #n_jobs=4)

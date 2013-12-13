@@ -4,10 +4,11 @@ import logging
 
 class MultinomialNaiveBayes(GenericClassifier):
 
-    def __init__(self, df, min_ct=0):
+    def __init__(self, df, weight=True, min_ct=0):
         self.logger = logging.getLogger(__name__)
         super(MultinomialNaiveBayes, self).__init__()  # call base constructor
         self.set_min_count(min_ct)
+        self.is_weighted_sample = weight
 
         # process data
         df = self._filter_rows(df)  # filter out low count rows

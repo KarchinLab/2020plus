@@ -6,11 +6,16 @@ from dummy_clf import DummyClf
 import utils.python.util as _utils
 import plot_data
 import pandas as pd
+import pandas.io.sql as psql
 import numpy as np
 import glob
 import re
+from scipy import stats
 import utils.python.plot as myplt
+import sqlite3
+import logging
 
+logger = logging.getLogger(__name__)
 
 def calc_onco_info(df, onco_pct, tsg_pct, min_ct):
     # calculate the number of genes classified as oncogene
@@ -76,6 +81,30 @@ def num_onco_by_pct_threshold(min_ct):
     return df_ct, df_pct
 
 
+def retrieve_gene_features():
+    """Retrieve gene information from the gene_features table.
+
+    See the gene_features module to understand the gene_features
+    database table.
+
+    Returns:
+        pd.DataFrame. dataframe of gene lengths
+    """
+    # get location of sqlite db
+    db_cfg = _utils.get_db_config('genes')
+
+    # get info from gene_features table
+    logger.info('Retrieving gene feature information . . . ')
+    conn = sqlite3.connect(db_cfg['db'])
+    sql = "SELECT gene, gene_length FROM gene_features"
+    df = psql.frame_query(sql, conn)
+    df = df.set_index('gene')
+    df['gene_length'] = df['gene_length'].fillna(df['gene_length'].mean())  # replace missing with mean length
+    conn.close()
+    logger.info('Finished retrieving gene features.')
+    return df
+
+
 def main(minimum_ct):
     cfg_opts = _utils.get_output_config('classifier')
 
@@ -89,6 +118,7 @@ def main(minimum_ct):
     pct_df.to_csv(_utils.clf_result_dir + cfg_opts['oncogene_parameters_pct'], sep='\t')
 
     # plot results
+    logger.info('Plotting results of 20/20 rule . . .')
     # plot number of predicted oncogenes while varying parameters
     tmp_save_path = _utils.clf_plot_dir + cfg_opts['number_oncogenes_plot']
     tmp_title = r"Vogelstein's Classifier Predicted Oncogenes"
@@ -118,14 +148,16 @@ def main(minimum_ct):
                                        minimum_ct,
                                        _utils.clf_plot_dir + '2020.scatter.png')
 
+    logger.info('Finished plotting results of 20/20 rule.')
+
     # random forest
-    print 'Random forest . . .'
+    logging.info('Running Random forest . . .')
     rclf = RandomForest(df, min_ct=minimum_ct)
     rclf.kfold_validation()
-    rclf_onco_mean_tpr, rclf_onco_mean_fpr, rclf_onco_mean_roc_auc = rclf.get_onco_roc_metrics()
-    rclf_onco_mean_precision, rclf_onco_mean_recall, rclf_onco_mean_pr_auc = rclf.get_onco_pr_metrics()
-    rclf_tsg_mean_tpr, rclf_tsg_mean_fpr, rclf_tsg_mean_roc_auc = rclf.get_tsg_roc_metrics()
-    rclf_tsg_mean_precision, rclf_tsg_mean_recall, rclf_tsg_mean_pr_auc = rclf.get_tsg_pr_metrics()
+    rclf_onco_tpr, rclf_onco_fpr, rclf_onco_mean_roc_auc = rclf.get_onco_roc_metrics()
+    rclf_onco_precision, rclf_onco_recall, rclf_onco_mean_pr_auc = rclf.get_onco_pr_metrics()
+    rclf_tsg_tpr, rclf_tsg_fpr, rclf_tsg_mean_roc_auc = rclf.get_tsg_roc_metrics()
+    rclf_tsg_precision, rclf_tsg_recall, rclf_tsg_mean_pr_auc = rclf.get_tsg_pr_metrics()
     mean_df = rclf.mean_importance
     std_df = rclf.std_importance
     plot_data.feature_importance_barplot(mean_df,
@@ -149,33 +181,40 @@ def main(minimum_ct):
                   xlabel='Oncogene Probability',
                   ylabel='TSG Probability',
                   title='Random Forest Predictions')
+    logger.info('Finished running Random Forest')
 
     # multinomial naive bayes
     print 'Naive Bayes . . .'
     nbclf = MultinomialNaiveBayes(df, min_ct=minimum_ct)
     nbclf.kfold_validation()
-    nbclf_onco_mean_tpr, nbclf_onco_mean_fpr, nbclf_onco_mean_roc_auc = nbclf.get_onco_roc_metrics()
-    nbclf_onco_mean_precision, nbclf_onco_mean_recall, nbclf_onco_mean_pr_auc = nbclf.get_onco_pr_metrics()
-    nbclf_tsg_mean_tpr, nbclf_tsg_mean_fpr, nbclf_tsg_mean_roc_auc = nbclf.get_tsg_roc_metrics()
-    nbclf_tsg_mean_precision, nbclf_tsg_mean_recall, nbclf_tsg_mean_pr_auc = nbclf.get_tsg_pr_metrics()
+    nbclf_onco_tpr, nbclf_onco_fpr, nbclf_onco_mean_roc_auc = nbclf.get_onco_roc_metrics()
+    nbclf_onco_precision, nbclf_onco_recall, nbclf_onco_mean_pr_auc = nbclf.get_onco_pr_metrics()
+    nbclf_tsg_tpr, nbclf_tsg_fpr, nbclf_tsg_mean_roc_auc = nbclf.get_tsg_roc_metrics()
+    nbclf_tsg_precision, nbclf_tsg_recall, nbclf_tsg_mean_pr_auc = nbclf.get_tsg_pr_metrics()
 
     # dummy classifier, predict most frequent
     print 'Dummy . . .'
-    dclf = DummyClf(df, strategy='most_frequent', min_ct=minimum_ct)
+    dclf = DummyClf(df,
+                    strategy='most_frequent',
+                    min_ct=minimum_ct,
+                    weight=False)
     dclf.kfold_validation()
-    dclf_onco_mean_tpr, dclf_onco_mean_fpr, dclf_onco_mean_roc_auc = dclf.get_onco_roc_metrics()
-    dclf_onco_mean_precision, dclf_onco_mean_recall, dclf_onco_mean_pr_auc = dclf.get_onco_pr_metrics()
-    dclf_tsg_mean_tpr, dclf_tsg_mean_fpr, dclf_tsg_mean_roc_auc = dclf.get_tsg_roc_metrics()
-    dclf_tsg_mean_precision, dclf_tsg_mean_recall, dclf_tsg_mean_pr_auc = dclf.get_tsg_pr_metrics()
+    dclf_onco_tpr, dclf_onco_fpr, dclf_onco_mean_roc_auc = dclf.get_onco_roc_metrics()
+    dclf_onco_precision, dclf_onco_recall, dclf_onco_mean_pr_auc = dclf.get_onco_pr_metrics()
+    dclf_tsg_tpr, dclf_tsg_fpr, dclf_tsg_mean_roc_auc = dclf.get_tsg_roc_metrics()
+    dclf_tsg_precision, dclf_tsg_recall, dclf_tsg_mean_pr_auc = dclf.get_tsg_pr_metrics()
 
     # plot oncogene roc figure
     random_forest_str = 'random forest (AUC = %0.3f)' % rclf_onco_mean_roc_auc
     naive_bayes_str = 'naive bayes (AUC = %0.3f)' % nbclf_onco_mean_roc_auc
     dummy_str = 'dummy (AUC = %0.3f)' % dclf_onco_mean_roc_auc
+    rclf_onco_mean_tpr = np.mean(rclf_onco_tpr, axis=0)
+    nbclf_onco_mean_tpr = np.mean(nbclf_onco_tpr, axis=0)
+    dclf_onco_mean_tpr = np.mean(dclf_onco_tpr, axis=0)
     df = pd.DataFrame({random_forest_str: rclf_onco_mean_tpr,
                        naive_bayes_str: nbclf_onco_mean_tpr,
                        dummy_str: dclf_onco_mean_tpr},
-                      index=rclf_onco_mean_fpr)
+                      index=rclf_onco_fpr)
     line_style = {dummy_str: '--',
                   random_forest_str: '-',
                   naive_bayes_str:'-'}
@@ -186,10 +225,13 @@ def main(minimum_ct):
     random_forest_str = 'random forest (AUC = %0.3f)' % rclf_tsg_mean_roc_auc
     naive_bayes_str = 'naive bayes (AUC = %0.3f)' % nbclf_tsg_mean_roc_auc
     dummy_str = 'dummy (AUC = %0.3f)' % dclf_tsg_mean_roc_auc
+    rclf_tsg_mean_tpr = np.mean(rclf_tsg_tpr, axis=0)
+    nbclf_tsg_mean_tpr = np.mean(nbclf_tsg_tpr, axis=0)
+    dclf_tsg_mean_tpr = np.mean(dclf_tsg_tpr, axis=0)
     df = pd.DataFrame({random_forest_str: rclf_tsg_mean_tpr,
                        naive_bayes_str: nbclf_tsg_mean_tpr,
                        dummy_str: dclf_tsg_mean_tpr},
-                      index=rclf_tsg_mean_fpr)
+                      index=rclf_tsg_fpr)
     line_style = {dummy_str: '--',
                   random_forest_str: '-',
                   naive_bayes_str:'-'}
@@ -200,25 +242,39 @@ def main(minimum_ct):
     random_forest_str = 'random forest (AUC = %0.3f)' % rclf_onco_mean_pr_auc
     naive_bayes_str = 'naive bayes (AUC = %0.3f)' % nbclf_onco_mean_pr_auc
     dummy_str = 'dummy (AUC = %0.3f)' % dclf_onco_mean_pr_auc
+    rclf_onco_mean_precision = np.mean(rclf_onco_precision, axis=0)
+    nbclf_onco_mean_precision = np.mean(nbclf_onco_precision, axis=0)
+    dclf_onco_mean_precision = np.mean(dclf_onco_precision, axis=0)
     df = pd.DataFrame({random_forest_str: rclf_onco_mean_precision,
                        naive_bayes_str: nbclf_onco_mean_precision,
                        dummy_str: dclf_onco_mean_precision},
-                      index=rclf_onco_mean_recall)
+                      index=rclf_onco_recall)
+    #rclf_onco_sem_precision = stats.sem(rclf_onco_precision, axis=0)
+    #nbclf_onco_sem_precision = stats.sem(nbclf_onco_precision, axis=0)
+    #dclf_onco_sem_precision = stats.sem(dclf_onco_precision, axis=0)
+    #sem_df = df.copy()
+    #sem_df[random_forest_str] = rclf_onco_sem_precision
+    #sem_df[naive_bayes_str] = nbclf_onco_sem_precision
+    #sem_df[dummy_str] = dclf_onco_sem_precision
     line_style = {dummy_str: '--',
                   random_forest_str: '-',
                   naive_bayes_str:'-'}
     save_path = _utils.clf_plot_dir + cfg_opts['pr_plot_oncogene']
     plot_data.precision_recall_curve(df, save_path, line_style,
+                                     #sem_df,
                                      title='Oncogene Precision-Recall Curve')
 
     # plot tsg pr figure
     random_forest_str = 'random forest (AUC = %0.3f)' % rclf_tsg_mean_pr_auc
     naive_bayes_str = 'naive bayes (AUC = %0.3f)' % nbclf_tsg_mean_pr_auc
     dummy_str = 'dummy (AUC = %0.3f)' % dclf_tsg_mean_pr_auc
+    rclf_tsg_mean_precision = np.mean(rclf_tsg_precision, axis=0)
+    nbclf_tsg_mean_precision = np.mean(nbclf_tsg_precision, axis=0)
+    dclf_tsg_mean_precision = np.mean(dclf_tsg_precision, axis=0)
     df = pd.DataFrame({random_forest_str: rclf_tsg_mean_precision,
                        naive_bayes_str: nbclf_tsg_mean_precision,
                        dummy_str: dclf_tsg_mean_precision},
-                      index=rclf_tsg_mean_recall)
+                      index=rclf_tsg_recall)
     line_style = {dummy_str: '--',
                   random_forest_str: '-',
                   naive_bayes_str:'-'}
