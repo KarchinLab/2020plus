@@ -34,29 +34,52 @@ def feature_importance_barplot(mean_df,
     logger.info('Finished plotting feature importance bar plot.')
 
 
-def precision_recall_curve(df, save_path, style,
+def precision_recall_curve(df,
+                           save_path,
+                           style,
+                           sem=None,
                            title='Precision-Recall Curve',
                            xlabel='Recall',
                            ylabel='Precision'):
     logger.info('Plotting precision-recall curve (%s) ...' % save_path)
-    myplt.line(df, save_path,
-               style=style,
-               title=title,
-               xlabel=xlabel,
-               ylabel=ylabel)
+    if not sem:
+        # normal line plot
+        myplt.line(df, save_path,
+                   style=style,
+                   title=title,
+                   xlabel=xlabel,
+                   ylabel=ylabel)
+    else:
+        # include standard error of the mean (sem) in the plot
+        myplt.line_fill_between(df, sem, save_path,
+                                style=style,
+                                title=title,
+                                xlabel=xlabel,
+                                ylabel=ylabel)
     logger.info('Finished plotting PR curve.')
 
 
-def receiver_operator_curve(df, save_path, style,
+def receiver_operator_curve(df,
+                            save_path,
+                            style,
+                            sem=None,
                             title='ROC Curve',
                             xlabel='False-Positive Rate',
                             ylabel='True-Positive Rate'):
     logger.info('Plotting receiver operator curve (%s) ...' % save_path)
-    myplt.line(df, save_path,
-               style=style,
-               title='ROC Curve',
-               xlabel='False-Positive Rate',
-               ylabel='True-Positive Rate')
+    if not sem:
+        # normal line plot
+        myplt.line(df, save_path,
+                   style=style,
+                   title='ROC Curve',
+                   xlabel='False-Positive Rate',
+                   ylabel='True-Positive Rate')
+    else:
+        # include standard error of the mean (sem) in plot
+        myplt.line_fill_between(df, sem, save_path,
+                                title=title,
+                                xlabel=xlabel,
+                                ylabel=ylabel)
     logger.info('Finished plotting ROC curve.')
 
 
