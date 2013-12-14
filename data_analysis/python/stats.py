@@ -6,7 +6,7 @@ import plot_data
 import mutation_types
 import single_gene
 import recurrent_mutation
-import features
+import feature_matrix
 import tables.sample_name as sample_name
 import tables.cosmic_aa as cosmic_aa
 import tables.cosmic_genomic as cosmic_genomic
@@ -18,6 +18,18 @@ import logging
 logger = logging.getLogger(__name__)
 
 def count_gene_mutations(conn):
+    """Count the total number of mutations for each gene.
+
+    Parameters
+    ----------
+    conn : mysql/sqlite connection
+        connection to db with nucleotide table
+
+    Returns
+    -------
+    df : pd.DataFrame
+        two column data frame with gene and counts
+    """
     logger.info('Counting number of mutations for each gene . . .')
 
     sql = ('SELECT Gene, COUNT(*) as count'
@@ -51,13 +63,12 @@ def main(recurrent, recurrent_max, db, classify_only):
         if not classify_only:
             missense.main(conn, 'nucleotide')  # specify different table name
 
-    features.main(recurrent, recurrent_max, conn)  # generate feature matrix
+    feature_matrix.main(recurrent, recurrent_max, conn)  # generate feature matrix
 
     # user can specify a flag to prevent complete updates of the
     # data_analysis results. if classify_only is specified only
     # the pertinent information for classification is updated.
     if not classify_only:
-
 
         # look at individual genes
         with open(_utils.config_dir + 'single_gene.txt') as handle:
@@ -70,7 +81,6 @@ def main(recurrent, recurrent_max, db, classify_only):
                     # be careful this catches all exceptions which might
                     # hide other errors
                     logger.debug('(Problem) Gene not found: %s' % gene)
-
 
         recurrent_mutation.main(conn)
 
@@ -90,6 +100,5 @@ def main(recurrent, recurrent_max, db, classify_only):
                                         _utils.plot_dir + cfg_opts['gene_mutation_histogram'])
         plot_data.cumulative_gene_mutation(gene_ct_df['count'],
                                         _utils.plot_dir + cfg_opts['cumulative_gene_mutation'])
-
 
     conn.close()  # close data/genes.db connection
