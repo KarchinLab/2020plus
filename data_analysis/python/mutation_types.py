@@ -32,12 +32,17 @@ def count_nucleotides(conn):
 def count_oncogenes(conn):
     """Count both DNA and protein mutation types for oncogenes.
 
-    Args:
-      | conn (MySQL/Sqlite connection): connection to database
+    Parameters
+    ----------
+    conn : MySQL/Sqlite connection
+        connection to database
 
-    Returns:
-      | aa_counts (pd.Series): mutation type counts for proteins
-      | nuc_counts (pd.Series): mutation type counts for DNA
+    Returns
+    -------
+    aa_counts : pd.Series
+        mutation type counts for proteins
+    nuc_counts : pd.Series
+        mutation type counts for DNA
     """
     logger.info('Counting oncogene mutation types . . .')
 
@@ -59,12 +64,17 @@ def count_oncogenes(conn):
 def count_tsg(conn):
     """Count both DNA and protein mutation types for Tumor Suppressor Genes.
 
-    Args:
-      | conn (MySQL/Sqlite connection): connection to database
+    Parameters
+    ----------
+    conn : MySQL/Sqlite connection
+        connection to database
 
-    Returns:
-      | aa_counts (pd.Series): mutation type counts for proteins.
-      | nuc_counts (pd.Series): mutation type counts for DNA.
+    Returns
+    -------
+    aa_counts : pd.Series
+        mutation type counts for proteins.
+    nuc_counts : pd.Series
+        mutation type counts for DNA.
     """
     logger.info('Counting tumor suppressor gene mutation types . . .')
 
@@ -86,11 +96,15 @@ def count_tsg(conn):
 def count_gene_types(file_path):
     """Returns protein mutation type counts by gene type (oncogenes, tsg, other).
 
-    Kwargs:
-      | file_path (str): path to mutation type cts by gene file
+    Parameters
+    ----------
+    file_path : str
+        path to mutation type cts by gene file
 
-    Returns:
-      | pd.DataFrame: mutation type counts by gene type
+    Returns
+    -------
+    mut_ct_df : pd.DataFrame
+        mutation type counts by gene type
     """
     logger.info('Counting mutation types by gene type . . .')
     df = pd.read_csv(file_path, sep='\t', index_col=0)
@@ -106,8 +120,10 @@ def main(conn):
     The main function uses other functions within the module to count
     mutations and the plot_data module to plot results.
 
-    Args:
-      | conn (MySQL/Sqlite connection): connection to database
+    Parameters
+    ----------
+    conn : MySQL/Sqlite connection
+        connection to database
     """
     out_dir = _utils.result_dir  # output directory for text files
     plot_dir = _utils.plot_dir  # plotting directory
