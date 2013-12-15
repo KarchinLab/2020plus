@@ -6,13 +6,10 @@ from dummy_clf import DummyClf
 import utils.python.util as _utils
 import plot_data
 import pandas as pd
-import pandas.io.sql as psql
 import numpy as np
 import glob
 import re
-from scipy import stats
 import utils.python.plot as myplt
-import sqlite3
 import logging
 
 logger = logging.getLogger(__name__)
@@ -79,30 +76,6 @@ def num_onco_by_pct_threshold(min_ct):
         df_ct[str(threshold)] = tmp_ct
         df_pct[str(threshold)] = tmp_pct
     return df_ct, df_pct
-
-
-def retrieve_gene_features():
-    """Retrieve gene information from the gene_features table.
-
-    See the gene_features module to understand the gene_features
-    database table.
-
-    Returns:
-        pd.DataFrame. dataframe of gene lengths
-    """
-    # get location of sqlite db
-    db_cfg = _utils.get_db_config('genes')
-
-    # get info from gene_features table
-    logger.info('Retrieving gene feature information . . . ')
-    conn = sqlite3.connect(db_cfg['db'])
-    sql = "SELECT gene, gene_length FROM gene_features"
-    df = psql.frame_query(sql, conn)
-    df = df.set_index('gene')
-    df['gene_length'] = df['gene_length'].fillna(df['gene_length'].mean())  # replace missing with mean length
-    conn.close()
-    logger.info('Finished retrieving gene features.')
-    return df
 
 
 def main(minimum_ct):
