@@ -26,17 +26,22 @@ def calc_gene_length(file_path):
 
     Assumes a typical one line header for a FASTA file.
 
-    Args:
-      | file_path (str): Path to FASTA file
+    **Parameters**
 
-    Returns:
-      | int. length of gene
+    file_path : str
+        Path to FASTA file
+
+    **Returns**
+
+    seq_len : int
+        length of gene
     """
     with open(file_path) as handle:
         handle.readline()  # skip FASTA header
         seq = handle.read()  # read file into single string
         seq = seq.replace('\n', '')  # remove line breaks
-    return len(seq)
+    seq_len = len(seq)
+    return seq_len
 
 
 def recursive_gene_length(fasta_dir):
@@ -44,11 +49,15 @@ def recursive_gene_length(fasta_dir):
 
     NOTE: assumes directories are ['0-9', 'A', .., 'Z']
 
-    Args:
-      | fasta_dir (str): path to fasta directory downloaded from COSMIC
+    **Parameters**
 
-    Returns:
-      | dict. keys=gene name, values=gene length
+    fasta_dir : str
+        path to fasta directory downloaded from COSMIC
+
+    **Returns**
+
+    gene_length_dict : dict
+        keys=gene name, values=gene length
     """
     gene_length_dict = {}
     mydirs = ['0-9'] + list(string.ascii_uppercase)
@@ -68,9 +77,12 @@ def save_db(df, genedb_path):
     If the table already exists, the table is droped and then
     re-inserted.
 
-    Args:
-        df (pd.DataFrame): data to insert into DB table
-        genedb_path (str): path to sqlite db
+    **Parameters**
+
+    df : pd.DataFrame
+        data to insert into DB table
+    genedb_path : str
+        path to sqlite db
     """
     logger.debug('Dropping gene_features table IF EXISTS.')
     _utils.drop_table('gene_features', kind='sqlite')  # drop table if exists
@@ -97,10 +109,11 @@ def main():
     logger.info('Processing features for gene_features table ...')
     gene_length = recursive_gene_length(in_opts['fasta_dir'])
     genes, lengths = zip(*gene_length.items())
-    gene_length_series = pd.Series(lengths, index=genes)
-    df = pd.read_csv(in_opts['mutsigcv_features'], sep='\t', index_col=0)
-    df['gene length'] = gene_length_series
-    df['gene'] = df.index  # add gene names as a column (not just an index)
+    gene_length_df = pd.DataFrame({'gene': genes, 'gene length': lengths})
+    df = pd.read_csv(in_opts['mutsigcv_features'], sep='\t')
+    df = pd.merge(gene_length_df, df, how='left', on='gene')  # merge the data frames
+    #df['gene length'] = gene_length_series
+    #df['gene'] = df.index  # add gene names as a column (not just an index)
     logger.info('Finished processing features for gene_features table.')
 
     # save database
