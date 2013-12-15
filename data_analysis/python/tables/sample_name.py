@@ -4,7 +4,6 @@ the `COSMIC_nuc` database by using the `nucleotide`. SampleName
 column.
 """
 
-from utils.python.cosmic_db import get_cosmic_db
 import utils.python.util as _utils
 import pandas.io.sql as psql
 
@@ -12,11 +11,15 @@ import pandas.io.sql as psql
 def count_mutated_genes(conn):
     """Count the number of genes that are mutated in each sample.
 
-    Args:
-        conn (MySQLdb connection): connection to COSMIC_nuc
+    Parameters
+    ----------
+    conn : MySQLdb connection
+        connection to COSMIC_nuc
 
-    Returns:
-        pd.DataFrame: two column data frame of sample names and gene cts
+    Returns
+    -------
+    df : pd.DataFrame
+        two column data frame of sample names and gene cts
     """
     sql = ('SELECT x.SampleName, SUM(x.gene_indicator) as GeneCounts'
           ' FROM ('
@@ -33,11 +36,15 @@ def count_mutated_genes(conn):
 def count_mutations(conn):
     """Count the number of mutations in each sample.
 
-    Args:
-        conn (MySQLdb connection): connection to COSMIC_nuc
+    Parameters
+    ----------
+    conn : MySQLdb connection
+        connection to COSMIC_nuc
 
-    Returns:
-        pd.DataFrame: two column data frame of sample names and mutation cts
+    Returns
+    -------
+    df : pd.DataFrame
+        two column data frame of sample names and mutation cts
     """
     sql = ('SELECT x.SampleName, SUM(x.mut_indicator) as MutationCounts'
           ' FROM ('

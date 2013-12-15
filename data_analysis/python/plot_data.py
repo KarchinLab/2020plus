@@ -23,9 +23,12 @@ def aa_missense_heatmap(file_path, save_path):
     the mutation transition probability. The y-axis represents the initial amino
     acid and the x-axis represents the mutated amino acid.
 
-    Args:
-      | file_path (str): file to data containing missense mutation counts
-      | save_path (str): file name of heatmap figure
+    Parameters
+    ----------
+    file_path : str
+        file to data containing missense mutation counts
+    save_path : str
+        file name of heatmap figure
     """
     logger.info('reading in %s ...' % file_path)
     df = pd.read_csv(file_path, sep='\t')  # read in data
@@ -66,9 +69,14 @@ def nuc_substitution_heatmap(file_path, save_path, title=''):
     heatmap represents the mutation transition probability. The y-axis represents the
     initial nucleotide and the x-axis represents the mutated nucleotide.
 
-    Kwargs:
-      | file_path (str): file to data containing substiution mutation counts
-      | save_path (str): file name of heatmap figure
+    Parameters
+    ----------
+    file_path : str
+        file to data containing substiution mutation counts
+    save_path : str
+        file name of heatmap figure
+    title : str, (default='')
+        plot title
     """
     logger.info('reading in %s ...' % file_path)
     df = pd.read_csv(file_path, sep='\t')  # read in data
@@ -156,12 +164,14 @@ def mutation_types_barplot(mutation_cts,
     Currently synonymous, missense, nonsense, frame shift, and indels
     are plotted for amino acids in the bar graph.
 
-    Args:
-      | mutation_cts (pd.Series): unique counts for mutation types
-
-    Kwargs:
-      | save_path (str): path to save barplot
-      | title (str): title for plot
+    Parameters
+    ----------
+    mutation_cts : pd.Series
+        unique counts for mutation types
+    save_path : str
+        path to save barplot
+    title : str
+        title for plot
     """
     logger.info('Plotting mutation type counts barplot (%s) . . .' % save_path)
     myplt.barplot(mutation_cts,
@@ -212,16 +222,18 @@ def pca_plot(file_path,
     Each point represents one gene. The features for each gene
     are reduced to two components for plotting.
 
-    Args:
-      | file_path (str): path to file for gene feature matrix
-      | save_path (str): path to save plot
-
-    Kwargs:
-      | norm_class (bool): Default False. flag for subsampling genes to even
-      |                    unbalanced classes.
-      | low_count_filter (int): Default 1. Genes should have at least
-      |                         low_count_filter number of mutations
-      | title (str): title for plot
+    Parameters
+    ----------
+    file_path : str
+        path to file for gene feature matrix
+    save_path : str
+        path to save plot
+    norm_class : bool, (Default=False)
+        flag for subsampling genes to even unbalanced classes.
+    low_count_filter : int, (Default=1)
+        Genes should have at least low_count_filter number of mutations
+    title : str
+        title for plot
     """
     logger.info('Plotting PCA of gene mutations (%s) . . .' % save_path)
 
