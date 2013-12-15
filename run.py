@@ -7,8 +7,9 @@ import traceback
 import argparse
 import data_analysis.python.stats
 import classify.python.classifier
-import utils.python.gene_tsv
-import utils.python.gene_features
+import features.python.features
+import savedb.python.gene_tsv
+import savedb.python.gene_features
 import utils.python.util as _utils
 
 # define exit status
@@ -74,8 +75,14 @@ def _savedb():
     information from the MutSigCV paper is also stored in the gene_features
     table.
     """
-    utils.python.gene_features.main()  # populate the gene_features table
-    utils.python.gene_tsv.main(args.hypermutator)  # populate the nucleotide table
+    savedb.python.gene_features.main()  # populate the gene_features table
+    savedb.python.gene_tsv.main(args.hypermutator)  # populate the nucleotide table
+
+
+def _features():
+    """Wrapper function to call the features main function."""
+    opts = vars(args)  # make CLI options a dictionary
+    features.python.features.main(opts)
 
 
 if __name__ == '__main__':
@@ -146,7 +153,9 @@ if __name__ == '__main__':
 
     # savedb sub-command
     help_string = ('Concatenate tab delim gene files found in /databases/COSMIC '
-                   'and then save them to a sqlite database for further use.')
+                   'and then save them to a sqlite database for further use. '
+                   'Gene length and information from the MutSigCV paper are also '
+                   'stored in the database.')
     parser_savedb = subparser.add_parser('savedb',
                                          help=help_string)
     parser_savedb.set_defaults(func=_savedb)
@@ -157,6 +166,35 @@ if __name__ == '__main__':
                                help='Number of mutations to define a sample '
                                'as a hypermutator. Hypermutator samples are filtered '
                                ' from further analysis. (default: 500)')
+
+    # features sub-command
+    help_string = ('Generate the features used in classification.'
+                   ' This command should be ran before "classify".'
+                   ' Features are saved as a text file.')
+    parser_features = subparser.add_parser('features',
+                                           help=help_string)
+    parser_features.set_defaults(func=_features)
+    parser_features.add_argument('--gene-length',
+                                 action='store_true',
+                                 default=False,
+                                 help='Add gene length to features for '
+                                 'classify command')
+    parser_features.add_argument('--mutation-rate',
+                                 action='store_true',
+                                 default=False,
+                                 help='Add noncoding mutation rate to'
+                                 ' features for classify command')
+    parser_features.add_argument('--replication-time',
+                                 action='store_true',
+                                 default=False,
+                                 help='Add replication time to'
+                                 ' features for classify command')
+    parser_features.add_argument('--expression',
+                                 action='store_true',
+                                 default=False,
+                                 help='Add gene expression to'
+                                 ' features for classify command')
+
 
     parser.set_defaults(database='genes')  # by default work on sqlite db
     args = parser.parse_args()  # parse the command line options
