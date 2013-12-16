@@ -19,8 +19,8 @@ def generate_feature_matrix(recurrency_threshold,
                             recurrency_cap=float('inf')):
     """Generate a feature matrix potentially useful for classifying genes.
 
-    Parameters
-    ----------
+    **Parameters**
+
     recurrency_threshold : int
         minimum number of mutations to define recurrency
     conn : db connection
@@ -28,8 +28,8 @@ def generate_feature_matrix(recurrency_threshold,
     recurrency_cap : int
         maximum number of mutations to define recurrency
 
-    Returns
-    -------
+    **Returns**
+
     features : list
         feature matrix
     """
