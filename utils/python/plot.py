@@ -69,6 +69,10 @@ def heatmap(df, file_path, title='', xlabel='', ylabel='', cmap=plt.cm.Blues):
     plt.ylabel(ylabel)
     plt.tight_layout()
 
+    # turn on color bar
+    cb = plt.colorbar(hmap)
+    cb.set_label('Transition Probability')
+
     # save figure
     plt.savefig(file_path)
     plt.close()
@@ -201,17 +205,24 @@ def scatter(x, y,
     """Create a 2D scatter plot. Many of the optional arguements
     deal with formatting the plot.
 
-    Args:
-        x (list|array): container for x-axis data
-        y (list|array): container for y-axis data
-        file_path (str): path to save figure
+    **Parameters**
 
-    Kwargs:
-        colors (str|list): either single color (e.g. 'blue') or a list
-        size (int|list): int for marker size or a list of ints
-        title (str): title for plot
-        xlabel (str): x-axis label
-        ylabel (str): y-axis label
+    x : list|array
+        container for x-axis data
+    y : list|array
+        container for y-axis data
+    file_path : str
+        path to save figure
+    colors : str|list, default=''
+        either single color (e.g. 'blue') or a list
+    size : int|list, default=20
+        int for marker size or a list of ints
+    title : str, default=''
+        title for plot
+    xlabel : str, dfault=''
+        x-axis label
+    ylabel : str, default=''
+        y-axis label
     """
     if colors:
         # plot user's color if supplied
