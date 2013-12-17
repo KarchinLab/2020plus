@@ -8,14 +8,15 @@ class DummyClf(GenericClassifier):
     def __init__(self, df,
                  strategy='most_frequent',
                  weight=False,
-                 min_ct=10):
+                 min_ct=0):
         self.logger = logging.getLogger(__name__)
         super(DummyClf, self).__init__()  # call base constructor
-        self.set_min_count(min_ct)
+        #self.set_min_count(min_ct)
         self.is_weighted_sample = False
 
         # process data
-        df = self._filter_rows(df)  # filter out low count rows
+        #df = self._filter_rows(df)  # filter out low count rows
+        df = df.fillna(df.mean())
         self.x, self.y = self._randomize(df)
 
         # setup classifier

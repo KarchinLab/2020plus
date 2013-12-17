@@ -90,6 +90,7 @@ def process_features(df):
     df = df.div(row_sums, axis=0)  # normalize each row
     df['recurrent count'] = recurrent_mutation
     df['deleterious count'] = deleterious_mutation
+    df['total'] = row_sums
     df['gene'] = df.index  # get back the gene column from the index
     return df
 
@@ -142,11 +143,14 @@ def random_sort(df):
 
 def main(options):
     # get configs
-    cfg_opts = _utils.get_output_config('classifier')
+    #cfg_opts = _utils.get_output_config('classifier')
+    in_opts = _utils.get_input_config('classifier')
+    count_opts = _utils.get_output_config('feature_matrix')
     db_cfg = _utils.get_db_config('genes')
 
     # read in mutation counts generated in data_analysis folder
-    count_features = pd.read_csv(_utils.result_dir + cfg_opts['gene_feature'], sep='\t')
+    count_features = pd.read_csv(_utils.result_dir + count_opts['gene_feature_matrix'],
+                                 sep='\t')
     count_features = process_features(count_features)
 
     # get additional features
@@ -159,4 +163,7 @@ def main(options):
                             how='left', on='gene')
 
     # save features to text file
-    all_features.to_csv('features/features.txt', sep='\t', index=False)
+    cols = all_features.columns.tolist()
+    new_order = ['gene'] + cols[:cols.index('gene')] + cols[cols.index('gene')+1:]
+    all_features = all_features[new_order]  # make the gene name the first column
+    all_features.to_csv(in_opts['gene_feature'], sep='\t', index=False)

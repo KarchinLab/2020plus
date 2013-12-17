@@ -94,7 +94,7 @@ def generate_feature_matrix(recurrency_threshold,
 
 
 def main(recurrent, recurrent_max, conn):
-    cfg_opts = _utils.get_output_config('features')  # get config
+    cfg_opts = _utils.get_output_config('feature_matrix')  # get config
 
     # generate features
     feature_matrix = generate_feature_matrix(recurrent, conn,

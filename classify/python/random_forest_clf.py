@@ -14,18 +14,19 @@ class RandomForest(GenericClassifier):
                  min_ct=0):
         self.logger = logging.getLogger(__name__)
         super(RandomForest, self).__init__(total_iter)  # call base constructor
-        self.set_min_count(min_ct)
+        # self.set_min_count(min_ct)
         self.is_weighted_sample = weight
 
         # process data
-        df = self._filter_rows(df)  # filter out low count rows
-        recurrent_mutation = df['recurrent missense'] + df['recurrent indel']
-        deleterious_mutation = df['lost stop'] + df['nonsense'] + df['frame shift'] + df['no protein']
-        row_sums = df.sum(axis=1).astype(float)
-        df = df.div(row_sums, axis=0)  # normalize each row
-        df['recurrent count'] = recurrent_mutation
-        df['deleterious count'] = deleterious_mutation
+        #df = self._filter_rows(df)  # filter out low count rows
+        #recurrent_mutation = df['recurrent missense'] + df['recurrent indel']
+        #deleterious_mutation = df['lost stop'] + df['nonsense'] + df['frame shift'] + df['no protein']
+        #row_sums = df.sum(axis=1).astype(float)
+        #df = df.div(row_sums, axis=0)  # normalize each row
+        #df['recurrent count'] = recurrent_mutation
+        #df['deleterious count'] = deleterious_mutation
         #df.to_csv('tmp.rclf.txt', sep='\t')
+        df = df.fillna(df.mean())
         self.x, self.y = self._randomize(df)
 
         # setup classifier

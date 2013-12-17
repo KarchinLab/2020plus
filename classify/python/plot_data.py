@@ -22,6 +22,8 @@ def feature_importance_barplot(mean_df,
                                std_df,
                                save_path):
     logger.info('Plotting feature importances from random forest . . .')
+    mean_df.rename({col: col.replace('_', '  ') for col in mean_df.index},
+                   inplace=True)
     mean_df.sort(ascending=True)  # sort with most important features first
     std_df = std_df.ix[mean_df.index]  # match ordering in bar plot
     myplt.barplot(mean_df,
