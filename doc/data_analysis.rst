@@ -19,10 +19,10 @@ plot_data module
 .. automodule:: data_analysis.python.plot_data
    :members:
 
-features module
+feature_matrix module
 ---------------
 
-.. automodule:: data_analysis.python.features
+.. automodule:: data_analysis.python.feature_matrix
    :members:
 
 missense module
