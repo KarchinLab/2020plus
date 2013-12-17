@@ -8,8 +8,8 @@ import logging
 class MyClassifier(object):
 
     def __init__(self,
-                 ntree=200,
-                 other_sample=.3,
+                 ntree=1000,
+                 other_sample=.02,
                  driver_sample=.7):
         self.ntree = ntree
         self.other_sample_rate = other_sample
@@ -100,6 +100,7 @@ class RRandomForest(GenericClassifier):
         # self.set_min_count(min_ct)
         self.is_weighted_sample = weight
 
+        df = df.drop('total', axis=1)
         df = df.fillna(df.mean())
         self.x, self.y = self._randomize(df)
 

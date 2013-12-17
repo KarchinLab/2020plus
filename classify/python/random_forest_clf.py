@@ -26,6 +26,7 @@ class RandomForest(GenericClassifier):
         #df['recurrent count'] = recurrent_mutation
         #df['deleterious count'] = deleterious_mutation
         #df.to_csv('tmp.rclf.txt', sep='\t')
+        df = df.drop('total', axis=1)
         df = df.fillna(df.mean())
         self.x, self.y = self._randomize(df)
 
