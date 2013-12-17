@@ -126,15 +126,35 @@ def main(minimum_ct):
     logger.info('Finished plotting results of 20/20 rule.')
 
     # R's random forest
-    rrclf = RandomForest(df, min_ct=minimum_ct)
+    logger.info('Running R\'s Random forest . . .')
+    rrclf = RRandomForest(df, min_ct=minimum_ct)
     rrclf.kfold_validation()
     rrclf_onco_tpr, rrclf_onco_fpr, rrclf_onco_mean_roc_auc = rrclf.get_onco_roc_metrics()
     rrclf_onco_precision, rrclf_onco_recall, rrclf_onco_mean_pr_auc = rrclf.get_onco_pr_metrics()
     rrclf_tsg_tpr, rrclf_tsg_fpr, rrclf_tsg_mean_roc_auc = rrclf.get_tsg_roc_metrics()
     rrclf_tsg_precision, rrclf_tsg_recall, rrclf_tsg_mean_pr_auc = rrclf.get_tsg_pr_metrics()
+    onco_prob, tsg_prob, other_prob = rrclf.kfold_prediction()
+    true_class = rrclf.y
+    tmp_df = df.copy()
+    tmp_df['true class'] = true_class
+    # tmp_df['predicted class'] = pred
+    tmp_df['onco prob class'] = onco_prob
+    tmp_df['tsg prob class'] = tsg_prob
+    tmp_df['other prob class'] = other_prob
+    tmp_df = tmp_df.fillna(0)
+    tmp_df = tmp_df.sort(['onco prob class', 'tsg prob class'], ascending=False)
+    tmp_df.to_csv('r_random_forest_prediction.txt', sep='\t')
+    myplt.scatter(tmp_df['onco prob class'],
+                  tmp_df['tsg prob class'],
+                  _utils.clf_plot_dir + 'r_random_forest_prob.png',
+                  xlabel='Oncogene Probability',
+                  ylabel='TSG Probability',
+                  title='R\'s Random Forest Predictions',
+                  colors='#348ABD')
+    logger.info('Finished running R\'s Random Forest')
 
     # random forest
-    logging.info('Running Random forest . . .')
+    logger.info('Running Random forest . . .')
     rclf = RandomForest(df, min_ct=minimum_ct)
     rclf.kfold_validation()
     rclf_onco_tpr, rclf_onco_fpr, rclf_onco_mean_roc_auc = rclf.get_onco_roc_metrics()
@@ -163,20 +183,22 @@ def main(minimum_ct):
                   _utils.clf_plot_dir + 'random_forest_prob.png',
                   xlabel='Oncogene Probability',
                   ylabel='TSG Probability',
-                  title='Random Forest Predictions')
+                  title='Random Forest Predictions',
+                  colors='#348ABD')
     logger.info('Finished running Random Forest')
 
     # multinomial naive bayes
-    print 'Naive Bayes . . .'
+    logger.info('Running Naive Bayes . . .')
     nbclf = MultinomialNaiveBayes(df, min_ct=minimum_ct)
     nbclf.kfold_validation()
     nbclf_onco_tpr, nbclf_onco_fpr, nbclf_onco_mean_roc_auc = nbclf.get_onco_roc_metrics()
     nbclf_onco_precision, nbclf_onco_recall, nbclf_onco_mean_pr_auc = nbclf.get_onco_pr_metrics()
     nbclf_tsg_tpr, nbclf_tsg_fpr, nbclf_tsg_mean_roc_auc = nbclf.get_tsg_roc_metrics()
     nbclf_tsg_precision, nbclf_tsg_recall, nbclf_tsg_mean_pr_auc = nbclf.get_tsg_pr_metrics()
+    logger.info('Finished Naive Bayes.')
 
     # dummy classifier, predict most frequent
-    print 'Dummy . . .'
+    logger.info('Running Dummy Classifier. . .')
     dclf = DummyClf(df,
                     strategy='most_frequent',
                     min_ct=minimum_ct,
@@ -186,6 +208,7 @@ def main(minimum_ct):
     dclf_onco_precision, dclf_onco_recall, dclf_onco_mean_pr_auc = dclf.get_onco_pr_metrics()
     dclf_tsg_tpr, dclf_tsg_fpr, dclf_tsg_mean_roc_auc = dclf.get_tsg_roc_metrics()
     dclf_tsg_precision, dclf_tsg_recall, dclf_tsg_mean_pr_auc = dclf.get_tsg_pr_metrics()
+    logger.info('Finished dummy classifier.')
 
     # plot oncogene roc figure
     random_forest_str = 'random forest (AUC = %0.3f)' % rclf_onco_mean_roc_auc

@@ -9,11 +9,13 @@ import pandas as pd
 class GenericClassifier(object):
 
     def __init__(self,
-                 total_iterations=5):
+                 total_iterations=5,
+                 classify_oncogene=True,
+                 classify_tsg=True):
         self.min_count = 0  # min mutations for a gene
 
         # set integer codes for classes
-        self.set_classes(oncogene=True, tsg=True)
+        self.set_classes(oncogene=classify_oncogene, tsg=classify_tsg)
 
         self.set_total_iter(total_iterations)  # initialize total number of simulations
         self._init_metrics()  # initialize metrics
