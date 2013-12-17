@@ -25,6 +25,7 @@ def retrieve_gene_features(conn, opts):
     df : pd.dataframe
         dataframe of gene lengths
     """
+    logger.info('Retrieving features of genes . . .')
     selected_cols = ['gene']
 
     # retrieve more features if specified by command line
@@ -149,9 +150,11 @@ def main(options):
     db_cfg = _utils.get_db_config('genes')
 
     # read in mutation counts generated in data_analysis folder
+    logger.info('Getting count features . . .')
     count_features = pd.read_csv(_utils.result_dir + count_opts['gene_feature_matrix'],
                                  sep='\t')
     count_features = process_features(count_features)
+    logger.info('Finished getting count features.')
 
     # get additional features
     conn = sqlite3.connect(db_cfg['db'])

@@ -26,12 +26,30 @@ def start_logging(log_file='', log_level='INFO'):
     if not log_file:
         log_file = 'log/log.run.' + str(datetime.datetime.now()).replace(':', '.') + '.txt'
 
+    # logger options
     lvl = logging.DEBUG if log_level.upper() == 'DEBUG' else logging.INFO
-    logging.basicConfig(level=lvl,
-                        format='%(asctime)s - %(name)s - '
-                               '%(levelname)s - %(message)s',
-                        filename=log_file,
-                        filemode='w')
+    myformat = '%(asctime)s - %(name)s - %(levelname)s \n>>>   %(message)s'
+
+    # create logger
+    if not log_file == 'stdout':
+        # normal logging to a regular file
+        logging.basicConfig(level=lvl,
+                            format=myformat,
+                            filename=log_file,
+                            filemode='w')
+    else:
+        # logging to stdout
+        root = logging.getLogger()
+        root.setLevel(lvl)
+        stdout_stream = logging.StreamHandler(sys.stdout)
+        stdout_stream.setLevel(lvl)
+        formatter = logging.Formatter(myformat)
+        stdout_stream.setFormatter(formatter)
+        root.addHandler(stdout_stream)
+        root.propagate = True
+        #logging.basicConfig(level=lvl,
+                            #format=myformat,
+                            #stream=stdout_stream)
 
 
 def handle_uncaught_exceptions(t, ex, tb):
@@ -94,12 +112,17 @@ if __name__ == '__main__':
 
     # parse command line arguments
     parser = argparse.ArgumentParser(description='Run scripts')
+    parser.add_argument('-ll', '--log-level',
+                        type=str,
+                        action='store',
+                        default='',
+                        help='Write a log file (--log-level=DEBUG for debug mode, '
+                        '--log-level=INFO for info mode)')
     parser.add_argument('-l', '--log',
                         type=str,
                         action='store',
                         default='',
-                        help='Write a log file (--log=DEBUG for debug mode, '
-                        '--log=INFO for info mode)')
+                        help='Path to log file. (accepts stdout)')
     subparser = parser.add_subparsers(help='sub-command help')
 
     # data analysis sub-command
@@ -200,8 +223,14 @@ if __name__ == '__main__':
     args = parser.parse_args()  # parse the command line options
 
     # handle logging
-    log_file = '' if args.log else os.devnull
-    log_level = args.log
+    if args.log_level or args.log:
+        if args.log:
+            log_file = args.log
+        else:
+            log_file = os.devnull
+    else:
+        log_file = os.devnull
+    log_level = args.log_level
     start_logging(log_file=log_file,
                   log_level=log_level)  # start logging
 
