@@ -120,8 +120,8 @@ def main(conn):
     The main function uses other functions within the module to count
     mutations and the plot_data module to plot results.
 
-    Parameters
-    ----------
+    **Parameters**
+
     conn : MySQL/Sqlite connection
         connection to database
     """
@@ -176,7 +176,7 @@ def main(conn):
                                      'Mutations By Type')
 
     # plot protein mutation type counts by gene type
-    cfg_opts2 = _utils.get_output_config('features')  # need to get diff cfg section
+    cfg_opts2 = _utils.get_output_config('feature_matrix')  # need to get diff cfg section
     tmp_mut_df = count_gene_types(out_dir + cfg_opts2['gene_feature_matrix'])
     tmp_mut_df.to_csv(out_dir + cfg_opts['gene_mutation_counts_by_type'],
                       sep='\t')
