@@ -22,6 +22,9 @@ def heatmap(df, file_path, title='', xlabel='', ylabel='', cmap=plt.cm.Blues):
 
     Code from:
     http://stackoverflow.com/questions/14391959/heatmap-in-matplotlib-with-pcolor
+
+    For information on colorbars:
+    http://stackoverflow.com/questions/13943217/how-to-add-colorbars-to-scatterplots-created-like-this
     """
     df = df.fillna(0)  # fills missing values with 0's
 
