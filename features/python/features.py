@@ -42,8 +42,6 @@ def retrieve_gene_features(conn, opts):
     logger.info('Retrieving gene feature information . . . ')
     sql = "SELECT %s FROM gene_features" % ', '.join(selected_cols)
     df = psql.frame_query(sql, conn)
-    # df = df.set_index('gene')
-    # df['gene_length'] = df['gene_length'].fillna(df['gene_length'].mean())  # replace missing with mean length
     logger.info('Finished retrieving gene features.')
     return df
 
@@ -75,16 +73,25 @@ def label_gene(gene,
             return other_num
 
 
-def filter_rows(df, min_ct=0):
+def _filter_rows(df, min_ct=0):
     """Filter out rows with counts less than the minimum."""
     row_sums = df.T.sum()
-    filtered_df = df[row_sums > min_ct]
+    filtered_df = df[row_sums >= min_ct]
     return filtered_df
 
 
-def process_features(df):
-    """Process mutation type counts."""
+def process_features(df, min_count):
+    """Process mutation type counts.
+
+    **Parameters**
+
+    df : pd.DataFrame
+        data frame with gene names and mutation counts for each type
+    min_count : int
+        minimum number of mutations for a gene to be used
+    """
     df = df.set_index('gene')  # hack to prevent dividing genes by a number
+    df = _filter_rows(df, min_ct=min_count)  # drop rows below minimum total mutations
     recurrent_mutation = df['recurrent missense'] + df['recurrent indel']
     deleterious_mutation = df['lost stop'] + df['nonsense'] + df['frame shift'] + df['no protein']
     row_sums = df.sum(axis=1).astype(float)
@@ -144,7 +151,6 @@ def random_sort(df):
 
 def main(options):
     # get configs
-    #cfg_opts = _utils.get_output_config('classifier')
     in_opts = _utils.get_input_config('classifier')
     count_opts = _utils.get_output_config('feature_matrix')
     db_cfg = _utils.get_db_config('genes')
@@ -153,7 +159,8 @@ def main(options):
     logger.info('Getting count features . . .')
     count_features = pd.read_csv(_utils.result_dir + count_opts['gene_feature_matrix'],
                                  sep='\t')
-    count_features = process_features(count_features)
+    count_features = process_features(count_features,
+                                      min_count=options['min_count'])
     logger.info('Finished getting count features.')
 
     # get additional features

@@ -55,9 +55,9 @@ def start_logging(log_file='', log_level='INFO'):
 def handle_uncaught_exceptions(t, ex, tb):
     """Handle any uncaught exceptions."""
     traceback_contents = ''.join(traceback.format_list(traceback.extract_tb(tb)))
-    print(t)
-    print(traceback_contents)
-    print(ex)
+    print('*'*40)
+    print('AN ERROR HAS OCCURRED: check the log file')
+    print('*'*40)
     logging.error('Type: ' + str(t))
     logging.error('Exception: ' + str(ex))
     logging.error('Traceback:\n ' + traceback_contents)
@@ -197,6 +197,13 @@ if __name__ == '__main__':
     parser_features = subparser.add_parser('features',
                                            help=help_string)
     parser_features.set_defaults(func=_features)
+    parser_features.add_argument('-m', '--min-count',
+                                 type=int,
+                                 action='store',
+                                 default=0,
+                                 help='Minimum number of mutations in a gene '
+                                 'for the gene to be in the saved feature file.'
+                                 ' (default: 0)')
     parser_features.add_argument('--gene-length',
                                  action='store_true',
                                  default=False,
