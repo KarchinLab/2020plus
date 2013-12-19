@@ -31,11 +31,12 @@ def skip_header(file_handle, skip_rows=8):
     To skip rows the next() method is called repeatedly.
     This skips the non-table part of the tab delimited gene files.
 
-    Args
-        file_handle (file): file object of tab delim file
+    **Parameters**
 
-    Kwargs
-        skip_rows (int): number of lines to skip
+    file_handle : file
+        file object of tab delim file
+    skip_rows : int, Default=8
+        number of lines to skip
     """
     for i in range(skip_rows):
         file_handle.next()
@@ -45,6 +46,19 @@ def skip_header(file_handle, skip_rows=8):
 def concatenate_genes(out_path, cosmic_dir):
     """Saves all information in tab delimited files from genes into
     a single file in the data directory.
+
+    Exceptions
+    * Skips "genes" that look like Ensemble Transcripts ("_ENST")
+    * Skips rows with "unkown" in somatic status
+    * Skips rows that are blank at either AA or nucleotide mutations
+    * Skips rows where mutations are both "?" for AA and DNA
+
+    **Parameters**
+
+    out_path : str
+        path to save concatenated file
+    cosmic_dir : str
+        base directory for gene tsv files
     """
     # concatenate gene tab delim files
     with open(out_path, 'wb') as mywriter:
@@ -109,6 +123,12 @@ def filter_hypermutators(hypermutator_count, conn):
     """Query database to find hypermutator samples so they can
     be excluded from further analysis.
 
+    **Parameters**
+
+    hypermutator_count : int
+        samples with mutation counts below this number are allowed
+    conn : db connection
+        database connection
     """
     sql = ("SELECT *"
           " FROM nucleotide"
@@ -141,6 +161,15 @@ def save_db(hypermutator_ct, tsv_path, genedb_path):
 
     NOTE: Uses pandas to store all contents in memory and then
     saves to sqlite db. This may cause large memory usage.
+
+    **Parameters**
+
+    hypermutator_ct : int
+        filter for overly mutated samples
+    tsv_path : str
+        path to tab delim file containing all gene mutations
+    genedb_pah : str
+        path to sqlite3 db
     """
     df = pd.read_csv(tsv_path, sep='\t')  # read data
 

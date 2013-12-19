@@ -59,6 +59,7 @@ def recursive_gene_length(fasta_dir):
     gene_length_dict : dict
         keys=gene name, values=gene length
     """
+    logger.info('Recursively calculating length in FASTA directories . . .')
     gene_length_dict = {}
     mydirs = ['0-9'] + list(string.ascii_uppercase)
     for mydir in mydirs:
@@ -68,6 +69,7 @@ def recursive_gene_length(fasta_dir):
                 gene_name = file_name.strip('_protein.txt')
                 gene_length = calc_gene_length(dir_path + file_name)
                 gene_length_dict[gene_name] = gene_length
+    logger.info('Finished counting gene length.')
     return gene_length_dict
 
 
