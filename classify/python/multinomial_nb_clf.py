@@ -1,5 +1,6 @@
 from sklearn.naive_bayes import MultinomialNB
 from generic_classifier import GenericClassifier
+import features.python.features as features
 import logging
 
 class MultinomialNaiveBayes(GenericClassifier):
@@ -22,7 +23,7 @@ class MultinomialNaiveBayes(GenericClassifier):
                  'nonsense', 'missense', 'synonymous', 'indel', 'no protein',
                  'lost stop']]
         df = df.mul(total, axis=0).astype(int)  # get back counts instead of pct
-        self.x, self.y = self._randomize(df)
+        self.x, self.y = features.randomize(df)
 
         # setup classifier
         self.clf = MultinomialNB(alpha=1,  # laplacian smooth, i.e. pseudocounts

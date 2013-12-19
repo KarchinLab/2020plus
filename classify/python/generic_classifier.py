@@ -1,4 +1,8 @@
+"""The generic_classifier module contains code to do validation
+of the classifier predictions."""
+
 import utils.python.util as _utils
+import features.python.features as features
 import numpy as np
 from numpy import interp
 from sklearn import cross_validation
@@ -68,46 +72,6 @@ class GenericClassifier(object):
         row_sums = df.T.sum()
         filtered_df = df[row_sums > self.min_count]
         return filtered_df
-
-    def _label_gene(self, gene,
-                    kind='vogelstein'):
-        """Label a gene according to Vogelstein's list of oncogenes
-        and tsg."""
-        if kind == 'vogelstein':
-            if gene in self.vogelsteins_oncogenes:
-                return self.onco_num
-            elif gene in self.vogelsteins_tsg:
-                return self.tsg_num
-            else:
-                return self.other_num
-        elif kind == 'smg':
-            if gene in self.smg_list:
-                return self.smg_num
-            else:
-                return self.other_num
-
-    def _random_sort(self, df):
-        """Randomly sort a data frame.
-
-        This method is an attempt to prevent order bias in the input data.
-        Non-random ordering could effect cross validation results.
-
-        Args:
-            df (pd.DataFrame): pandas dataframe
-
-        Returns:
-            pd.DataFrame: randomly sorted data frame
-        """
-        random_indices = np.random.choice(df.index.values,  # sample from 'genes'
-                                          len(df),  # number of samples
-                                          replace=False)  # sample without replacement
-        random_df = df.reindex(random_indices)  # change order of df
-        return random_df
-
-    def _randomize(self, df):
-        x = self._random_sort(df)  # randomly sort data
-        y = x.index.to_series().apply(self._label_gene)  # get gene labels
-        return x, y
 
     def _update_metrics(self, y_true, y_pred):
         prec, recall, fscore, support = metrics.precision_recall_fscore_support(y_true, y_pred,
@@ -205,7 +169,7 @@ class GenericClassifier(object):
         self.num_pred = 0  # number of predictions
 
         for i in range(self.total_iter):
-            self.x, self.y = self._randomize(self.x)  # randomize for another round
+            self.x, self.y = features.randomize(self.x)  # randomize for another round
 
             # initialize predicted results variables
             num_genes = len(self.y)
@@ -267,53 +231,20 @@ class GenericClassifier(object):
 
         self._on_finish()  # update info for kfold cross-validation
 
-    def kfold_prediction_old(self, k=5):
-        # generate indices for kfold cross validation
-        k_fold = cross_validation.KFold(n=len(self.x),  # len of df
-                                        n_folds=k,  # k fold
-                                        indices=True)  # return indices
-        self.num_pred = 0  # number of predictions
-        self.x, self.y = self._randomize(self.x)  # randomize data
-
-        prediction = pd.Series(index=self.y.index)  # predicted class
-        onco_prob = pd.Series(index=self.y.index).fillna(0)
-        tsg_prob = pd.Series(index=self.y.index).fillna(0)
-
-        for i in range(self.total_iter):
-            self.x, self.y = self._randomize(self.x)  # randomize for another round
-            # obtain predictions from single round of kfold validation
-            for train_ix, test_ix in k_fold:
-                # retreive indices from pandas dataframe using row number
-                tmp_train_ix = self.x.iloc[train_ix].index
-                tmp_test_ix = self.x.iloc[test_ix].index
-
-                # predict test data in kfold validation
-                self.clf.fit(self.x.ix[tmp_train_ix], self.y.ix[tmp_train_ix])
-                tmp_prob = self.clf.predict_proba(self.x.ix[tmp_test_ix])
-                onco_prob.ix[tmp_test_ix] += tmp_prob[:, self.onco_num]
-                tsg_prob.ix[tmp_test_ix] += tmp_prob[:, self.tsg_num]
-            self.num_pred += 1
-        onco_prob /= self.num_pred
-        tsg_prob /= self.num_pred
-        other_prob = 1 - (onco_prob + tsg_prob)
-
-        # return prediction.astype(int), prob
-        return onco_prob, tsg_prob, other_prob
-
     def kfold_prediction(self, k=5):
         # generate indices for kfold cross validation
         k_fold = cross_validation.KFold(n=len(self.x),  # len of df
                                         n_folds=k,  # k fold
                                         indices=True)  # return indices
         self.num_pred = 0  # number of predictions
-        self.x, self.y = self._randomize(self.x)  # randomize data
+        self.x, self.y = features.randomize(self.x)  # randomize data
 
         prediction = pd.Series(index=self.y.index)  # predicted class
         onco_prob = pd.Series(index=self.y.index).fillna(0)
         tsg_prob = pd.Series(index=self.y.index).fillna(0)
 
         for i in range(self.total_iter):
-            self.x, self.y = self._randomize(self.x)  # randomize for another round
+            self.x, self.y = features.randomize(self.x)  # randomize for another round
             # obtain predictions from single round of kfold validation
             for train_ix, test_ix in k_fold:
                 # retreive indices from pandas dataframe using row number

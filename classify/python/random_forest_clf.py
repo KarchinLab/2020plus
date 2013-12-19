@@ -2,6 +2,7 @@ from __future__ import division
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import ExtraTreesClassifier
 from generic_classifier import GenericClassifier
+import features.python.features as features
 import pandas as pd
 import logging
 
@@ -28,7 +29,7 @@ class RandomForest(GenericClassifier):
         #df.to_csv('tmp.rclf.txt', sep='\t')
         df = df.drop('total', axis=1)
         df = df.fillna(df.mean())
-        self.x, self.y = self._randomize(df)
+        self.x, self.y = features.randomize(df)
 
         # setup classifier
         self.clf = RandomForestClassifier(n_estimators=250)
