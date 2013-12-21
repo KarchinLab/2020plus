@@ -12,6 +12,9 @@ Type python run.py --help for details.
 NOTE: Run run.py while in the same directory. Because of package imports,
 running from a different directory may cause an import error.
 
+The matplotlibrc file is the configuration for plotting styles. If you prefer
+a different plot style then just replace the config file from the styles directory.
+
 Directories
 -----------
 
@@ -21,4 +24,5 @@ Directories
 * log -- contain log files from running run.py
 * utils -- useful miscellaneous code for this package
 * config -- contains configuration files for running code
+* styles -- matplotlib styles for plotting
 * tests -- unit tests to be tested by the python "nose" package
