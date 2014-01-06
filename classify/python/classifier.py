@@ -78,8 +78,10 @@ def num_onco_by_pct_threshold(min_ct):
         df_pct[str(threshold)] = tmp_pct
     return df_ct, df_pct
 
+
 def rand_forest_pred(clf, data, result_path,
                      plot_path, plot_title):
+    """Makes gene predictions using a random forest classifier."""
     onco_prob, tsg_prob, other_prob = clf.kfold_prediction()
     true_class = clf.y
     tmp_df = data.copy()
@@ -88,6 +90,8 @@ def rand_forest_pred(clf, data, result_path,
     tmp_df['onco prob class'] = onco_prob
     tmp_df['tsg prob class'] = tsg_prob
     tmp_df['other prob class'] = other_prob
+    pred_class = tmp_df[['other prob class', 'onco prob class', 'tsg prob class']].values.argmax(axis=1)
+    tmp_df['predicted class'] = pred_class
     tmp_df = tmp_df.fillna(0)
     tmp_df = tmp_df.sort(['onco prob class', 'tsg prob class'], ascending=False)
     tmp_df.to_csv(result_path, sep='\t')
@@ -98,6 +102,7 @@ def rand_forest_pred(clf, data, result_path,
                   ylabel='TSG Probability',
                   title='R\'s Random Forest Predictions',
                   colors='#348ABD')
+
 
 def main(cli_opts):
     cfg_opts = _utils.get_output_config('classifier')

@@ -183,7 +183,7 @@ if __name__ == '__main__':
                                  type=float,
                                  action='store',
                                  default=3.,
-                                 help='Ratio for sample size for R\'s random forest for '
+                                 help='Ratio of sample size for R\'s random forest for '
                                  '"other" genes. (default: 3.0)')
     parser_classify.add_argument('-n', '--ntrees',
                                  type=int,
