@@ -1,4 +1,6 @@
 import utils.python.plot as myplt
+import utils.python.util as _utils
+import matplotlib.pyplot as plt
 import logging
 
 logger = logging.getLogger(__name__)
@@ -101,3 +103,41 @@ def vogelstein_score_scatter(df, min_count, save_path):
                   xlabel='Oncogene score',
                   ylabel='TSG score')
 
+
+def prob_kde(df, col_name, save_path,
+             title,
+             xlabel='Probability'):
+    df['olfactory flag'] = [1 if gene in _utils.olfactory_set
+                            else 0 for gene in df.index]
+    df[df['olfactory flag']==1][col_name].plot(kind='kde', label='Olfactory Receptors')
+    df[df['true class']==2][col_name].plot(kind='kde', label='TSG')
+    df[df['true class']==1][col_name].plot(kind='kde', label='Oncogenes')
+    df[df['true class']==0][col_name].plot(kind='kde', label='Other genes')
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.legend()
+    plt.savefig(save_path)
+    plt.close()
+
+
+def prob_scatter(df, plot_path, title):
+    """
+    Scatter plot of oncogene versus tsg probabilities.
+
+    **Parameters**
+
+    df : pd.DataFrame
+        results from random forest prediction
+    plot_path : str
+        path to save scatter plot of tsg/onco probabilities
+    title : str
+        title of scatter plot
+    """
+    # scatter plot of oncogene/tsg probabilities
+    myplt.scatter(df['onco prob class'],
+                  df['tsg prob class'],
+                  plot_path,
+                  xlabel='Oncogene Probability',
+                  ylabel='TSG Probability',
+                  title=title,
+                  colors='#348ABD')

@@ -80,8 +80,7 @@ def num_onco_by_pct_threshold(min_ct):
     return df_ct, df_pct
 
 
-def rand_forest_pred(clf, data, result_path,
-                     plot_path, plot_title):
+def rand_forest_pred(clf, data, result_path):
     """Makes gene predictions using a random forest classifier.
 
     **Parameters**
@@ -92,16 +91,16 @@ def rand_forest_pred(clf, data, result_path,
         data frame containing feature information
     result_path : str
         path to save text file result
-    plot_path : str
-        path to save scatter plot of tsg/onco probabilities
-    plot_title : str
-        title of scatter plot
+
+    **Returns**
+
+    tmp_df : pd.DataFrame
+        random forest results (already saved to file)
     """
     onco_prob, tsg_prob, other_prob = clf.kfold_prediction()
     true_class = clf.y
     tmp_df = data.copy()
     tmp_df['true class'] = true_class
-    # tmp_df['predicted class'] = pred
     tmp_df['onco prob class'] = onco_prob
     tmp_df['tsg prob class'] = tsg_prob
     tmp_df['other prob class'] = other_prob
@@ -110,13 +109,7 @@ def rand_forest_pred(clf, data, result_path,
     tmp_df = tmp_df.fillna(0)
     tmp_df = tmp_df.sort(['onco prob class', 'tsg prob class'], ascending=False)
     tmp_df.to_csv(result_path, sep='\t')
-    myplt.scatter(tmp_df['onco prob class'],
-                  tmp_df['tsg prob class'],
-                  plot_path,
-                  xlabel='Oncogene Probability',
-                  ylabel='TSG Probability',
-                  title='R\'s Random Forest Predictions',
-                  colors='#348ABD')
+    return tmp_df
 
 
 def main(cli_opts):
@@ -182,10 +175,19 @@ def main(cli_opts):
     rrclf_tsg_precision, rrclf_tsg_recall, rrclf_tsg_mean_pr_auc = rrclf.get_tsg_pr_metrics()
 
     # run predictions using R's random forest
-    rand_forest_pred(rrclf, df,
-                     result_path=_utils.clf_result_dir + cfg_opts['rrand_forest_pred'],
-                     plot_path=_utils.clf_plot_dir + cfg_opts['rrand_forest_plot'],
-                     plot_title='R\'s Random Forest Predictions')
+    result_df = rand_forest_pred(rrclf, df,
+                                 result_path=_utils.clf_result_dir + cfg_opts['rrand_forest_pred'])
+    plot_data.prob_scatter(result_df,
+                           plot_path=_utils.clf_plot_dir + cfg_opts['rrand_forest_plot'],
+                           title='R\'s Random Forest Predictions')
+    plot_data.prob_kde(result_df,
+                       col_name='onco prob class',
+                       save_path=_utils.clf_plot_dir + cfg_opts['onco_kde_rrand_forest'],
+                       title='Distribution of Oncogene Probabilities (R\'s random forest)')
+    plot_data.prob_kde(result_df,
+                       col_name='tsg prob class',
+                       save_path=_utils.clf_plot_dir + cfg_opts['tsg_kde_rrand_forest'],
+                       title='Distribution of TSG Probabilities (R\'s random forest)')
     logger.info('Finished running R\'s Random Forest')
 
     # scikit learns' random forest
@@ -205,10 +207,19 @@ def main(cli_opts):
                                          _utils.clf_plot_dir + cfg_opts['feature_importance_plot'])
 
     # predict using scikit learn's random forest
-    rand_forest_pred(rclf, df,
-                     result_path=_utils.clf_result_dir + cfg_opts['rand_forest_pred'],
-                     plot_path=_utils.clf_plot_dir + cfg_opts['rand_forest_plot'],
-                     plot_title='Random Forest Predictions')
+    result_df = rand_forest_pred(rclf, df,
+                                 result_path=_utils.clf_result_dir + cfg_opts['rand_forest_pred'])
+    plot_data.prob_scatter(result_df,
+                           plot_path=_utils.clf_plot_dir + cfg_opts['rand_forest_plot'],
+                           title='Random Forest Predictions')
+    plot_data.prob_kde(result_df,
+                       col_name='onco prob class',
+                       save_path=_utils.clf_plot_dir + cfg_opts['onco_kde_rand_forest'],
+                       title='Distribution of Oncogene Probabilities (random forest)')
+    plot_data.prob_kde(result_df,
+                       col_name='tsg prob class',
+                       save_path=_utils.clf_plot_dir + cfg_opts['tsg_kde_rand_forest'],
+                       title='Distribution of TSG Probabilities (random forest)')
     logger.info('Finished running Random Forest')
 
     # multinomial naive bayes
