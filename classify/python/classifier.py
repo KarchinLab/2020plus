@@ -78,10 +78,31 @@ def num_onco_by_pct_threshold(min_ct):
         df_pct[str(threshold)] = tmp_pct
     return df_ct, df_pct
 
+def rand_forest_pred(clf, data, result_path,
+                     plot_path, plot_title):
+    onco_prob, tsg_prob, other_prob = clf.kfold_prediction()
+    true_class = clf.y
+    tmp_df = data.copy()
+    tmp_df['true class'] = true_class
+    # tmp_df['predicted class'] = pred
+    tmp_df['onco prob class'] = onco_prob
+    tmp_df['tsg prob class'] = tsg_prob
+    tmp_df['other prob class'] = other_prob
+    tmp_df = tmp_df.fillna(0)
+    tmp_df = tmp_df.sort(['onco prob class', 'tsg prob class'], ascending=False)
+    tmp_df.to_csv(result_path, sep='\t')
+    myplt.scatter(tmp_df['onco prob class'],
+                  tmp_df['tsg prob class'],
+                  plot_path,
+                  xlabel='Oncogene Probability',
+                  ylabel='TSG Probability',
+                  title='R\'s Random Forest Predictions',
+                  colors='#348ABD')
 
-def main(minimum_ct):
+def main(cli_opts):
     cfg_opts = _utils.get_output_config('classifier')
     in_opts = _utils.get_input_config('classifier')
+    minimum_ct = cli_opts['min_count']
 
     # get oncogene info
     count_df, pct_df = num_onco_by_pct_threshold(minimum_ct)
@@ -121,70 +142,53 @@ def main(minimum_ct):
     # plot the 20/20 rule scores
     plot_data.vogelstein_score_scatter(df.copy(),
                                        minimum_ct,
-                                       _utils.clf_plot_dir + '2020.scatter.png')
-
+                                       _utils.clf_plot_dir + cfg_opts['2020_score_plot'])
     logger.info('Finished plotting results of 20/20 rule.')
 
     # R's random forest
     logger.info('Running R\'s Random forest . . .')
-    rrclf = RRandomForest(df, min_ct=minimum_ct)
+    # initialize R's random forest
+    rrclf = RRandomForest(df,
+                          other_sample_ratio=cli_opts['other_ratio'],
+                          driver_sample=cli_opts['driver_rate'],
+                          ntrees=cli_opts['ntrees'],
+                          min_ct=minimum_ct)
+
+    # analyze classification metrics
     rrclf.kfold_validation()
     rrclf_onco_tpr, rrclf_onco_fpr, rrclf_onco_mean_roc_auc = rrclf.get_onco_roc_metrics()
     rrclf_onco_precision, rrclf_onco_recall, rrclf_onco_mean_pr_auc = rrclf.get_onco_pr_metrics()
     rrclf_tsg_tpr, rrclf_tsg_fpr, rrclf_tsg_mean_roc_auc = rrclf.get_tsg_roc_metrics()
     rrclf_tsg_precision, rrclf_tsg_recall, rrclf_tsg_mean_pr_auc = rrclf.get_tsg_pr_metrics()
-    onco_prob, tsg_prob, other_prob = rrclf.kfold_prediction()
-    true_class = rrclf.y
-    tmp_df = df.copy()
-    tmp_df['true class'] = true_class
-    # tmp_df['predicted class'] = pred
-    tmp_df['onco prob class'] = onco_prob
-    tmp_df['tsg prob class'] = tsg_prob
-    tmp_df['other prob class'] = other_prob
-    tmp_df = tmp_df.fillna(0)
-    tmp_df = tmp_df.sort(['onco prob class', 'tsg prob class'], ascending=False)
-    tmp_df.to_csv('r_random_forest_prediction.txt', sep='\t')
-    myplt.scatter(tmp_df['onco prob class'],
-                  tmp_df['tsg prob class'],
-                  _utils.clf_plot_dir + 'r_random_forest_prob.png',
-                  xlabel='Oncogene Probability',
-                  ylabel='TSG Probability',
-                  title='R\'s Random Forest Predictions',
-                  colors='#348ABD')
+
+    # run predictions using R's random forest
+    rand_forest_pred(rrclf, df,
+                     result_path=_utils.clf_result_dir + cfg_opts['rrand_forest_pred'],
+                     plot_path=_utils.clf_plot_dir + cfg_opts['rrand_forest_plot'],
+                     plot_title='R\'s Random Forest Predictions')
     logger.info('Finished running R\'s Random Forest')
 
-    # random forest
+    # scikit learns' random forest
     logger.info('Running Random forest . . .')
-    rclf = RandomForest(df, min_ct=minimum_ct)
+    rclf = RandomForest(df, ntrees=cli_opts['ntrees'], min_ct=minimum_ct)
     rclf.kfold_validation()
     rclf_onco_tpr, rclf_onco_fpr, rclf_onco_mean_roc_auc = rclf.get_onco_roc_metrics()
     rclf_onco_precision, rclf_onco_recall, rclf_onco_mean_pr_auc = rclf.get_onco_pr_metrics()
     rclf_tsg_tpr, rclf_tsg_fpr, rclf_tsg_mean_roc_auc = rclf.get_tsg_roc_metrics()
     rclf_tsg_precision, rclf_tsg_recall, rclf_tsg_mean_pr_auc = rclf.get_tsg_pr_metrics()
+
+    # plot feature importance
     mean_df = rclf.mean_importance
     std_df = rclf.std_importance
     plot_data.feature_importance_barplot(mean_df,
                                          std_df,
                                          _utils.clf_plot_dir + cfg_opts['feature_importance_plot'])
-    # pred, prob = rclf.kfold_prediction()
-    onco_prob, tsg_prob, other_prob = rclf.kfold_prediction()
-    true_class = rclf.y
-    tmp_df = df.copy()
-    tmp_df['true class'] = true_class
-    # tmp_df['predicted class'] = pred
-    tmp_df['onco prob class'] = onco_prob
-    tmp_df['tsg prob class'] = tsg_prob
-    tmp_df['other prob class'] = other_prob
-    tmp_df = tmp_df.fillna(0)
-    tmp_df = tmp_df.sort(['onco prob class', 'tsg prob class'], ascending=False)
-    tmp_df.to_csv('random_forest_prediction.txt', sep='\t')
-    myplt.scatter(tmp_df['onco prob class'],
-                  tmp_df['tsg prob class'],
-                  _utils.clf_plot_dir + 'random_forest_prob.png',
-                  xlabel='Oncogene Probability',
-                  ylabel='TSG Probability',
-                  title='Random Forest Predictions',
-                  colors='#348ABD')
+
+    # predict using scikit learn's random forest
+    rand_forest_pred(rclf, df,
+                     result_path=_utils.clf_result_dir + cfg_opts['rand_forest_pred'],
+                     plot_path=_utils.clf_plot_dir + cfg_opts['rand_forest_plot'],
+                     plot_title='Random Forest Predictions')
     logger.info('Finished running Random Forest')
 
     # multinomial naive bayes

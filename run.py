@@ -83,7 +83,8 @@ def _data_analysis():
 
 def _classify():
     """Wrapper function to call scripts in the classify folder."""
-    classify.python.classifier.main(args.min_count)  # run code
+    opts = vars(args)  # create a dictionary for CLI options
+    classify.python.classifier.main(opts)  # run code
 
 
 def _savedb():
@@ -172,6 +173,24 @@ if __name__ == '__main__':
                                  help='Minimum number of mutations in a gene '
                                  'for the gene to be considered in classification.'
                                  ' (default: 0)')
+    parser_classify.add_argument('-d', '--driver-rate',
+                                 type=float,
+                                 action='store',
+                                 default=.7,
+                                 help='Sample rate for R\'s random forest for '
+                                 'oncogenes and TSGs. (default: .7)')
+    parser_classify.add_argument('-o', '--other-ratio',
+                                 type=float,
+                                 action='store',
+                                 default=3.,
+                                 help='Ratio for sample size for R\'s random forest for '
+                                 '"other" genes. (default: 3.0)')
+    parser_classify.add_argument('-n', '--ntrees',
+                                 type=int,
+                                 action='store',
+                                 default=500,
+                                 help='Number of decision trees for random forests. '
+                                 '(default: 500)')
     parser_classify.set_defaults(func=_classify)
 
     # savedb sub-command

@@ -132,14 +132,6 @@ class GenericClassifier(object):
         self.tsg_precision_array[self.num_pred, :] = interp(self.tsg_recall_array, r, p)
 
     def _on_finish(self):
-        #self.confusion_matrix /= self.num_pred
-        #self.onco_f1_score /= self.num_pred
-        #self.onco_precision /= self.num_pred
-        #self.onco_recall /= self.num_pred
-        #self.tsg_f1_score /= self.num_pred
-        #self.tsg_precision /= self.num_pred
-        #self.tsg_recall /= self.num_pred
-
         # ROC curve metrics
         #self.onco_mean_tpr /= self.num_pred  # divide by number of folds squared
         #self.onco_tpr_array[:, -1] = 1.0  # it always ends at 1
@@ -161,7 +153,13 @@ class GenericClassifier(object):
         self.tsg_mean_pr_auc = metrics.auc(self.tsg_recall_array,
                                            np.mean(self.tsg_precision_array, axis=0))
 
-    def kfold_validation(self, k=5):
+        # log info on classifier predictions
+        self.logger.info('TSG: Precision=%s, Recall=%s, Fscore=%s' % (
+                         np.mean(self.tsg_precision), np.mean(self.tsg_recall), np.mean(self.tsg_f1_score)))
+        self.logger.info('Oncogene: Precision=%s, Recall=%s, Fscore=%s' % (
+                         np.mean(self.onco_precision), np.mean(self.onco_recall), np.mean(self.onco_f1_score)))
+
+    def kfold_validation(self, k=10):
         # generate indices for kfold cross validation
         #k_fold = cross_validation.KFold(n=len(self.x),  # len of df
                                         #n_folds=k,  # k fold
@@ -231,7 +229,7 @@ class GenericClassifier(object):
 
         self._on_finish()  # update info for kfold cross-validation
 
-    def kfold_prediction(self, k=5):
+    def kfold_prediction(self, k=10):
         # generate indices for kfold cross validation
         k_fold = cross_validation.KFold(n=len(self.x),  # len of df
                                         n_folds=k,  # k fold
@@ -283,15 +281,19 @@ class GenericClassifier(object):
         return onco_prob, tsg_prob, other_prob
 
     def get_onco_roc_metrics(self):
+        """Simple get method for oncogene ROC metrics."""
         return self.onco_tpr_array, self.onco_fpr_array, self.onco_mean_roc_auc
 
     def get_tsg_roc_metrics(self):
+        """Simple get method for tumor supressor ROC metrics."""
         return self.tsg_tpr_array, self.tsg_fpr_array, self.tsg_mean_roc_auc
 
     def get_onco_pr_metrics(self):
+        """Simple get method for oncogene Precision-Recall metrics."""
         return self.onco_precision_array, self.onco_recall_array, self.onco_mean_pr_auc
 
     def get_tsg_pr_metrics(self):
+        """Simple get method for tumor supressor Precision-Recall metrics"""
         return self.tsg_precision_array, self.tsg_recall_array, self.tsg_mean_pr_auc
 
     def set_classes(self, oncogene, tsg):

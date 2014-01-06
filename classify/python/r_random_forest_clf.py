@@ -18,11 +18,13 @@ class MyClassifier(object):
     """
 
     def __init__(self,
-                 ntree=1000,
-                 other_sample=.02,
+                 ntrees=250,
+                 other_sample_ratio=3.,
+                 # other_sample=.02,
                  driver_sample=.7):
-        self.ntree = ntree
-        self.other_sample_rate = other_sample
+        self.ntrees = ntrees
+        # self.other_sample_rate = other_sample
+        self.other_sample_ratio = other_sample_ratio
         self.driver_sample_rate = driver_sample
 
         # Code for R's random forest using rpy2
@@ -56,9 +58,11 @@ class MyClassifier(object):
         self.rf_pred = ro.r['rf_pred']
 
     def set_sample_size(self, sampsize):
-        sampsize[0] *= self.other_sample_rate
+        # sampsize[0] *= self.other_sample_rate
         sampsize[1] *= self.driver_sample_rate
         sampsize[2] *= self.driver_sample_rate
+        tmp_total_driver = sampsize[1] + sampsize[2]
+        sampsize[0] = int(self.other_sample_ratio * tmp_total_driver)
         self.sample_size = ro.IntVector(sampsize)
 
     def fit(self, xtrain, ytrain):
@@ -81,7 +85,7 @@ class MyClassifier(object):
         self.set_sample_size(sampsize)
         xtrain['true_class'] = ytrain
         r_xtrain = com.convert_to_r_dataframe(xtrain)
-        self.rf = self.rf_fit(r_xtrain, self.ntree, self.sample_size)
+        self.rf = self.rf_fit(r_xtrain, self.ntrees, self.sample_size)
 
     def set_classes(self, oncogene, tsg):
         """Sets the integers used to represent classes in classification."""
@@ -135,7 +139,10 @@ class RRandomForest(GenericClassifier):
     def __init__(self, df,
                  total_iter=5,
                  weight=False,
-                 min_ct=5):
+                 min_ct=5,
+                 ntrees=250,
+                 other_sample_ratio=3.,
+                 driver_sample=.7):
         self.logger = logging.getLogger(__name__)
         onco_flag, tsg_flag = True, True  # classes to actually classify
         super(RRandomForest, self).__init__(total_iter,
@@ -149,5 +156,7 @@ class RRandomForest(GenericClassifier):
         self.x, self.y = features.randomize(df)
 
         # use the MyClassifier wrapper class around R
-        self.clf = MyClassifier()
+        self.clf = MyClassifier(ntrees=ntrees,
+                                driver_sample=driver_sample,
+                                other_sample_ratio=other_sample_ratio)
         self.clf.set_classes(onco_flag, tsg_flag)

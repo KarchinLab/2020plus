@@ -1,6 +1,5 @@
 from __future__ import division
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import ExtraTreesClassifier
 from generic_classifier import GenericClassifier
 import features.python.features as features
 import pandas as pd
@@ -10,32 +9,39 @@ import logging
 class RandomForest(GenericClassifier):
 
     def __init__(self, df,
+                 ntrees=250,
                  total_iter=5,
                  weight=True,
                  min_ct=0):
         self.logger = logging.getLogger(__name__)
         super(RandomForest, self).__init__(total_iter)  # call base constructor
-        # self.set_min_count(min_ct)
         self.is_weighted_sample = weight
 
         # process data
-        #df = self._filter_rows(df)  # filter out low count rows
-        #recurrent_mutation = df['recurrent missense'] + df['recurrent indel']
-        #deleterious_mutation = df['lost stop'] + df['nonsense'] + df['frame shift'] + df['no protein']
-        #row_sums = df.sum(axis=1).astype(float)
-        #df = df.div(row_sums, axis=0)  # normalize each row
-        #df['recurrent count'] = recurrent_mutation
-        #df['deleterious count'] = deleterious_mutation
-        #df.to_csv('tmp.rclf.txt', sep='\t')
         df = df.drop('total', axis=1)
         df = df.fillna(df.mean())
-        self.x, self.y = features.randomize(df)
+        tmpdf = pd.DataFrame({'deleterious percent': df['nonsense'] + df['no protein'] + df['lost stop'] + df['frame shift'],
+                              'recurrent percent': df['recurrent missense'] + df['recurrent indel'],
+                              'missense': df.missense,
+                              'indel': df.indel,
+                              'recurrent count': df['recurrent count'],
+                              'deleterious count': df['deleterious count'],
+                              'synonymous': df.synonymous})
+
+        # optional columns from mutsigcv paper
+        if 'gene_length' in df.columns:
+            tmpdf['gene_length'] = df['gene_length']
+        if 'noncoding_mutation_rate' in df.columns:
+            tmpdf['noncoding_mutation_rate'] = df['noncoding_mutation_rate']
+        if 'expression' in df.columns:
+            tmpdf['expression'] = df['expression']
+        if 'replication_time' in df.columns:
+            tmpdf['replication_time'] = df['replication_time']
+
+        self.x, self.y = features.randomize(tmpdf)
 
         # setup classifier
-        self.clf = RandomForestClassifier(n_estimators=250)
-        #self.clf = ExtraTreesClassifier(n_estimators=1000,
-                                        #max_features=2,
-                                        #n_jobs=4)
+        self.clf = RandomForestClassifier(n_estimators=ntrees)
 
     def _update_onco_metrics(self, y_true, y_pred, prob):
         super(RandomForest, self)._update_onco_metrics(y_true, y_pred, prob)
