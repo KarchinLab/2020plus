@@ -16,13 +16,13 @@ def _count_recurrent_missense(hgvs_iterable):
     """Counts the total missense mutations and stratifies missense
     counts according to position.
 
-    Parameters
-    ----------
+    **Parameters**
+
     hgvs_iterable : iterable
         container object with HGVS protein strings
 
-    Returns
-    -------
+    **Returns**
+
     gene_pos_ctr : dict
         counts missense mutations by position. {mutation_position: count, ...}
     total_missense_ctr : int
@@ -48,8 +48,8 @@ def count_missense_types(hgvs_iterable,
     """Count the number of recurrent missense and regular missense
     mutations given a valid recurrency range.
 
-    Parameters
-    ----------
+    **Parameters**
+
     hgvs_iterable : iterable
         contains HGVS protein strings for a single gene.
     recurrent_min : int, (default=2)
@@ -57,8 +57,8 @@ def count_missense_types(hgvs_iterable,
     recurrent_max : int, (default=infinity)
         maximum number of missense mutations to define a recurrent position.
 
-    Returns
-    -------
+    **Returns**
+
     recurrent_cts : int
         number of recurrent missense mutations in a gene
     missense_cts : int

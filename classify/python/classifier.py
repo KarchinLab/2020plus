@@ -66,6 +66,7 @@ def num_onco_by_recurrent_mutations(onco_pct, tsg_pct, min_ct):
 
 
 def num_onco_by_pct_threshold(min_ct):
+    """Enumerates percent thresholds for 2020 rule."""
     # initialization of dataframe
     cts, pct = num_onco_by_recurrent_mutations(.2, .2, min_ct)
     df_ct = pd.DataFrame(index=cts.index)
@@ -81,7 +82,21 @@ def num_onco_by_pct_threshold(min_ct):
 
 def rand_forest_pred(clf, data, result_path,
                      plot_path, plot_title):
-    """Makes gene predictions using a random forest classifier."""
+    """Makes gene predictions using a random forest classifier.
+
+    **Parameters**
+
+    clf : GenericClassifier
+        random forest sub-class of GenericClassifier
+    data : pd.DataFrame
+        data frame containing feature information
+    result_path : str
+        path to save text file result
+    plot_path : str
+        path to save scatter plot of tsg/onco probabilities
+    plot_title : str
+        title of scatter plot
+    """
     onco_prob, tsg_prob, other_prob = clf.kfold_prediction()
     true_class = clf.y
     tmp_df = data.copy()

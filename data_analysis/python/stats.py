@@ -20,13 +20,13 @@ logger = logging.getLogger(__name__)
 def count_gene_mutations(conn):
     """Count the total number of mutations for each gene.
 
-    Parameters
-    ----------
+    **Parameters**
+
     conn : mysql/sqlite connection
         connection to db with nucleotide table
 
-    Returns
-    -------
+    **Returns**
+
     df : pd.DataFrame
         two column data frame with gene and counts
     """

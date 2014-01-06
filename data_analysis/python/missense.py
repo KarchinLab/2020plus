@@ -12,13 +12,13 @@ logger = logging.getLogger(__name__)
 def count_missense(conn, table):
     """Count amino acid changes.
 
-    Parameters
-    ----------
+    **Parameters**
+
     conn : mysqldb connection object
         either could be sqlite or mysql
 
-    Returns
-    -------
+    **Returns**
+
     aa_change_counter : dict
         contains counts eg. {('aa1', 'aa2'): 4}
     """
