@@ -28,7 +28,7 @@ def start_logging(log_file='', log_level='INFO'):
 
     # logger options
     lvl = logging.DEBUG if log_level.upper() == 'DEBUG' else logging.INFO
-    myformat = '%(asctime)s - %(name)s - %(levelname)s \n>>>   %(message)s'
+    myformat = '%(asctime)s - %(name)s - %(levelname)s \n>>>  %(message)s'
 
     # create logger
     if not log_file == 'stdout':
@@ -47,9 +47,6 @@ def start_logging(log_file='', log_level='INFO'):
         stdout_stream.setFormatter(formatter)
         root.addHandler(stdout_stream)
         root.propagate = True
-        #logging.basicConfig(level=lvl,
-                            #format=myformat,
-                            #stream=stdout_stream)
 
 
 def handle_uncaught_exceptions(t, ex, tb):

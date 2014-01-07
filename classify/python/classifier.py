@@ -80,6 +80,27 @@ def num_onco_by_pct_threshold(min_ct):
     return df_ct, df_pct
 
 
+def generate_2020_result(onco_pct, tsg_pct, min_ct):
+    """Simply runs the 20/20 rule with given parameters."""
+    # process count features from "data_analysis" results
+    gene_features = './data_analysis/results/genes/gene_feature_matrix.txt'
+    df = pd.read_csv(gene_features, sep='\t', index_col=0)
+    df['total'] = df.T.sum()
+    df['total recurrent count'] = df['recurrent missense'] + df['recurrent indel']
+    df['total deleterious count'] = df['frame shift'] + df['nonsense'] + df['lost stop'] + df['no protein']
+    df['oncogene score'] = df['total recurrent count'].astype(float).div(df['total'])
+    df['tsg score'] = df['total deleterious count'].astype(float).div(df['total'])
+
+    # predict using the "20/20" rule
+    vclf = VogelsteinClassifier(onco_pct, tsg_pct, min_count=min_ct)
+    input_list = ((row['total recurrent count'], row['total deleterious count'], row['total'])
+                  for i, row in df.iterrows())
+    df['2020 class'] = vclf.predict_list(input_list)
+    df['curated class'] = [_utils.classify_gene(gene)
+                           for gene in df.index.tolist()]
+    return df
+
+
 def rand_forest_pred(clf, data, result_path):
     """Makes gene predictions using a random forest classifier.
 
@@ -125,6 +146,13 @@ def main(cli_opts):
     # save results
     count_df.to_csv(_utils.clf_result_dir + cfg_opts['oncogene_parameters_ct'], sep='\t')
     pct_df.to_csv(_utils.clf_result_dir + cfg_opts['oncogene_parameters_pct'], sep='\t')
+
+    # get the "normal" results from the 20/20 rule, based on
+    # gene_feature_matrix.txt (aka last settings for data_analysis command)
+    logger.info('Generating 20/20 rule predictions . . .')
+    result_df = generate_2020_result(.2, .2, minimum_ct)
+    result_df.to_csv(_utils.clf_result_dir + cfg_opts['vogelstein_predictions'], sep='\t')
+    logger.info('Finished generating 20/20 rule predictions.')
 
     # plot results
     logger.info('Plotting results of 20/20 rule . . .')
