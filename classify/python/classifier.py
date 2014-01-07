@@ -10,7 +10,6 @@ import pandas as pd
 import numpy as np
 import glob
 import re
-import utils.python.plot as myplt
 import logging
 
 logger = logging.getLogger(__name__)
@@ -151,7 +150,17 @@ def main(cli_opts):
     # gene_feature_matrix.txt (aka last settings for data_analysis command)
     logger.info('Generating 20/20 rule predictions . . .')
     result_df = generate_2020_result(.2, .2, minimum_ct)
+    # save result
     result_df.to_csv(_utils.clf_result_dir + cfg_opts['vogelstein_predictions'], sep='\t')
+    # plot results
+    label_to_int = {'oncogene': 1, 'other': 0, 'tsg': 2}  # labels to integer code
+    result_df['true class'] = result_df['curated class'].apply(lambda x: label_to_int[x])
+    plot_data.prob_kde(result_df, 'oncogene score', 'onco_score.kde.png',
+                       title='Distribution of Oncogene Scores',
+                       xlabel='Oncogene Score')
+    plot_data.prob_kde(result_df, 'tsg score', 'tsg_score.kde.png',
+                       title='Distribution of TSG Scores',
+                       xlabel='TSG Score')
     logger.info('Finished generating 20/20 rule predictions.')
 
     # plot results
