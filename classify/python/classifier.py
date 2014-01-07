@@ -155,10 +155,12 @@ def main(cli_opts):
     # plot results
     label_to_int = {'oncogene': 1, 'other': 0, 'tsg': 2}  # labels to integer code
     result_df['true class'] = result_df['curated class'].apply(lambda x: label_to_int[x])
-    plot_data.prob_kde(result_df, 'oncogene score', 'onco_score.kde.png',
+    plot_data.prob_kde(result_df, 'oncogene score',
+                       _utils.clf_plot_dir + cfg_opts['onco_score_kde'],
                        title='Distribution of Oncogene Scores',
                        xlabel='Oncogene Score')
-    plot_data.prob_kde(result_df, 'tsg score', 'tsg_score.kde.png',
+    plot_data.prob_kde(result_df, 'tsg score',
+                       _utils.clf_plot_dir + cfg_opts['tsg_score_kde'],
                        title='Distribution of TSG Scores',
                        xlabel='TSG Score')
     logger.info('Finished generating 20/20 rule predictions.')
