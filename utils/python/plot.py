@@ -122,25 +122,34 @@ def barplot(df,
 
 def histogram(df,
               save_path,
-              bins,
+              bins=False,
               log=False,
               title='',
               xlabel='',
               ylabel=''):
     """Plots a histogram using matplotlib.
 
-    Args:
-        df (pd.DataFrame): one dimensional data frame or series
-        file_path (str): path to save figure
-        bins (list): bin positions for histogram
+    **Parameters**
 
-    Kwargs:
-        log (Bool): boolean for log scaling y-axis
-        title (str): title of plot
-        xlabel (str): label on x-axis
-        ylabel (str): label on y-axis
+    df : pd.DataFrame
+        one dimensional data frame or series
+    file_path : str
+        path to save figure
+    bins : list
+        bin positions for histogram
+    log : Bool
+        boolean for log scaling y-axis
+    title : str
+        title of plot
+    xlabel : str
+        label on x-axis
+    ylabel : str
+        label on y-axis
     """
-    df.hist(bins=bins, log=log)
+    if bins:
+        df.hist(bins=bins, log=log)
+    else:
+        df.hist(log=log)
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)

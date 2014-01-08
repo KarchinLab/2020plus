@@ -3,6 +3,7 @@ import numpy as np
 import sqlite3
 import pandas as pd
 import pandas.io.sql as psql
+import plot_data
 import logging
 
 logger = logging.getLogger(__name__)
@@ -153,6 +154,7 @@ def main(options):
     # get configs
     in_opts = _utils.get_input_config('classifier')
     count_opts = _utils.get_output_config('feature_matrix')
+    result_opts = _utils.get_input_config('result')
     db_cfg = _utils.get_db_config('genes')
 
     # read in mutation counts generated in data_analysis folder
@@ -177,3 +179,7 @@ def main(options):
     new_order = ['gene'] + cols[:cols.index('gene')] + cols[cols.index('gene')+1:]
     all_features = all_features[new_order]  # make the gene name the first column
     all_features.to_csv(in_opts['gene_feature'], sep='\t', index=False)
+
+    # plot mutation histogram for olfactory receptor genes
+    plot_data.or_gene_hist(all_features,
+                           result_opts['feature_plot_dir'] + 'or.hist.png')
