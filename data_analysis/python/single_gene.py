@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 def count_primary_tissues(gene, conn):
     """Count the number of mutations in a single gene for each primary tissue.
 
-    Parameters
-    ----------
+    **Parameters**
+
     gene : str
         gene name
     conn : sqlite/MySQL connection
@@ -34,8 +34,8 @@ def count_primary_tissues(gene, conn):
 def count_types_primary_tissue(gene, recurrent_min, conn):
     """Count mutation types in a single gene for each primary tissue.
 
-    Parameters
-    ----------
+    **Parameters**
+
     gene : str
         gene name
     conn : sqlite/MySQL connection
@@ -90,7 +90,7 @@ def main(gene_name, recurrent_count, conn):
     myplt.barplot(tissue_cts,
                   gene_plot_dir + cfg_opts['primary_tissue_barplot'],
                   ylabel='Counts',
-                  title='%s Mutation Counts in Primary Tissues' % gene_name)
+                  title='%s Mutation Counts in Primary Tissues' % gene_name.replace('_',' '))
 
     # stratify by mutation types
     aa_df, nuc_df = count_types_primary_tissue(gene_name, recurrent_count, conn)
@@ -102,9 +102,9 @@ def main(gene_name, recurrent_count, conn):
                   gene_plot_dir + cfg_opts['aa_type_primary_tissue_barplot'],
                   stacked=True,
                   ylabel='Counts',
-                  title='%s Mutation Counts in Primary Tissues' % gene_name)
+                  title='%s Mutation Counts in Primary Tissues' % gene_name.replace('_', ' '))
     myplt.barplot(nuc_df,
                   gene_plot_dir + cfg_opts['nuc_type_primary_tissue_barplot'],
                   stacked=True,
                   ylabel='Counts',
-                  title='%s Mutation Counts in Primary Tissues' % gene_name)
+                  title='%s Mutation Counts in Primary Tissues' % gene_name.replace('_', ' '))
