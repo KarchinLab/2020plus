@@ -11,14 +11,18 @@ import numpy as np
 def heatmap(df, file_path, title='', xlabel='', ylabel='', cmap=plt.cm.Blues):
     """Plot a heatmap from a pandas dataframe.
 
-    Args:
-        df (pandas.DataFrame): data for heatmap plotting
-        file_path (str): path to save figure (png, pdf, etc.)
+    **Parameters:**
 
-    Kwargs:
-        xlabel (str): x-axis label
-        ylabel (str): y-axis label
-        cmap (cm): color scheme for heatmap
+    df : pandas.DataFrame
+        data for heatmap plotting
+    file_path : str
+        path to save figure (png, pdf, etc.)
+    xlabel : str
+        x-axis label
+    ylabel : str
+        y-axis label
+    cmap : cm
+        color scheme for heatmap
 
     Code from:
     http://stackoverflow.com/questions/14391959/heatmap-in-matplotlib-with-pcolor
@@ -93,13 +97,16 @@ def barplot(df,
             stacked=False):
     """barplot generates/saves a bar plot from a pandas data frame.
 
-    Args:
-        df (pd.DataFrame): data frame for bar plot
-        file_path (str): path to save bar plot figure
+    **Parameters**
 
-    Kwargs:
-        kind (str): ['bar' | 'barh'] vertical or horizontal bar chart
-        stderror (list): stdev of each bar
+        df : pd.DataFrame
+            data frame for bar plot
+        file_path : str
+            path to save bar plot figure
+        kind : str, ['bar' | 'barh']
+            vertical or horizontal bar chart
+        stderror : list
+            stdev of each bar
         Matplotlib options for plotting
     """
     if yerr is not None:
@@ -170,17 +177,20 @@ def line(data,
          vlines=[]):
     """Plots a line plot using matplotlib.
 
-    Args:
-        data (pd.DataFrame): two column df with x and y values
-        file_path (str): path to save figure
+    **Parameters**
 
-    Kwargs:
-        title (str): graph title
-        xlabel (str): x-axis label
-        ylabel (str): y-axis label
-        logx (bool): log transform x-axis
-        logy (bool): log transform y-axis
-        vlines (list of int): draw vertical lines at positions
+    data : pd.DataFrame
+        two column df with x and y values
+    file_path : str
+        path to save figure
+    title : str
+        graph title
+    xlabel : str
+        x-axis label
+    ylabel : str
+        y-axis label
+    vlines : list of int
+        draw vertical lines at positions
     """
     # plot data
     data.plot(kind='line', style=style)
@@ -260,15 +270,20 @@ def line_fill_between(data, sem,
     """Plot a line graph from data but also add a fill between effect
     base on the standard error of the mean (sem).
 
-    Args:
-      | data (pd.DataFrame): data for one to multiple lines
-      | sem (pd.DataFrame): sem for each point in data
-      | save_path (str): file path for saving
+    **Parameters**
 
-    Kwargs:
-      | title (str): title of figure
-      | xlabel (str): x-axis label
-      | ylabel (str): y-axis label
+    data : pd.DataFrame
+        data for one to multiple lines
+    sem : pd.DataFrame
+        sem for each point in data
+    save_path : str
+        file path for saving
+    title :str
+        title of figure
+    xlabel : str
+        x-axis label
+    ylabel : str
+        y-axis label
     """
     # plot lines
     ax = data.plot(kind='line', style=style)
