@@ -1,11 +1,13 @@
 Code
 ====
 
-The code is written in 100% python. This has a clear advantage of
+The code is written in almost 100% python. This has a clear advantage of
 preventing usage of "hacked" scripts. In fact, the code is meant to
 be used through a single python script named run.py. If a module has
 a main method then generally that is the only function that is called
-externally from a different module.
+externally from a different module. The one exception is the use of 
+RPy2 to run R's random forest algorith implemented in the randomForest
+library.
 
 :doc:`data_analysis`
 --------------------
