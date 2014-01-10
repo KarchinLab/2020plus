@@ -99,19 +99,23 @@ def read_smg():
         smgs = tuple(gene.strip() for gene in handle.readlines())
 
     # open connection
-    gene_db_path = get_db_config('genes')['db']
-    conn = sqlite3.connect(gene_db_path)
+    try:
+        # if DB is not created this will throw an error
+        gene_db_path = get_db_config('genes')['db']
+        conn = sqlite3.connect(gene_db_path)
 
-    sql = ("SELECT DISTINCT Gene"
-          " FROM nucleotide"
-          " WHERE Gene in " + str(smgs))
-    df = psql.frame_query(sql, con=conn)
-    conn.close()  # close connection
+        sql = ("SELECT DISTINCT Gene"
+            " FROM nucleotide"
+            " WHERE Gene in " + str(smgs))
+        df = psql.frame_query(sql, con=conn)
+        conn.close()  # close connection
 
-    # get significantly mutated genes found in database
-    smgs_in_database = tuple(df['Gene'])
-    logger.info('There are only %d/%d significantly mutated genes found in the database.'
-                % (len(smgs_in_database), len(smgs)))
+        # get significantly mutated genes found in database
+        smgs_in_database = tuple(df['Gene'])
+        logger.info('There are only %d/%d significantly mutated genes found in the database.'
+                    % (len(smgs_in_database), len(smgs)))
+    except:
+        smgs_in_database = smgs
     return smgs_in_database
 
 
