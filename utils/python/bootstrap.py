@@ -23,7 +23,7 @@ class Bootstrap(object):
         multinomial_sample = np.random.multinomial(n,  # total counts for multinomial
                                                    self.prob,  # probability
                                                    self.num_samples)  # number of samples
-        for i in range(self.n_iter):
+        for i in range(self.num_samples):
             tmp_df.values[self.nonzero_indices] = multinomial_sample[i]
             yield tmp_df
 
