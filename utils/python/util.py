@@ -132,20 +132,24 @@ def read_olfactory_receptors():
         olfactory = tuple(gene.strip() for gene in handle.readlines())
 
     # open connection
-    gene_db_path = get_db_config('genes')['db']
-    conn = sqlite3.connect(gene_db_path)
+    try:
+        # it table is not found just catch exception
+        gene_db_path = get_db_config('genes')['db']
+        conn = sqlite3.connect(gene_db_path)
 
-    sql = ("SELECT DISTINCT Gene"
-          " FROM nucleotide"
-          " WHERE Gene in " + str(olfactory))
+        sql = ("SELECT DISTINCT Gene"
+            " FROM nucleotide"
+            " WHERE Gene in " + str(olfactory))
 
-    df = psql.frame_query(sql, con=conn)
-    conn.close()  # close connection
+        df = psql.frame_query(sql, con=conn)
+        conn.close()  # close connection
 
-    # get significantly mutated genes found in database
-    olfactory_in_database = tuple(df['Gene'])
-    logger.info('There are only %d/%d olfactory receptors found in the database.'
-                % (len(olfactory_in_database), len(olfactory)))
+        # get significantly mutated genes found in database
+        olfactory_in_database = tuple(df['Gene'])
+        logger.info('There are only %d/%d olfactory receptors found in the database.'
+                    % (len(olfactory_in_database), len(olfactory)))
+    except:
+        olfactory_in_database = olfactory
     return olfactory_in_database
 
 
