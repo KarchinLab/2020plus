@@ -304,3 +304,22 @@ def line_fill_between(data, sem,
     plt.savefig(save_path)
     plt.clf()
     plt.close()
+
+
+def errorbars(x, y, err,
+              save_path='',
+              title='',
+              xlabel='',
+              ylabel='',
+              label=''):
+    if label:
+        plt.errorbar(x, y, yerr=err, label=label, fmt='-o')
+        plt.legend(loc='best')
+    else:
+        plt.errorbar(x, y, yerr=err, fmt='-o')
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    if save_path:
+        plt.savefig(save_path)
+        plt.close()

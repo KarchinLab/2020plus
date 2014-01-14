@@ -91,7 +91,8 @@ def process_features(df, min_count):
     min_count : int
         minimum number of mutations for a gene to be used
     """
-    df = df.set_index('gene')  # hack to prevent dividing genes by a number
+    if 'gene' in df.columns:
+        df = df.set_index('gene')  # hack to prevent dividing genes by a number
     df = _filter_rows(df, min_ct=min_count)  # drop rows below minimum total mutations
     recurrent_mutation = df['recurrent missense'] + df['recurrent indel']
     deleterious_mutation = df['lost stop'] + df['nonsense'] + df['frame shift'] + df['no protein']

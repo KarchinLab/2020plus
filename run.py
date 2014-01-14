@@ -7,6 +7,7 @@ import traceback
 import argparse
 import data_analysis.python.stats
 import classify.python.classifier
+import simulation.python.simulate
 import features.python.features
 import savedb.python.gene_tsv
 import savedb.python.gene_features
@@ -82,6 +83,12 @@ def _classify():
     """Wrapper function to call scripts in the classify folder."""
     opts = vars(args)  # create a dictionary for CLI options
     classify.python.classifier.main(opts)  # run code
+
+
+def _simulation():
+    """Wrapper function to call scripts in the classify folder."""
+    opts = vars(args)  # create a dictionary for CLI options
+    simulation.python.simulate.main(opts)  # run code
 
 
 def _savedb():
@@ -189,6 +196,62 @@ if __name__ == '__main__':
                                  help='Number of decision trees for random forests. '
                                  '(default: 500)')
     parser_classify.set_defaults(func=_classify)
+
+    # simulation sub-command
+    parser_simulation = subparser.add_parser('simulation',
+                                             help='Run simulation scripts'
+                                             ' in the simulation folder')
+    parser_simulation.add_argument('-m', '--min-count',
+                                   type=int,
+                                   action='store',
+                                   default=0,
+                                   help='Minimum number of mutations in a gene '
+                                   'for the gene to be considered in classification.'
+                                   ' (default: 0)')
+    parser_simulation.add_argument('-d', '--driver-rate',
+                                   type=float,
+                                   action='store',
+                                   default=.7,
+                                   help='Sample rate for R\'s random forest for '
+                                   'oncogenes and TSGs. (default: .7)')
+    parser_simulation.add_argument('-o', '--other-ratio',
+                                   type=float,
+                                   action='store',
+                                   default=3.,
+                                   help='Ratio of sample size for R\'s random forest for '
+                                   '"other" genes. (default: 3.0)')
+    parser_simulation.add_argument('-n', '--ntrees',
+                                   type=int,
+                                   action='store',
+                                   default=500,
+                                   help='Number of decision trees for random forests. '
+                                   '(default: 500)')
+    parser_simulation.add_argument('-s', '--samples',
+                                   type=int,
+                                   action='store',
+                                   default=10,
+                                   help='Number of samples for each simulation.')
+    parser_simulation.add_argument('--gene-length',
+                                   action='store_true',
+                                   default=False,
+                                   help='Add gene length to features for '
+                                   'simulation command')
+    parser_simulation.add_argument('--mutation-rate',
+                                   action='store_true',
+                                   default=False,
+                                   help='Add noncoding mutation rate to'
+                                   ' features for simulation command')
+    parser_simulation.add_argument('--replication-time',
+                                   action='store_true',
+                                   default=False,
+                                   help='Add replication time to'
+                                   ' features for simulation command')
+    parser_simulation.add_argument('--expression',
+                                   action='store_true',
+                                   default=False,
+                                   help='Add gene expression to'
+                                   ' features for simulation command')
+    parser_simulation.set_defaults(func=_simulation)
 
     # savedb sub-command
     help_string = ('Concatenate tab delim gene files found in /databases/COSMIC '

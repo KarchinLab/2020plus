@@ -37,10 +37,10 @@ class Bootstrap(object):
         Args:
           | subsample (float): 0 < subsample <= 1.0
         """
-        if 0 < subsample <= 1:
+        if subsample > 0:
             self.subsample = subsample
         else:
-            raise ValueError('Subsample should be between zero and one.')
+            raise ValueError('Subsample should be positive.')
 
     def set_num_samples(self, num_samples):
         """Set number of times to sample from multinomial distribution.
@@ -55,5 +55,7 @@ class Bootstrap(object):
 
     def set_df(self, df):
         """Set data frame which contains the counts for mutational types."""
+        if 'gene' in df.columns:
+            df = df.set_index('gene')
         self.df = df
 
