@@ -201,6 +201,22 @@ if __name__ == '__main__':
     parser_simulation = subparser.add_parser('simulation',
                                              help='Run simulation scripts'
                                              ' in the simulation folder')
+    parser_simulation.add_argument('-l', '--lower-sample-rate',
+                                   type=float,
+                                   action='store',
+                                   default=0.1,
+                                   help='Lower end of sample rate interval for simulations. (Default: .1)')
+    parser_simulation.add_argument('-u', '--upper-sample-rate',
+                                   type=float,
+                                   action='store',
+                                   default=3.1,
+                                   help='Upper end of sample rate interval for simulations. (Default: 3.1)')
+    parser_simulation.add_argument('-num', '--num-sample-rate',
+                                   type=int,
+                                   action='store',
+                                   default=7,
+                                   help='Number of sampling rates to simulate between '
+                                   'LOWER_SAMPLE_RATE and UPPER_SAMPLE_RATE. (Default: 7)')
     parser_simulation.add_argument('-m', '--min-count',
                                    type=int,
                                    action='store',

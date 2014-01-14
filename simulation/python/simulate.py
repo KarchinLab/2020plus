@@ -125,7 +125,9 @@ def main(cli_opts):
 
     # iterate through each sampling rate
     r_result, py_result = {}, {}
-    for sample_rate in np.linspace(.1, 3, 7):
+    for sample_rate in np.linspace(cli_opts['lower_sample_rate'],
+                                   cli_opts['upper_sample_rate'],
+                                   cli_opts['num_sample_rate']):
         # bootstrap object for sub-sampling
         bs = Bootstrap(df.copy(),
                        subsample=sample_rate,
