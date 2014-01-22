@@ -12,6 +12,7 @@ import numpy as np
 import utils.python.plot as myplt
 import utils.python.util as _utils
 from matplotlib.mlab import PCA
+import matplotlib.pyplot as plt
 import logging
 
 logger = logging.getLogger(__name__)  # logger obj for this module
@@ -328,3 +329,18 @@ def recurrent_missense_pos_line(df,
                ylabel='Number of Recurrent Missense Positions per Gene')
     logger.info('Finished plotting number of recurrent missense positions')
 
+
+def missense_entropy_kde(df,
+                         save_path,
+                         title='',
+                         xlabel='',
+                         ylabel='Density'):
+    df[df['true class']==2]['missense position entropy'].dropna().plot(kind='kde', label='TSG')
+    df[df['true class']==1]['missense position entropy'].dropna().plot(kind='kde', label='Oncogenes')
+    df[df['true class']==0]['missense position entropy'].dropna().plot(kind='kde', label='Other genes')
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.legend(loc='best')
+    plt.savefig(save_path)
+    plt.close()

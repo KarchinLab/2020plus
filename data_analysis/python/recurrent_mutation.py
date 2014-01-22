@@ -7,6 +7,8 @@ import utils.python.util as _utils
 import pandas as pd
 import pandas.io.sql as psql
 import plot_data
+import numpy as np
+import utils.python.math as mymath
 from collections import Counter
 import logging
 
@@ -79,6 +81,54 @@ def count_recurrent_by_number(hgvs_iterable):
     return mycounter
 
 
+def unique_missense_positions(conn):
+    logger.info('Calculating unique missense positions. . .')
+
+    # query database
+    sql = "SELECT Gene, AminoAcid FROM nucleotide"  # get everything from table
+    df = psql.frame_query(sql, con=conn)
+    gene_to_indexes = df.groupby('Gene').groups
+
+    # calculate missense position entropy by gene
+    gene_items = gene_to_indexes.items()
+    gene_list, _ = zip(*gene_items)
+    result_df = pd.DataFrame(np.zeros(len(gene_list)), columns=['unique missense position'], index=gene_list)
+    for gene, indexes in gene_items:
+        tmp_df = df.ix[indexes]
+        myct = count_recurrent_by_number(tmp_df['AminoAcid'])
+        pos_ct = np.array(myct.values())  # convert to numpy array
+        unique_missense = len(pos_ct)
+        result_df.ix[gene, 'unique missense position'] = unique_missense
+
+    logger.info('Finsihed counting unique missense positions.')
+    return result_df
+
+
+def missense_position_entropy(conn):
+    logger.info('Calculating missense position entropy . . .')
+
+    # query database
+    sql = "SELECT Gene, AminoAcid FROM nucleotide"  # get everything from table
+    df = psql.frame_query(sql, con=conn)
+    gene_to_indexes = df.groupby('Gene').groups
+
+    # calculate missense position entropy by gene
+    gene_items = gene_to_indexes.items()
+    gene_list, _ = zip(*gene_items)
+    result_df = pd.DataFrame(np.zeros(len(gene_list)), columns=['missense position entropy'], index=gene_list)
+    for gene, indexes in gene_items:
+        tmp_df = df.ix[indexes]
+        myct = count_recurrent_by_number(tmp_df['AminoAcid'])
+        pos_ct = np.array(myct.values())  # convert to numpy array
+        total_missense = np.sum(pos_ct)  # total number of missense
+        p = pos_ct / float(total_missense)  # normalize to a probability
+        missense_entropy = mymath.shannon_entropy(p)  # calc shannon entropy
+        result_df.ix[gene, 'missense position entropy'] = missense_entropy  # store result
+
+    logger.info('Finsihed calculating missense position entropy.')
+    return result_df
+
+
 def count_recurrent(conn):
     logger.info('Counting the number of recurrent positions . . .')
 
@@ -149,3 +199,19 @@ def main(conn):
     tmp_path = _utils.plot_dir + cfg_opts['recur_missense_line']
     plot_data.recurrent_missense_pos_line(other_df,
                                           tmp_path)
+
+    # get information about missense position entropy
+    entropy_df = missense_position_entropy(conn)
+    entropy_df['true class'] = 0
+    onco_mask = [True if gene in _utils.oncogene_set else False for gene in entropy_df.index]
+    tsg_mask = [True if gene in _utils.tsg_set else False for gene in entropy_df.index]
+    entropy_df.ix[onco_mask, 'true class'] = 1
+    entropy_df.ix[tsg_mask, 'true class'] = 2
+    print entropy_df.describe()
+    entropy_df.to_csv('awesome.txt', sep='\t')
+
+    tmp_path = 'awesome.png'
+    plot_data.missense_entropy_kde(entropy_df,
+                                   tmp_path,
+                                   title='KDE of Missense Position Entropy',
+                                   xlabel='Missense Position Entropy (bits)')
