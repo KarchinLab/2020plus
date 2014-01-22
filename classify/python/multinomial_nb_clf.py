@@ -5,9 +5,9 @@ import logging
 
 class MultinomialNaiveBayes(GenericClassifier):
 
-    def __init__(self, df, weight=True, min_ct=0):
+    def __init__(self, df, weight=True, min_ct=0, total_iter=5):
         self.logger = logging.getLogger(__name__)
-        super(MultinomialNaiveBayes, self).__init__()  # call base constructor
+        super(MultinomialNaiveBayes, self).__init__(total_iterations=total_iter)  # call base constructor
         #self.set_min_count(min_ct)
         self.is_weighted_sample = weight
 

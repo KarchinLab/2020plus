@@ -136,22 +136,22 @@ class GenericClassifier(object):
         #self.onco_mean_tpr /= self.num_pred  # divide by number of folds squared
         #self.onco_tpr_array[:, -1] = 1.0  # it always ends at 1
         #self.onco_tpr_array[:, 0] = 0.0
-        self.onco_mean_roc_auc = metrics.auc(self.onco_fpr_array,
-                                             np.mean(self.onco_tpr_array, axis=0))
+        self.onco_mean_roc_auc = float(metrics.auc(self.onco_fpr_array,
+                                                   np.mean(self.onco_tpr_array, axis=0)))
         #self.tsg_mean_tpr /= self.num_pred  # divide by number of folds squared
         #self.tsg_tpr_array[:, -1] = 1.0  # it always ends at 1
         #self.tsg_tpr_array[:, 0] = 0.0  # it always begins as 0
-        self.tsg_mean_roc_auc = metrics.auc(self.tsg_fpr_array,
-                                            np.mean(self.tsg_tpr_array, axis=0))
+        self.tsg_mean_roc_auc = float(metrics.auc(self.tsg_fpr_array,
+                                                  np.mean(self.tsg_tpr_array, axis=0)))
 
         # Precision-Recall curve metrics
         #self.onco_mean_precision /= self.num_pred
-        self.onco_mean_pr_auc = metrics.auc(self.onco_recall_array,
-                                            np.mean(self.onco_precision_array, axis=0))
+        self.onco_mean_pr_auc = float(metrics.auc(self.onco_recall_array,
+                                                  np.mean(self.onco_precision_array, axis=0)))
         #self.onco_mean_threshold /= self.num_pred
         #self.tsg_mean_precision /= self.num_pred
-        self.tsg_mean_pr_auc = metrics.auc(self.tsg_recall_array,
-                                           np.mean(self.tsg_precision_array, axis=0))
+        self.tsg_mean_pr_auc = float(metrics.auc(self.tsg_recall_array,
+                                                 np.mean(self.tsg_precision_array, axis=0)))
 
         # log info on classifier predictions
         self.logger.info('TSG: Precision=%s, Recall=%s, Fscore=%s' % (
