@@ -6,7 +6,6 @@ import plot_data
 import pandas as pd
 import numpy as np
 import pandas.io.sql as psql
-from collections import Counter
 import logging
 
 logger = logging.getLogger(name=__file__)
@@ -94,6 +93,7 @@ def missense_position_entropy(conn):
 
 
 def main(conn):
+    cfg_opts = _utils.get_output_config('position_entropy')
 
     # get information about missense position entropy
     entropy_df = missense_position_entropy(conn)
@@ -102,15 +102,13 @@ def main(conn):
     tsg_mask = [True if gene in _utils.tsg_set else False for gene in entropy_df.index]
     entropy_df.ix[onco_mask, 'true class'] = 1
     entropy_df.ix[tsg_mask, 'true class'] = 2
-    entropy_df.to_csv('awesome.txt', sep='\t')
+    entropy_df.to_csv(cfg_opts['missense_pos_entropy'], sep='\t')
 
     # plot distribution of missense position entropy
-    tmp_path = 'awesome.png'
     plot_data.missense_entropy_kde(entropy_df,
-                                   tmp_path,
+                                   cfg_opts['missense_pos_entropy_dist'],
                                    title='Distribution of Missense Position Entropy',
                                    xlabel='Missense Position Entropy (bits)')
-
 
     # get information about mutation position entropy
     entropy_df = mutation_position_entropy(conn)
@@ -119,11 +117,10 @@ def main(conn):
     tsg_mask = [True if gene in _utils.tsg_set else False for gene in entropy_df.index]
     entropy_df.ix[onco_mask, 'true class'] = 1
     entropy_df.ix[tsg_mask, 'true class'] = 2
-    entropy_df.to_csv('awesome2.txt', sep='\t')
+    entropy_df.to_csv(cfg_opts['mutation_pos_entropy'], sep='\t')
 
     # plot distribution of mutation position entropy
-    tmp_path = 'awesome2.png'
     plot_data.missense_entropy_kde(entropy_df,
-                                   tmp_path,
+                                   cfg_opts['mutation_pos_entropy_dist'],
                                    title='Distribution of Mutation Position Entropy',
                                    xlabel='Mutation Position Entropy (bits)')
