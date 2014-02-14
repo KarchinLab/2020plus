@@ -57,10 +57,10 @@ def mutation_position_entropy(conn):
         # myct = recurrent_mutation.count_recurrent_by_number(tmp_df['AminoAcid'])
         myct, total_ct = _count_mutation_position(tmp_df['AminoAcid'])
         pos_ct = np.array(myct.values())  # convert to numpy array
-        total_missense = np.sum(pos_ct)  # total number of missense
-        p = pos_ct / float(total_missense)  # normalize to a probability
-        missense_entropy = mymath.shannon_entropy(p)  # calc shannon entropy
-        result_df.ix[gene, 'missense position entropy'] = missense_entropy  # store result
+        total_mutation = np.sum(pos_ct)  # total number of missense
+        p = pos_ct / float(total_mutation)  # normalize to a probability
+        mutation_entropy = mymath.shannon_entropy(p)  # calc shannon entropy
+        result_df.ix[gene, 'mutation position entropy'] = mutation_entropy  # store result
 
     logger.info('Finsihed calculating mutation position entropy.')
     return result_df
@@ -102,11 +102,11 @@ def main(conn):
     tsg_mask = [True if gene in _utils.tsg_set else False for gene in entropy_df.index]
     entropy_df.ix[onco_mask, 'true class'] = 1
     entropy_df.ix[tsg_mask, 'true class'] = 2
-    entropy_df.to_csv(cfg_opts['missense_pos_entropy'], sep='\t')
+    entropy_df.to_csv(_utils.result_dir + cfg_opts['missense_pos_entropy'], sep='\t')
 
     # plot distribution of missense position entropy
     plot_data.missense_entropy_kde(entropy_df,
-                                   cfg_opts['missense_pos_entropy_dist'],
+                                   _utils.plot_dir + cfg_opts['missense_pos_entropy_dist'],
                                    title='Distribution of Missense Position Entropy',
                                    xlabel='Missense Position Entropy (bits)')
 
@@ -117,10 +117,10 @@ def main(conn):
     tsg_mask = [True if gene in _utils.tsg_set else False for gene in entropy_df.index]
     entropy_df.ix[onco_mask, 'true class'] = 1
     entropy_df.ix[tsg_mask, 'true class'] = 2
-    entropy_df.to_csv(cfg_opts['mutation_pos_entropy'], sep='\t')
+    entropy_df.to_csv(_utils.result_dir + cfg_opts['mutation_pos_entropy'], sep='\t')
 
     # plot distribution of mutation position entropy
     plot_data.missense_entropy_kde(entropy_df,
-                                   cfg_opts['mutation_pos_entropy_dist'],
+                                   _utils.plot_dir + cfg_opts['mutation_pos_entropy_dist'],
                                    title='Distribution of Mutation Position Entropy',
                                    xlabel='Mutation Position Entropy (bits)')
