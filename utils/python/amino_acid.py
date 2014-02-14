@@ -224,6 +224,7 @@ class AminoAcid(object):
         self.is_synonymous = False  # assume not synonymous until proven
         if self.unknown_effect or self.is_no_protein:
             # unknown effect from mutation. usually denoted as p.?
+            self.pos = None
             pass
         elif self.is_lost_stop:
             self.initial = aa_hgvs[0]
@@ -243,21 +244,21 @@ class AminoAcid(object):
             if self.is_insertion:
                 if not self.is_missing_info:
                     self.initial = re.findall('([A-Z])\d+', aa_hgvs)[:2]  # first two
-                    self.pos = map(int, re.findall('[A-Z](\d+)', aa_hgvs)[:2])  # first two
+                    self.pos = tuple(map(int, re.findall('[A-Z](\d+)', aa_hgvs)[:2]))  # first two
                     self.mutated = re.findall('(?<=INS)[A-Z0-9?*]+', aa_hgvs)[0]
                     self.mutated = self.mutated.strip('?')  # remove the missing info '?'
                 else:
                     self.initial = ''
-                    self.pos = []
+                    self.pos = tuple()
                     self.mutated = ''
             elif self.is_deletion:
                 if not self.is_missing_info:
                     self.initial = re.findall('([A-Z])\d+', aa_hgvs)
-                    self.pos = map(int, re.findall('[A-Z](\d+)', aa_hgvs))
+                    self.pos = tuple(map(int, re.findall('[A-Z](\d+)', aa_hgvs)))
                     self.mutated = re.findall('(?<=DEL)[A-Z]*', aa_hgvs)[0]
                 else:
                     self.initial = ''
-                    self.pos = []
+                    self.pos = tuple()
                     self.mutated = ''
         elif self.is_frame_shift:
             self.initial = aa_hgvs[0]
@@ -286,8 +287,9 @@ class AminoAcid(object):
             except ValueError:
                 # wierd error of p.E217>D*
                 self.is_valid = False
+                self.pos = None
                 self.logger.debug('(Parsing-Problem) Invalid HGVS Amino Acid '
-                                'syntax: ' + aa_hgvs)
+                                  'syntax: ' + aa_hgvs)
             if self.initial == self.mutated:
                 # classify nonsense-to-nonsense mutations as synonymous
                 self.is_synonymous = True
