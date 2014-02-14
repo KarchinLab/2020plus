@@ -6,6 +6,7 @@ import plot_data
 import mutation_types
 import single_gene
 import recurrent_mutation
+import position_entropy
 import feature_matrix
 import tables.sample_name as sample_name
 import tables.cosmic_aa as cosmic_aa
@@ -83,6 +84,8 @@ def main(recurrent, recurrent_max, db, classify_only):
                     logger.debug('(Problem) Gene not found: %s' % gene)
 
         recurrent_mutation.main(conn)
+
+        position_entropy.main(conn)
 
         sample_name.main(conn)  # info related to mutations for each sample
 
