@@ -14,3 +14,22 @@ def shannon_entropy(p):
     shannon entropy in bits
     """
     return -np.sum(p * np.log2(p))
+
+
+def max_shannon_entropy(n):
+    """Returns max possible entropy given "n" mutations.
+
+    The maximum possible entropy is the entropy of the
+    uniform distribution. The uniform distribution has
+    entropy equal to log(n) (I will use base 2).
+
+    **Parameters**
+
+    n : int
+        total mutation counts
+
+    **Returns**
+
+    max possible shannon entropy in bits
+    """
+    return np.log2(n)

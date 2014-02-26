@@ -330,14 +330,15 @@ def recurrent_missense_pos_line(df,
     logger.info('Finished plotting number of recurrent missense positions')
 
 
-def missense_entropy_kde(df,
-                         save_path,
-                         title='',
-                         xlabel='',
-                         ylabel='Density'):
-    df[df['true class']==2]['missense position entropy'].dropna().plot(kind='kde', label='TSG')
-    df[df['true class']==1]['missense position entropy'].dropna().plot(kind='kde', label='Oncogenes')
-    df[df['true class']==0]['missense position entropy'].dropna().plot(kind='kde', label='Other genes')
+def entropy_kde(df,
+                column,
+                save_path,
+                title='',
+                xlabel='',
+                ylabel='Density'):
+    df[df['true class']==2][column].dropna().plot(kind='kde', label='TSG')
+    df[df['true class']==1][column].dropna().plot(kind='kde', label='Oncogenes')
+    df[df['true class']==0][column].dropna().plot(kind='kde', label='Other genes')
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)

@@ -27,6 +27,7 @@ def retrieve_gene_features(conn, opts):
         dataframe of gene lengths
     """
     logger.info('Retrieving features of genes . . .')
+
     selected_cols = ['gene']
 
     # retrieve more features if specified by command line
@@ -40,10 +41,24 @@ def retrieve_gene_features(conn, opts):
         selected_cols.append('expression_CCLE as expression')
 
     # get info from gene_features table
-    logger.info('Retrieving gene feature information . . . ')
+    logger.info('Retrieving gene feature information from gene_features table . . . ')
     sql = "SELECT %s FROM gene_features" % ', '.join(selected_cols)
     df = psql.frame_query(sql, conn)
-    logger.info('Finished retrieving gene features.')
+    df = df.set_index('gene')
+    df['gene'] = df.index
+    logger.info('Finished retrieving gene features from gene_features table.')
+
+    # get position entropy features
+    entropy_cfg = _utils.get_output_config('position_entropy')
+    mutation_pos_entropy = pd.read_csv(_utils.result_dir + entropy_cfg['mutation_pos_entropy'],
+                                       sep='\t', index_col=0)
+    missense_pos_entropy = pd.read_csv(_utils.result_dir + entropy_cfg['missense_pos_entropy'],
+                                       sep='\t', index_col=0)
+    df['mutation position entropy'] = mutation_pos_entropy['mutation position entropy']
+    df['pct of uniform mutation entropy'] = mutation_pos_entropy['pct of uniform mutation entropy']
+    df['missense position entropy'] = missense_pos_entropy['missense position entropy']
+    df['pct of uniform missense entropy'] = missense_pos_entropy['pct of uniform missense entropy']
+
     return df
 
 

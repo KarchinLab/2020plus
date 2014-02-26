@@ -51,16 +51,19 @@ def mutation_position_entropy(conn):
     # calculate missense position entropy by gene
     gene_items = gene_to_indexes.items()
     gene_list, _ = zip(*gene_items)
-    result_df = pd.DataFrame(np.zeros(len(gene_list)), columns=['missense position entropy'], index=gene_list)
+    result_df = pd.DataFrame(np.zeros((len(gene_list), 2)),
+                             columns=['mutation position entropy',
+                                      'pct of uniform mutation entropy'],
+                             index=gene_list)
     for gene, indexes in gene_items:
         tmp_df = df.ix[indexes]
-        # myct = recurrent_mutation.count_recurrent_by_number(tmp_df['AminoAcid'])
         myct, total_ct = _count_mutation_position(tmp_df['AminoAcid'])
         pos_ct = np.array(myct.values())  # convert to numpy array
-        total_mutation = np.sum(pos_ct)  # total number of missense
-        p = pos_ct / float(total_mutation)  # normalize to a probability
+        p = pos_ct / float(total_ct)  # normalize to a probability
         mutation_entropy = mymath.shannon_entropy(p)  # calc shannon entropy
+        percent_mutation_entropy = mutation_entropy / mymath.max_shannon_entropy(total_ct)  # percent of max entropy
         result_df.ix[gene, 'mutation position entropy'] = mutation_entropy  # store result
+        result_df.ix[gene, 'pct of uniform mutation entropy'] = percent_mutation_entropy  # store result
 
     logger.info('Finsihed calculating mutation position entropy.')
     return result_df
@@ -77,7 +80,10 @@ def missense_position_entropy(conn):
     # calculate missense position entropy by gene
     gene_items = gene_to_indexes.items()
     gene_list, _ = zip(*gene_items)
-    result_df = pd.DataFrame(np.zeros(len(gene_list)), columns=['missense position entropy'], index=gene_list)
+    result_df = pd.DataFrame(np.zeros((len(gene_list), 2)),
+                             columns=['missense position entropy',
+                                      'pct of uniform missense entropy'],
+                             index=gene_list)
     for gene, indexes in gene_items:
         tmp_df = df.ix[indexes]
         # myct = recurrent_mutation.count_recurrent_by_number(tmp_df['AminoAcid'])
@@ -86,7 +92,9 @@ def missense_position_entropy(conn):
         total_missense = np.sum(pos_ct)  # total number of missense
         p = pos_ct / float(total_missense)  # normalize to a probability
         missense_entropy = mymath.shannon_entropy(p)  # calc shannon entropy
+        percent_missense_entropy = missense_entropy / mymath.max_shannon_entropy(total_missense)
         result_df.ix[gene, 'missense position entropy'] = missense_entropy  # store result
+        result_df.ix[gene, 'pct of uniform missense entropy'] = percent_missense_entropy  # store result
 
     logger.info('Finsihed calculating missense position entropy.')
     return result_df
@@ -105,10 +113,17 @@ def main(conn):
     entropy_df.to_csv(_utils.result_dir + cfg_opts['missense_pos_entropy'], sep='\t')
 
     # plot distribution of missense position entropy
-    plot_data.missense_entropy_kde(entropy_df,
-                                   _utils.plot_dir + cfg_opts['missense_pos_entropy_dist'],
-                                   title='Distribution of Missense Position Entropy',
-                                   xlabel='Missense Position Entropy (bits)')
+    plot_data.entropy_kde(entropy_df,
+                          'missense position entropy',  # use the missense entropy column
+                          _utils.plot_dir + cfg_opts['missense_pos_entropy_dist'],
+                          title='Distribution of Missense Position Entropy',
+                          xlabel='Missense Position Entropy (bits)')
+    plot_data.entropy_kde(entropy_df,
+                          'pct of uniform missense entropy',  # use the missense entropy column
+                          _utils.plot_dir + cfg_opts['pct_missense_pos_entropy_dist'],
+                          title='Distribution of Percentage of Maximum Missense Position Entropy',
+                          xlabel='Percentage of Maximum Missense Position Entropy (bits)')
+
 
     # get information about mutation position entropy
     entropy_df = mutation_position_entropy(conn)
@@ -120,7 +135,13 @@ def main(conn):
     entropy_df.to_csv(_utils.result_dir + cfg_opts['mutation_pos_entropy'], sep='\t')
 
     # plot distribution of mutation position entropy
-    plot_data.missense_entropy_kde(entropy_df,
-                                   _utils.plot_dir + cfg_opts['mutation_pos_entropy_dist'],
-                                   title='Distribution of Mutation Position Entropy',
-                                   xlabel='Mutation Position Entropy (bits)')
+    plot_data.entropy_kde(entropy_df,
+                          'mutation position entropy',  # use the mutation entropy column
+                          _utils.plot_dir + cfg_opts['mutation_pos_entropy_dist'],
+                          title='Distribution of Mutation Position Entropy',
+                          xlabel='Mutation Position Entropy (bits)')
+    plot_data.entropy_kde(entropy_df,
+                          'pct of uniform mutation entropy',  # use the missense entropy column
+                          _utils.plot_dir + cfg_opts['pct_mutation_pos_entropy_dist'],
+                          title='Distribution of Percentage of Maximum Mutation Position Entropy',
+                          xlabel='Percentage of Maximum Mutation Position Entropy (bits)')
