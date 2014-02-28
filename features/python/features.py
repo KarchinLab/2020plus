@@ -169,6 +169,7 @@ def random_sort(df):
 def main(options):
     # get configs
     in_opts = _utils.get_input_config('classifier')
+    out_opts = _utils.get_output_config('features')
     count_opts = _utils.get_output_config('feature_matrix')
     result_opts = _utils.get_input_config('result')
     db_cfg = _utils.get_db_config('genes')
@@ -198,4 +199,26 @@ def main(options):
 
     # plot mutation histogram for olfactory receptor genes
     plot_data.or_gene_hist(all_features,
-                           result_opts['feature_plot_dir'] + 'or.hist.png')
+                           result_opts['feature_plot_dir'] + out_opts['or_hist'])
+
+
+    # scatter plot of correlation between recurrent counts
+    # and total mutation counts
+    tmpdf = all_features[(all_features['recurrent count']<300) & (all_features['total']<300)]
+    plot_data.correlation_plot(tmpdf,
+                               'recurrent count', 'total',
+                               save_path=result_opts['feature_plot_dir'] + out_opts['recur_vs_total_cor'],
+                               xlabel='Recurrent Mutations',
+                               ylabel='Total Mutations',
+                               title='Recurrent ($<300$) vs Total ($<300$)mutations')
+
+
+    # scatter plot of correlation between deleterious counts
+    # and total mutation counts
+    tmpdf = all_features[(all_features['deleterious count']<300) & (all_features['total']<300)]
+    plot_data.correlation_plot(tmpdf,
+                               'deleterious count', 'total',
+                               save_path=result_opts['feature_plot_dir'] + out_opts['del_vs_total_cor'],
+                               xlabel='Deleterious Mutations',
+                               ylabel='Total Mutations',
+                               title='Deleterious ($<300$) vs Total ($<300$)mutations')

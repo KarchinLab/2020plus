@@ -6,6 +6,7 @@ to make a reasonable looking plot.
 
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy.stats as stats
 
 
 def heatmap(df, file_path, title='', xlabel='', ylabel='', cmap=plt.cm.Blues):
@@ -323,3 +324,25 @@ def errorbars(x, y, err,
     if save_path:
         plt.savefig(save_path)
         plt.close()
+
+
+def correlation_plot(x, y,
+                     save_path,
+                     title,
+                     xlabel, ylabel):
+    plt.scatter(x, y)
+    slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
+    line_x = np.arange(x.min(), x.max())
+    line_y = slope*line_x + intercept
+    plt.plot(line_x, line_y,
+             label='$%.2fx + %.2f$, $R^2=%.2f$' % (slope, intercept, r_value**2))
+    plt.legend(loc='best')
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.tight_layout()
+    plt.savefig(save_path)
+    plt.clf()  # clear figure
+    plt.close()
+
+
