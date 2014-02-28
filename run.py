@@ -98,8 +98,10 @@ def _savedb():
     information from the MutSigCV paper is also stored in the gene_features
     table.
     """
-    savedb.python.gene_features.main()  # populate the gene_features table
-    savedb.python.gene_tsv.main(args.hypermutator)  # populate the nucleotide table
+    savedb.python.gene_features.main(args.output)  # populate the gene_features table
+    savedb.python.gene_tsv.main(args.hypermutator,
+                                args.input,
+                                args.output)  # populate the nucleotide table
 
 
 def _features():
@@ -277,6 +279,15 @@ if __name__ == '__main__':
     parser_savedb = subparser.add_parser('savedb',
                                          help=help_string)
     parser_savedb.set_defaults(func=_savedb)
+    help_str = ('Save sqlite db to non-standard location which'
+                ' will NOT be used for further analysis (optional)')
+    parser_savedb.add_argument('-o', '--output',
+                               type=str, default='',
+                               help=help_str)
+    help_str = 'Directory of unpacked genes.tgz file from COSMIC (optional)'
+    parser_savedb.add_argument('-i', '--input',
+                               type=str, default='',
+                               help=help_str)
     parser_savedb.add_argument('-m', '--hypermutator',
                                type=int,
                                action='store',

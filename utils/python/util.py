@@ -259,6 +259,7 @@ def read_cosmic_tsv_by_gene(gene_name):
 
 
 def drop_table(tbl_name,
+               genes_db_path='',
                kind='sqlite'):
     """Drop a table from database if exists.
 
@@ -275,7 +276,9 @@ def drop_table(tbl_name,
     kind : str, ['sqlite' | 'mysql']
         type of database
     """
-    genes_db_path = get_db_config('genes')['db']
+    if not genes_db_path:
+        # if db not specified, use config file
+        genes_db_path = get_db_config('genes')['db']
     if kind == 'sqlite':
         with sqlite3.connect(genes_db_path) as cur:
             sql = "DROP TABLE IF EXISTS %s" % tbl_name

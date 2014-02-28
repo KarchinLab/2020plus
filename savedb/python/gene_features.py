@@ -87,7 +87,7 @@ def save_db(df, genedb_path):
         path to sqlite db
     """
     logger.debug('Dropping gene_features table IF EXISTS.')
-    _utils.drop_table('gene_features', kind='sqlite')  # drop table if exists
+    _utils.drop_table('gene_features', genes_db_path=genedb_path, kind='sqlite')  # drop table if exists
     logger.debug('After dropping gene_features table IF EXISTS.')
 
     logger.info('Saving gene_features table ...')
@@ -102,7 +102,7 @@ def save_db(df, genedb_path):
     logger.info('Finished saving gene_features table.')
 
 
-def main():
+def main(db_path):
     # get config files
     in_opts = _utils.get_input_config('input')
     db_opts = _utils.get_db_config('genes')
@@ -118,5 +118,7 @@ def main():
     #df['gene'] = df.index  # add gene names as a column (not just an index)
     logger.info('Finished processing features for gene_features table.')
 
+    db_path = db_path if db_path else db_opts['db']
+
     # save database
-    save_db(df, db_opts['db'])
+    save_db(df, db_path)

@@ -119,7 +119,7 @@ def concatenate_genes(out_path, cosmic_dir):
                                     mywriter.write(gene_name + "\t" + line)  # write with gene name
 
 
-def filter_hypermutators(hypermutator_count, conn):
+def filter_hypermutators(hypermutator_count, conn, db_path=''):
     """Query database to find hypermutator samples so they can
     be excluded from further analysis.
 
@@ -129,6 +129,8 @@ def filter_hypermutators(hypermutator_count, conn):
         samples with mutation counts below this number are allowed
     conn : db connection
         database connection
+    db_path : str
+        if using non-config defined db, specify the db path
     """
     sql = ("SELECT *"
           " FROM nucleotide"
@@ -147,7 +149,7 @@ def filter_hypermutators(hypermutator_count, conn):
 
     df = psql.frame_query(sql, conn)  # get non hypermutator mutations
 
-    _utils.drop_table('nucleotide', kind='sqlite')
+    _utils.drop_table('nucleotide', db_path, kind='sqlite')
 
     psql.write_frame(df,
                      'nucleotide',
@@ -190,7 +192,7 @@ def save_db(hypermutator_ct, tsv_path, genedb_path):
     df['hg19end'] = df['hg19end'].astype(int)
 
     # drop table if already exists
-    _utils.drop_table('nucleotide', kind='sqlite')
+    _utils.drop_table('nucleotide', genedb_path, kind='sqlite')
 
     conn = sqlite3.connect(genedb_path)  # open connection
 
@@ -202,14 +204,27 @@ def save_db(hypermutator_ct, tsv_path, genedb_path):
                      if_exists='replace')  # drop table if exists
 
     # drop table and re-insert data without hypermutators
-    filter_hypermutators(hypermutator_ct, conn)
+    filter_hypermutators(hypermutator_ct, conn, genedb_path)
 
     conn.close()  # close
 
 
-def main(hypermutator_count):
+def main(hypermutator_count, gene_dir, db_path):
     """Concatenates all the mutation data from tab delmited files in
-    the cosmic directory. Next, saves the results to a sqlite db."""
+    the cosmic directory. Next, saves the results to a sqlite db.
+
+    **Parameters**
+
+    hypermutator_count : int
+        remove samples with too many mutations
+    gene_dir : str
+        path to directory containing contents of COSMIC's
+        genes.tgz file. If empty string, just use path
+        from config file.
+    db_path : str
+        path to save sqlite database. If string is empty,
+        use path from config.
+    """
     # get input/output configurations
     in_opts = _utils.get_input_config('input')
     cosmic_dir = in_opts['cosmic_dir']
@@ -218,6 +233,12 @@ def main(hypermutator_count):
     db_opts = _utils.get_db_config('genes')
     out_db = db_opts['db']
 
+    # concatenate all gene files
+    cosmic_dir = gene_dir if gene_dir else cosmic_dir
+    concatenate_genes(out_path, cosmic_dir)
+
+    # check if user specifies non standard db path
+    out_db = db_path if db_path else out_db
+
     # save info into a txt file and sqlite3 database
-    concatenate_genes(out_path, cosmic_dir)  # concatenate all gene files
-    save_db(hypermutator_count, out_path, out_db)  # save file to sqlite database
+    save_db(hypermutator_count, out_path, out_db)
