@@ -21,7 +21,7 @@ class MultinomialNaiveBayes(GenericClassifier):
         total = df['total']
         df = df[['recurrent missense', 'recurrent indel', 'frame shift',
                  'nonsense', 'missense', 'synonymous', 'indel', 'no protein',
-                 'lost stop']]
+                 'lost stop', 'splicing mutation']]
         df = df.mul(total, axis=0).astype(int)  # get back counts instead of pct
         self.x, self.y = features.randomize(df)
 

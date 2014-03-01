@@ -58,7 +58,8 @@ def count_types_primary_tissue(gene, recurrent_min, conn):
     groups = df.groupby('PrimaryTissue').groups
     aa, nuc = {}, {}
     for k, v in groups.iteritems():
-        aa_types = _utils.count_mutation_types(df.ix[v]['AminoAcid'])
+        aa_types = _utils.count_mutation_types(df.ix[v]['AminoAcid'],
+                                               df.ix[v]['Nucleotide'])
         recur_ct, missense_ct = recur.count_missense_types(df.ix[v]['AminoAcid'],
                                                            recurrent_min=recurrent_min)
         aa_types = aa_types.set_value('missense', missense_ct)

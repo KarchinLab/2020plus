@@ -50,6 +50,44 @@ class Nucleotide(object):
             elif self.is_insertion:
                 self.mutation_type = 'insertion'
 
+        # check if mutation at splice site
+        self.__set_splice_mutation()
+
+    def __set_splice_mutation(self):
+        """Set the is_splicing_mutation flag"""
+        len5ss = 6  # positive number since 5SS
+        len3ss = -20  # use negative syntax like HGVS
+        if type(self.intron_pos) == int:
+            # SNV case, only one position
+            if len3ss <= self.intron_pos <= len5ss:
+                self.is_splicing_mutation = True
+            else:
+                self.is_splicing_mutation = False
+        elif type(self.intron_pos) == list:
+            # deletion case, now have a window to check overlap
+            if self.intron_pos[0]:
+                first_in_splice = len3ss <= self.intron_pos[0] <= len5ss
+                tmp_pos1 = self.intron_pos[0]
+            else:
+                first_in_splice = False
+                tmp_pos1 = 0
+            if self.intron_pos[1]:
+                second_in_splice = len3ss <= self.intron_pos[1] <= len5ss
+                tmp_pos2 = self.intron_pos[1]
+            else:
+                second_in_splice = False
+                tmp_pos2 = 0
+
+            # set splice site mutation flag
+            if first_in_splice or second_in_splice:
+                self.is_splicing_mutation = True
+            elif (tmp_pos1 == 0 and tmp_pos2 > len5ss) or (tmp_pos1 < len3ss and tmp_pos2 == 0):
+                self.is_splicing_mutation = True
+            else:
+                self.is_splicing_mutation = False
+        else:
+            self.is_splicing_mutation = False
+
     def __set_unknown_effect(self, hgvs_str):
         """Sets a flag for unkown effect (c.? or ?).
 
@@ -138,7 +176,9 @@ class Nucleotide(object):
                     self.mutated = mutated
             else:
                 self.is_valid = False
+                self.intron_pos = None
                 self.logger.debug('(Parsing-Problem) Invalid DNA Substitution: ' + hgvs_str)
+                return
         elif self.is_deletion:
             del_pattern = '(?:([0-9?]+)([-+]\d+)?(?:_))?([0-9?]+)([-+]\d+)?del([A-Z?0-9]+)$'
             matches = re.findall(del_pattern, hgvs_str)
@@ -161,6 +201,8 @@ class Nucleotide(object):
                     self.intron_pos = [intron_tmp1, intron_tmp2]
                     self.mutated = ''
                     self.initial = del_nuc
+            else:
+                self.intron_pos = False
         elif self.is_insertion:
             ins_pattern = '(?:([0-9?]+)([-+]\d+)?(?:_))?([0-9?]+)([-+]\d+)?ins([A-Z?0-9]+)$'
             matches = re.findall(ins_pattern, hgvs_str)
@@ -168,7 +210,7 @@ class Nucleotide(object):
                 init_pos, init_intron, reg_pos, reg_intron, ins_nuc = matches[0]
                 if not init_pos:
                     # only one nucleotide inserted
-                    self.pos = int(reg_pos) if reg_pos!= '?' else reg_pos
+                    self.pos = int(reg_pos) if reg_pos != '?' else reg_pos
                     self.intron_pos = int(reg_intron) if reg_intron != '' else None
                     self.initial = ''
                     self.mutated = ins_nuc
@@ -183,12 +225,16 @@ class Nucleotide(object):
                     self.intron_pos = [intron_tmp1, intron_tmp2]
                     self.initial = ''
                     self.mutated = ins_nuc
+            else:
+                self.intron_pos = None
         elif self.unknown_effect:
             # unknown effect for mutation. usually denoted as c.?
-            pass
+            self.intron_pos = None
+            return
         else:
             # mutation did not fall into any of the categories. thus it likely
             # has invalid syntax
             self.is_valid = False
+            self.intron_pos = None
             self.logger.debug('(Parsing-Problem) Invalid HGVS DNA syntax: ' + hgvs_str)
-
+            return

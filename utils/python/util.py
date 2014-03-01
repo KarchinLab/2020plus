@@ -173,13 +173,19 @@ def classify_gene(gene):
         return 'other'
 
 
-def get_mutation_types(hgvs_iterable, kind='amino acid'):
+def get_mutation_types(mut_iterable,
+                       dna_series=None,
+                       kind='amino acid'):
     """Classify each protein HGVS mutation as a certain type.
 
     **Parameters**
 
-    hgvs_iterable : iterable
-        iterable container with HGVS mutaiton strings
+    mut_iterable : iterable
+        iterable container with HGVS mutaiton strings. If amino acids,
+        a secon dna_iterable is needed to identify splice mutations.
+    dna_series : pd.Series
+        optional, only required to find splice mutations when a list of
+        amino acids is given for mut_iterable
 
     **Returns**
 
@@ -188,18 +194,27 @@ def get_mutation_types(hgvs_iterable, kind='amino acid'):
     """
     mut_type = []
     if kind == 'amino acid':
-        for hgvs_aa in hgvs_iterable:
+        if dna_series is None:
+            # dna iterable required
+            raise ValueError('DNA should be specified to identify splice mutations.')
+        for i, hgvs_aa in enumerate(mut_iterable):
             aa = AminoAcid(hgvs=hgvs_aa)
-            mut_type.append(aa.mutation_type)
+            nuc = Nucleotide(hgvs=dna_series.iloc[i])
+            if nuc.is_splicing_mutation:
+                # check if mutation in splice site
+                mut_type.append('splicing mutation')
+            else:
+                # if not in splice site, just add
+                mut_type.append(aa.mutation_type)
     elif kind == 'nucleotide':
-        for hgvs_nuc in hgvs_iterable:
+        for hgvs_nuc in mut_iterable:
             nuc = Nucleotide(hgvs=hgvs_nuc)
             mut_type.append(nuc.mutation_type)
     mut_type_series = pd.Series(mut_type)
     return mut_type_series
 
 
-def count_mutation_types(hgvs_iterable, kind='amino acid'):
+def count_mutation_types(hgvs_iterable, dna_series=None, kind='amino acid'):
     """Count mutation types from HGVS protein strings (missense, indels, etc.)
     and DNA strings (substitutions, indels).
 
@@ -207,13 +222,18 @@ def count_mutation_types(hgvs_iterable, kind='amino acid'):
 
     hgvs_iterable : iterable
         An iterable object containing protein HGVS
+    dna_iterable : iterable
+        contains hgvs DNA mutations to classify splice mutations
+        for amino acid. Only required if hgvs_iterable is AA mutations.
 
     **Returns**
 
     unique_cts : pd.Series
         A pandas series object counting protein mutation types
     """
-    mut_type_series = get_mutation_types(hgvs_iterable, kind=kind)  # get mutation types
+    mut_type_series = get_mutation_types(hgvs_iterable,
+                                         dna_series=dna_series,
+                                         kind=kind)  # get mutation types
     unique_cts = mut_type_series.value_counts() # count mutation types
     return unique_cts
 

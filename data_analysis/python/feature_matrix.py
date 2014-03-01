@@ -3,7 +3,7 @@ and features are specified in different columns. The generate_feature_matrix
 function specifies how the feature matrix is constructed.
 """
 from utils.python.amino_acid import AminoAcid
-import recurrent_mutation
+import recurrent_mutation as recur
 import plot_data
 import pandas.io.sql as psql
 import utils.python.util as _utils
@@ -37,7 +37,8 @@ def generate_feature_matrix(recurrency_threshold,
 
     # query database
     df = psql.frame_query("SELECT * FROM nucleotide", con=conn)  # get all
-    mtypes = _utils.get_mutation_types(df['AminoAcid'])
+    mtypes = _utils.get_mutation_types(df['AminoAcid'],
+                                       df['Nucleotide'])
     df['mut_types'] = mtypes  # add mutation types to SQL output
     gene_to_indexes = df.groupby('Gene').groups
 
@@ -57,10 +58,12 @@ def generate_feature_matrix(recurrency_threshold,
                                     ['indel', 0],
                                     ['no protein', 0],
                                     ['lost stop', 0],
+                                    ['splicing mutation', 0],
                                     #['missing', 0],
                                     ['nonsense', 0]])
                                     #['unknown effect', 0]])
-        for hgvs in tmp_df['AminoAcid']:
+        # count identical indels
+        for i, hgvs in enumerate(tmp_df['AminoAcid']):
             aa = AminoAcid(hgvs)
             if aa.mutation_type not in not_used_types:
                 # do not use 'missing', 'unkown effect' or 'not valid'
@@ -68,15 +71,19 @@ def generate_feature_matrix(recurrency_threshold,
                     # keep track of missense pos for recurrency
                 #    gene_pos_counter.setdefault(aa.pos, 0)
                 #    gene_pos_counter[aa.pos] += 1
-                if aa.mutation_type == 'indel':
+                if aa.mutation_type == 'indel' and tmp_df['mut_types'].iloc[i] != 'splicing mutation':
                     # keep track of missense pos for recurrency
                     identical_indel.setdefault(aa.hgvs_original, 0)
                     identical_indel[aa.hgvs_original] += 1
-                mut_type_ctr[aa.mutation_type] += 1
 
-        recur_ct, missense_ct = recurrent_mutation.count_missense_types(tmp_df['AminoAcid'],
-                                                                        recurrency_threshold,
-                                                                        recurrency_cap)
+        # count mutation types
+        for mt in tmp_df['mut_types']:
+            if mt not in not_used_types:
+                mut_type_ctr[mt] += 1
+
+        recur_ct, missense_ct = recur.count_missense_types(tmp_df['AminoAcid'],
+                                                           recurrency_threshold,
+                                                           recurrency_cap)
 
         # needs to have at least one count
         if sum(mut_type_ctr.values()):
