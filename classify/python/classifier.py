@@ -41,7 +41,7 @@ def num_onco_by_recurrent_mutations(onco_pct, tsg_pct, min_ct):
     """Count number of oncogenes while varying the definition of recurrency"""
     # calculate counts for oncogenes/tsg with varying the required the number
     # of mutations to define a recurrent position
-    file_match_pattern = './data_analysis/results/genes/gene_feature_matrix.r*.txt'
+    file_match_pattern = _utils.result_dir + 'gene_feature_matrix.r*.txt'
     gene_design_matrix_paths = glob.glob(file_match_pattern)
     onco_ct_list, onco_pct_list = [], []  # list of cts/pct for oncogenes
     for file_path in gene_design_matrix_paths:
@@ -82,8 +82,8 @@ def num_onco_by_pct_threshold(min_ct):
 def generate_2020_result(onco_pct, tsg_pct, min_ct):
     """Simply runs the 20/20 rule with given parameters."""
     # process count features from "data_analysis" results
-    gene_features = './data_analysis/results/genes/gene_feature_matrix.txt'
-    df = pd.read_csv(gene_features, sep='\t', index_col=0)
+    in_cfg = _utils.get_input_config('classifier')  # get directory
+    df = pd.read_csv(in_cfg['gene_feature'], sep='\t', index_col=0)
     df['total'] = df.T.sum()
     df['total recurrent count'] = df['recurrent missense'] + df['recurrent indel']
     df['total deleterious count'] = df['frame shift'] + df['nonsense'] + df['lost stop'] + df['no protein']

@@ -66,12 +66,14 @@ def _data_analysis():
     """Wrapper function to call scripts in the data_analysis folder."""
     if args.database == 'cosmic_nuc':
         # change output dir for COSMIC_nuc
-        _utils.plot_dir = 'data_analysis/plots/cosmic_nuc/'
-        _utils.result_dir = 'data_analysis/results/cosmic_nuc/'
+        # _utils.plot_dir = 'data_analysis/plots/cosmic_nuc/'
+        # _utils.result_dir = 'data_analysis/results/cosmic_nuc/'
+        pass
     elif args.database == 'genes':
         # change output dir for data/genes.db
-        _utils.plot_dir = 'data_analysis/plots/genes/'
-        _utils.result_dir = 'data_analysis/results/genes/'
+        # _utils.plot_dir = 'data_analysis/plots/genes/'
+        #_utils.result_dir = 'data_analysis/results/genes/'
+        pass
 
     data_analysis.python.stats.main(args.recurrent,
                                     args.recurrent_max,
