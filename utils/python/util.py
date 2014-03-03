@@ -25,6 +25,7 @@ result_dir = _opts['result_dir']
 clf_plot_dir = _opts['clf_plot_dir']
 clf_result_dir = _opts['clf_result_dir']
 feature_plot_dir = _opts['feature_plot_dir']
+sim_plot_dir = _opts['sim_plot_dir']
 
 def read_aa_properties(file_path):
     """Read aa property counts from the data_analysis/results folder.

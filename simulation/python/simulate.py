@@ -11,7 +11,6 @@ import pandas as pd
 import numpy as np
 from scipy import stats
 import sqlite3
-from IPython import embed
 
 
 def r_random_forest(df, opts):
@@ -171,6 +170,7 @@ def calculate_stats(result_dict,
 
 def main(cli_opts):
     out_opts = _utils.get_output_config('feature_matrix')
+    sim_opts = _utils.get_output_config('simulation')
 
     gene_df = retrieve_gene_features(cli_opts)  # features like gene length, etc
 
@@ -216,13 +216,15 @@ def main(cli_opts):
                'naive bayes': pd.Panel(nb_result)}
 
     # plot results of simulations
+    tmp_save_path = _utils.sim_plot_dir + sim_opts['pr_plot']
     plot_data.oncogene_pr_auc_errorbar(results,
-                                       save_path='tmp.prauc.png',
+                                       save_path=tmp_save_path,
                                        title='Oncogene PR AUC vs. DB size',
                                        xlabel='Sample rate',
                                        ylabel='PR AUC')
+    tmp_save_path = _utils.sim_plot_dir + sim_opts['roc_plot']
     plot_data.oncogene_roc_auc_errorbar(results,
-                                        save_path='tmp.rocauc.png',
+                                        save_path=tmp_save_path,
                                         title='Oncogene ROC AUC vs. DB size',
                                         xlabel='Sample rate',
                                         ylabel='ROC AUC')
@@ -232,13 +234,15 @@ def main(cli_opts):
     # metrics like precision and recall
     results['20/20 classifier'] = pd.Panel(v_result)
 
+    tmp_save_path = _utils.sim_plot_dir + sim_opts['precision_plot']
     plot_data.oncogene_precision_errorbar(results,
-                                          save_path='tmp.precision.png',
+                                          save_path=tmp_save_path,
                                           title='Oncogene Precision vs. DB size',
                                           xlabel='Sample rate',
                                           ylabel='Precision')
+    tmp_save_path = _utils.sim_plot_dir + sim_opts['recall_plot']
     plot_data.oncogene_recall_errorbar(results,
-                                       save_path='tmp.recall.png',
+                                       save_path=tmp_save_path,
                                        title='Oncogene Recall vs. DB size',
                                        xlabel='Sample rate',
                                        ylabel='Recall')
