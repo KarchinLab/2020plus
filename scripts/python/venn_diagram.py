@@ -74,6 +74,9 @@ def main(opts):
     second_set = set(second[0].tolist())
 
     # print the exact results
+    print 'intersect:', len(first_set & second_set)
+    print 'first only:', len(first_set - second_set)
+    print 'second only:', len(second_set - first_set)
     print 'INTERSECTION'
     print '-' * 20
     for element in (first_set & second_set):
