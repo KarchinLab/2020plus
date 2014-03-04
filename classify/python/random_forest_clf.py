@@ -52,17 +52,23 @@ class RandomForest(GenericClassifier):
         # setup classifier
         self.clf = RandomForestClassifier(n_estimators=ntrees)
 
+    def _update_metrics(self, y_true, y_pred):
+        super(RandomForest, self)._update_metrics(y_true, y_pred)
+
+        # evaluate feature importance for random forest
+        self.feature_importance.append(self.clf.feature_importances_)
+
     def _update_onco_metrics(self, y_true, y_pred, prob):
         super(RandomForest, self)._update_onco_metrics(y_true, y_pred, prob)
 
         # evaluate feature importance for random forest
-        self.feature_importance.append(self.clf.feature_importances_)
+        # self.feature_importance.append(self.clf.feature_importances_)
 
     def _update_tsg_metrics(self, y_true, y_pred, prob):
         super(RandomForest, self)._update_tsg_metrics(y_true, y_pred, prob)
 
         # evaluate feature importance for random forest
-        self.feature_importance.append(self.clf.feature_importances_)
+        # self.feature_importance.append(self.clf.feature_importances_)
 
     def _on_finish(self):
         super(RandomForest, self)._on_finish()
