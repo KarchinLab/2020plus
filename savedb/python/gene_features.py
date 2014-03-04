@@ -114,6 +114,8 @@ def main(db_path):
     gene_length_df = pd.DataFrame({'gene': genes, 'gene length': lengths})
     df = pd.read_csv(in_opts['mutsigcv_features'], sep='\t')
     df = pd.merge(gene_length_df, df, how='left', on='gene')  # merge the data frames
+    biogrid_df = pd.read_csv('data/biogrid_stats.txt', sep='\t')
+    df = pd.merge(df, biogrid_df, how='left', on='gene')
     #df['gene length'] = gene_length_series
     #df['gene'] = df.index  # add gene names as a column (not just an index)
     logger.info('Finished processing features for gene_features table.')

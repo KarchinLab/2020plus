@@ -312,6 +312,14 @@ if __name__ == '__main__':
                                  help='Minimum number of mutations in a gene '
                                  'for the gene to be in the saved feature file.'
                                  ' (default: 0)')
+    parser_features.add_argument('--betweeness',
+                                 action='store_true',
+                                 default=False,
+                                 help='Gene betweeness from Biogrid.')
+    parser_features.add_argument('--degree',
+                                 action='store_true',
+                                 default=False,
+                                 help='Gene edge degree.')
     parser_features.add_argument('--gene-length',
                                  action='store_true',
                                  default=False,

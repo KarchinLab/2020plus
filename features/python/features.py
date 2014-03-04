@@ -39,6 +39,10 @@ def retrieve_gene_features(conn, opts):
         selected_cols.append('replication_time')
     if opts['expression']:
         selected_cols.append('expression_CCLE as expression')
+    if opts['betweeness']:
+        selected_cols.append('gene_betweeness')
+    if opts['degree']:
+        selected_cols.append('gene_degree')
 
     # get info from gene_features table
     logger.info('Retrieving gene feature information from gene_features table . . . ')
