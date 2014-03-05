@@ -251,6 +251,14 @@ if __name__ == '__main__':
                                    action='store',
                                    default=10,
                                    help='Number of samples for each simulation.')
+    parser_simulation.add_argument('--betweeness',
+                                   action='store_true',
+                                   default=False,
+                                   help='Gene betweeness from Biogrid.')
+    parser_simulation.add_argument('--degree',
+                                   action='store_true',
+                                   default=False,
+                                   help='Gene edge degree.')
     parser_simulation.add_argument('--gene-length',
                                    action='store_true',
                                    default=False,
