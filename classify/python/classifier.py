@@ -169,7 +169,7 @@ def main(cli_opts):
     logger.info('Plotting results of 20/20 rule . . .')
     # plot number of predicted oncogenes while varying parameters
     tmp_save_path = _utils.clf_plot_dir + cfg_opts['number_oncogenes_plot']
-    tmp_title = r"Vogelstein's Classifier Predicted Oncogenes"
+    tmp_title = r"Landscape 2013 Classifier Predicted Oncogenes"
     tmp_ylabel = 'Number of Oncogenes'
     tmp_xlabel = 'Number of Mutations Required for Recurrency'
     plot_data.onco_mutations_parameter(count_df,
@@ -178,7 +178,7 @@ def main(cli_opts):
                                        ylabel=tmp_ylabel,
                                        xlabel=tmp_xlabel)
     # plot percentage of vogelstein's oncogenes recovered
-    tmp_title = 'Percentage of Vogelstein\'s Oncogenes Recovered'
+    tmp_title = 'Percentage of Landscape 2013 Oncogenes Recovered'
     tmp_ylabel = 'Oncogene Recall'
     tmp_xlabel = 'Number of Mutations Required for Recurrency'
     tmp_save_path = _utils.clf_plot_dir + cfg_opts['pct_oncogenes_plot']
@@ -222,11 +222,11 @@ def main(cli_opts):
     plot_data.prob_kde(result_df,
                        col_name='onco prob class',
                        save_path=_utils.clf_plot_dir + cfg_opts['onco_kde_rrand_forest'],
-                       title='Distribution of Oncogene Probabilities (R\'s random forest)')
+                       title='Distribution of Oncogene Probabilities (sub-sampled random forest)')
     plot_data.prob_kde(result_df,
                        col_name='tsg prob class',
                        save_path=_utils.clf_plot_dir + cfg_opts['tsg_kde_rrand_forest'],
-                       title='Distribution of TSG Probabilities (R\'s random forest)')
+                       title='Distribution of TSG Probabilities (sub-sampled random forest)')
     logger.info('Finished running R\'s Random Forest')
 
     # scikit learns' random forest
@@ -286,7 +286,7 @@ def main(cli_opts):
 
     # plot oncogene roc figure
     random_forest_str = 'random forest (AUC = %0.3f)' % rclf_onco_mean_roc_auc
-    rrandom_forest_str = 'R\'s random forest (AUC = %0.3f)' % rrclf_onco_mean_roc_auc
+    rrandom_forest_str = 'sub-sampled random forest (AUC = %0.3f)' % rrclf_onco_mean_roc_auc
     naive_bayes_str = 'naive bayes (AUC = %0.3f)' % nbclf_onco_mean_roc_auc
     dummy_str = 'dummy (AUC = %0.3f)' % dclf_onco_mean_roc_auc
     rclf_onco_mean_tpr = np.mean(rclf_onco_tpr, axis=0)
@@ -307,12 +307,15 @@ def main(cli_opts):
 
     # plot tsg roc figure
     random_forest_str = 'random forest (AUC = %0.3f)' % rclf_tsg_mean_roc_auc
+    r_random_forest_str = 'sub-sampled random forest (AUC = %0.3f)' % rrclf_tsg_mean_roc_auc
     naive_bayes_str = 'naive bayes (AUC = %0.3f)' % nbclf_tsg_mean_roc_auc
     dummy_str = 'dummy (AUC = %0.3f)' % dclf_tsg_mean_roc_auc
     rclf_tsg_mean_tpr = np.mean(rclf_tsg_tpr, axis=0)
+    rrclf_tsg_mean_tpr = np.mean(rrclf_tsg_tpr, axis=0)
     nbclf_tsg_mean_tpr = np.mean(nbclf_tsg_tpr, axis=0)
     dclf_tsg_mean_tpr = np.mean(dclf_tsg_tpr, axis=0)
     df = pd.DataFrame({random_forest_str: rclf_tsg_mean_tpr,
+                       r_random_forest_str: rrclf_tsg_mean_tpr,
                        naive_bayes_str: nbclf_tsg_mean_tpr,
                        dummy_str: dclf_tsg_mean_tpr},
                       index=rclf_tsg_fpr)
@@ -324,7 +327,7 @@ def main(cli_opts):
 
     # plot oncogene pr figure
     random_forest_str = 'random forest (AUC = %0.3f)' % rclf_onco_mean_pr_auc
-    rrandom_forest_str = 'R\'s random forest (AUC = %0.3f)' % rrclf_onco_mean_pr_auc
+    rrandom_forest_str = 'sub-sampled random forest (AUC = %0.3f)' % rrclf_onco_mean_pr_auc
     naive_bayes_str = 'naive bayes (AUC = %0.3f)' % nbclf_onco_mean_pr_auc
     dummy_str = 'dummy (AUC = %0.3f)' % dclf_onco_mean_pr_auc
     rclf_onco_mean_precision = np.mean(rclf_onco_precision, axis=0)
@@ -354,12 +357,15 @@ def main(cli_opts):
 
     # plot tsg pr figure
     random_forest_str = 'random forest (AUC = %0.3f)' % rclf_tsg_mean_pr_auc
+    r_random_forest_str = 'sub-sampled random forest (AUC = %0.3f)' % rrclf_tsg_mean_pr_auc
     naive_bayes_str = 'naive bayes (AUC = %0.3f)' % nbclf_tsg_mean_pr_auc
     dummy_str = 'dummy (AUC = %0.3f)' % dclf_tsg_mean_pr_auc
     rclf_tsg_mean_precision = np.mean(rclf_tsg_precision, axis=0)
+    rrclf_tsg_mean_precision = np.mean(rrclf_tsg_precision, axis=0)
     nbclf_tsg_mean_precision = np.mean(nbclf_tsg_precision, axis=0)
     dclf_tsg_mean_precision = np.mean(dclf_tsg_precision, axis=0)
     df = pd.DataFrame({random_forest_str: rclf_tsg_mean_precision,
+                       r_random_forest_str: rrclf_tsg_mean_precision,
                        naive_bayes_str: nbclf_tsg_mean_precision,
                        dummy_str: dclf_tsg_mean_precision},
                       index=rclf_tsg_recall)
