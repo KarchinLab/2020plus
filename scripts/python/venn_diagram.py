@@ -66,7 +66,7 @@ def parse_arguments():
 
 def main(opts):
     # read data
-    first = pd.read_csv(opts['fist'], header=None)
+    first = pd.read_csv(opts['first'], header=None)
     second = pd.read_csv(opts['second'], header=None)
 
     # make them sets
@@ -81,11 +81,11 @@ def main(opts):
     print '-' * 20
     for element in (first_set & second_set):
         print element
-    print opts['first_name'] + ' only'
+    print opts['name_first'] + ' only'
     print '-' * 20
     for element in (first_set - second_set):
         print element
-    print opts['second_name'] + ' only'
+    print opts['name_second'] + ' only'
     print '-' * 20
     for element in (second_set - first_set):
         print element
