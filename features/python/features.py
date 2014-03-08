@@ -52,6 +52,12 @@ def retrieve_gene_features(conn, opts):
     df['gene'] = df.index
     logger.info('Finished retrieving gene features from gene_features table.')
 
+    # fill graph stats with zeros if gene not in Biogrid
+    if 'gene_betweeness' in df.columns:
+        df['gene_betweeness'] = df['gene_betweeness'].fillna(0)
+    if 'gene_degree' in df.columns:
+        df['gene_degree'] = df['gene_degree'].fillna(0)
+
     # get position entropy features
     entropy_cfg = _utils.get_output_config('position_entropy')
     mutation_pos_entropy = pd.read_csv(_utils.result_dir + entropy_cfg['mutation_pos_entropy'],
