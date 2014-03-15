@@ -70,8 +70,8 @@ class VogelsteinClassifier(object):
             return self.other_label
 
         # sufficient number of counts
-        recur_perc = recurrent / total
-        del_perc = deleterious / total
+        recur_perc = recurrent / float(total)
+        del_perc = deleterious / float(total)
         gene_class = self.predict_by_pct(recur_perc,
                                          del_perc,
                                          total)

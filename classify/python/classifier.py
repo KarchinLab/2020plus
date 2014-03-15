@@ -84,11 +84,13 @@ def generate_2020_result(onco_pct, tsg_pct, min_ct):
     # process count features from "data_analysis" results
     in_cfg = _utils.get_input_config('classifier')  # get directory
     df = pd.read_csv(in_cfg['gene_feature'], sep='\t', index_col=0)
-    df['total'] = df.T.sum()
-    df['total recurrent count'] = df['recurrent missense'] + df['recurrent indel']
-    df['total deleterious count'] = df['frame shift'] + df['nonsense'] + df['lost stop'] + df['no protein']
-    df['oncogene score'] = df['total recurrent count'].astype(float).div(df['total'])
-    df['tsg score'] = df['total deleterious count'].astype(float).div(df['total'])
+    # df['total'] = df.T.sum()
+    df['total recurrent count'] = df['total'] * (df['recurrent missense'] + df['recurrent indel'])
+    df['total deleterious count'] = df['total'] * (df['frame shift'] + df['nonsense'] + df['lost stop'] + df['no protein'])
+    df['oncogene score'] = df['recurrent missense'] + df['recurrent indel']
+    df['tsg score'] = df['frame shift'] + df['nonsense'] + df['lost stop'] + df['no protein']
+    #df['oncogene score'] = df['total recurrent count'].astype(float).div(df['total'])
+    #df['tsg score'] = df['total deleterious count'].astype(float).div(df['total'])
 
     # predict using the "20/20" rule
     vclf = VogelsteinClassifier(onco_pct, tsg_pct, min_count=min_ct)
@@ -126,6 +128,7 @@ def rand_forest_pred(clf, data, result_path):
     tmp_df['other prob class'] = other_prob
     pred_class = tmp_df[['other prob class', 'onco prob class', 'tsg prob class']].values.argmax(axis=1)
     tmp_df['predicted class'] = pred_class
+    tmp_df['predicted cancer gene'] = ((tmp_df['onco prob class'] + tmp_df['tsg prob class']) > .5).astype(int)
     tmp_df = tmp_df.fillna(0)
     tmp_df = tmp_df.sort(['onco prob class', 'tsg prob class'], ascending=False)
     tmp_df.to_csv(result_path, sep='\t')
@@ -336,8 +339,8 @@ def main(cli_opts):
     dclf_onco_mean_precision = np.mean(dclf_onco_precision, axis=0)
     df = pd.DataFrame({random_forest_str: rclf_onco_mean_precision,
                        rrandom_forest_str: rrclf_onco_mean_precision,
-                       naive_bayes_str: nbclf_onco_mean_precision,
-                       dummy_str: dclf_onco_mean_precision},
+                       naive_bayes_str: nbclf_onco_mean_precision},
+                       # dummy_str: dclf_onco_mean_precision},
                       index=rclf_onco_recall)
     #rclf_onco_sem_precision = stats.sem(rclf_onco_precision, axis=0)
     #nbclf_onco_sem_precision = stats.sem(nbclf_onco_precision, axis=0)
@@ -366,11 +369,12 @@ def main(cli_opts):
     dclf_tsg_mean_precision = np.mean(dclf_tsg_precision, axis=0)
     df = pd.DataFrame({random_forest_str: rclf_tsg_mean_precision,
                        r_random_forest_str: rrclf_tsg_mean_precision,
-                       naive_bayes_str: nbclf_tsg_mean_precision,
-                       dummy_str: dclf_tsg_mean_precision},
+                       naive_bayes_str: nbclf_tsg_mean_precision},
+                       #dummy_str: dclf_tsg_mean_precision},
                       index=rclf_tsg_recall)
     line_style = {dummy_str: '--',
                   random_forest_str: '-',
+                  r_random_forest_str: '-',
                   naive_bayes_str:'-'}
     save_path = _utils.clf_plot_dir + cfg_opts['pr_plot_tsg']
     plot_data.precision_recall_curve(df, save_path, line_style,
