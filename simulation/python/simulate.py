@@ -193,6 +193,10 @@ def main(cli_opts):
             # create feature matrix for bootstrap sample
             bs_df = features.process_features(bs_df, 0)
             all_df = merge_feature_df(bs_df, gene_df)  # all feature info
+            all_df = all_df.drop('mutation position entropy', 1)
+            all_df = all_df.drop('missense position entropy', 1)
+            all_df = all_df.drop('pct of uniform mutation entropy', 1)
+            all_df = all_df.drop('pct of uniform missense entropy', 1)
 
             # run classifiers on bootstrap sampled counts
             r_sim_results[i] = r_random_forest(all_df, cli_opts)
