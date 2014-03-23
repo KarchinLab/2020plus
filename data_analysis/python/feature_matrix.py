@@ -36,7 +36,7 @@ def generate_feature_matrix(recurrency_threshold,
     logger.info('Creating design matrix . . .')
 
     # query database
-    df = psql.frame_query("SELECT * FROM nucleotide", con=conn)  # get all
+    df = psql.frame_query("SELECT * FROM cosmic_mutation", con=conn)  # get all
     mtypes = _utils.get_mutation_types(df['AminoAcid'],
                                        df['Nucleotide'])
     df['mut_types'] = mtypes  # add mutation types to SQL output

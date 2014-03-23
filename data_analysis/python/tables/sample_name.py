@@ -24,7 +24,7 @@ def count_mutated_genes(conn):
     sql = ('SELECT x.SampleName, SUM(x.gene_indicator) as GeneCounts'
           ' FROM ('
           '     SELECT SampleName, Gene, 1 as gene_indicator'
-          '     FROM `nucleotide`'
+          '     FROM cosmic_mutation'
           '     GROUP BY SampleName, Gene'
           ' ) x GROUP BY SampleName'
           ' ORDER BY GeneCounts Desc;')
@@ -49,7 +49,7 @@ def count_mutations(conn):
     sql = ('SELECT x.SampleName, SUM(x.mut_indicator) as MutationCounts'
           ' FROM ('
           '     SELECT SampleName, 1 as mut_indicator'
-          '     FROM `nucleotide`'
+          '     FROM cosmic_mutation'
           ' ) x GROUP BY SampleName'
           ' ORDER BY MutationCounts Desc;')
     df = psql.frame_query(sql, con=conn)

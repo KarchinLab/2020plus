@@ -108,7 +108,7 @@ def read_smg():
         conn = sqlite3.connect(gene_db_path)
 
         sql = ("SELECT DISTINCT Gene"
-              " FROM nucleotide"
+              " FROM cosmic_mutation"
               " WHERE Gene in " + str(smgs))
         df = psql.frame_query(sql, con=conn)
         conn.close()  # close connection
@@ -141,7 +141,7 @@ def read_olfactory_receptors():
         conn = sqlite3.connect(gene_db_path)
 
         sql = ("SELECT DISTINCT Gene"
-              " FROM nucleotide"
+              " FROM cosmic_mutation"
               " WHERE Gene in " + str(olfactory))
 
         df = psql.frame_query(sql, con=conn)

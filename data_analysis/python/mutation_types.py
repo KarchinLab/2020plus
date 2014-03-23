@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)  # module logger
 def count_amino_acids(conn):
     """Count the amino acid mutation types (missense, indel, etc.).
     """
-    df = psql.frame_query("""SELECT * FROM nucleotide""", con=conn)
+    df = psql.frame_query("""SELECT * FROM cosmic_mutation""", con=conn)
     unique_cts = _utils.count_mutation_types(df['AminoAcid'],
                                              df['Nucleotide'])
     return unique_cts
@@ -24,7 +24,7 @@ def count_amino_acids(conn):
 def count_nucleotides(conn):
     """Count the nucleotide mutation types (substitution, indels)
     """
-    sql = "SELECT Nucleotide FROM nucleotide"
+    sql = "SELECT Nucleotide FROM cosmic_mutation"
     df = psql.frame_query(sql, con=conn)
     unique_cts = _utils.count_mutation_types(df['Nucleotide'], kind='nucleotide')
     return unique_cts
@@ -49,7 +49,7 @@ def count_oncogenes(conn):
 
     # prepare sql statement
     oncogenes = _utils.oncogene_list
-    sql = "SELECT * FROM nucleotide WHERE Gene in " + str(oncogenes)
+    sql = "SELECT * FROM cosmic_mutation WHERE Gene in " + str(oncogenes)
     logger.debug('Oncogene SQL statement: ' + sql)
 
     df = psql.frame_query(sql, con=conn)  # execute query
@@ -82,7 +82,7 @@ def count_tsg(conn):
 
     # prepare sql statement
     tsgs = _utils.tsg_list
-    sql = "SELECT * FROM nucleotide WHERE Gene in " + str(tsgs)
+    sql = "SELECT * FROM cosmic_mutation WHERE Gene in " + str(tsgs)
     logger.debug('Oncogene SQL statement: ' + sql)
 
     df = psql.frame_query(sql, con=conn)  # execute query
@@ -146,7 +146,7 @@ def main(conn):
     plot_data.mutation_types_barplot(mut_cts,
                                      save_path=plot_dir + cfg_opts['aa_type_barplot'],
                                      title='Protein Mutations by Type '
-                                           r'for \textit{nucleotide} Table')
+                                           r'for \textit{cosmic mutation} Table')
 
     # handle oncogene mutation types
     onco_aa_cts, onco_nuc_cts = count_oncogenes(conn)  # oncogene mutation cts

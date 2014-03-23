@@ -43,7 +43,7 @@ def count_nuc_substitutions(conn):
     logger.info('Starting to count DNA substitutions . . .')
 
     # query `nucleotide` table
-    sql = "SELECT Nucleotide FROM nucleotide"
+    sql = "SELECT Nucleotide FROM cosmic_mutation"
     df = psql.frame_query(sql, con=conn)
 
     # count DNA substitutions
@@ -67,7 +67,7 @@ def count_oncogene_substitutions(conn):
 
     # prepare sql statement
     oncogenes = _utils.oncogene_list
-    sql = "SELECT Nucleotide FROM nucleotide WHERE Gene in " + str(oncogenes)
+    sql = "SELECT Nucleotide FROM cosmic_mutation WHERE Gene in " + str(oncogenes)
     logger.debug('Oncogene SQL statement: ' + sql)
 
     df = psql.frame_query(sql, con=conn)  # execute query
@@ -82,7 +82,7 @@ def count_tsg_substitutions(conn):
 
     # prepare sql statement
     tsgs = _utils.tsg_list
-    sql = "SELECT Nucleotide FROM nucleotide WHERE Gene in " + str(tsgs)
+    sql = "SELECT Nucleotide FROM cosmic_mutation WHERE Gene in " + str(tsgs)
     logger.debug('Oncogene SQL statement: ' + sql)
 
     df = psql.frame_query(sql, con=conn)  # execute query

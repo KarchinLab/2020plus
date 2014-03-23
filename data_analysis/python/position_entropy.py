@@ -44,7 +44,7 @@ def mutation_position_entropy(conn):
     logger.info('Calculating mutation position entropy . . .')
 
     # query database
-    sql = "SELECT Gene, AminoAcid FROM nucleotide"  # get everything from table
+    sql = "SELECT Gene, AminoAcid FROM cosmic_mutation"  # get everything from table
     df = psql.frame_query(sql, con=conn)
     gene_to_indexes = df.groupby('Gene').groups
 
@@ -73,7 +73,7 @@ def missense_position_entropy(conn):
     logger.info('Calculating missense position entropy . . .')
 
     # query database
-    sql = "SELECT Gene, AminoAcid FROM nucleotide"  # get everything from table
+    sql = "SELECT Gene, AminoAcid FROM cosmic_mutation"  # get everything from table
     df = psql.frame_query(sql, con=conn)
     gene_to_indexes = df.groupby('Gene').groups
 

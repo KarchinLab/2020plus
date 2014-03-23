@@ -133,14 +133,14 @@ def filter_hypermutators(hypermutator_count, conn, db_path=''):
         if using non-config defined db, specify the db path
     """
     sql = ("SELECT *"
-          " FROM nucleotide"
+          " FROM cosmic_mutation"
           " WHERE COSMICSampleID in ("
           "     SELECT y.COSMICSampleID"
           "     FROM ("
           "         SELECT x.COSMICSampleID, SUM(x.mut_indicator) as MutationCounts"
           "         FROM ( "
           "             SELECT COSMICSampleID, 1 as mut_indicator"
-          "             FROM nucleotide"
+          "             FROM cosmic_mutation"
           "         ) x "
           "         GROUP BY COSMICSampleID"
           "     ) y"
@@ -149,10 +149,10 @@ def filter_hypermutators(hypermutator_count, conn, db_path=''):
 
     df = psql.frame_query(sql, conn)  # get non hypermutator mutations
 
-    _utils.drop_table('nucleotide', db_path, kind='sqlite')
+    _utils.drop_table('cosmic_mutation', db_path, kind='sqlite')
 
     psql.write_frame(df,
-                     'nucleotide',
+                     'cosmic_mutation',
                      conn,
                      flavor='sqlite',
                      if_exists='replace')
@@ -196,14 +196,14 @@ def save_db(hypermutator_ct, gene_tsv_path,
     df['hg19end'] = df['hg19end'].astype(int)
 
     # drop table if already exists
-    _utils.drop_table('nucleotide', genedb_path, kind='sqlite')
+    _utils.drop_table('cosmic_mutation', genedb_path, kind='sqlite')
     _utils.drop_table('cosmic_cnv', genedb_path, kind='sqlite')
 
     conn = sqlite3.connect(genedb_path)  # open connection
 
     # save tsv to sqlite3 database
     psql.write_frame(df,  # pandas dataframe
-                     'nucleotide',  # table name
+                     'cosmic_mutation',  # table name
                      con=conn,  # connection
                      flavor='sqlite',  # use sqlite
                      if_exists='replace')  # drop table if exists

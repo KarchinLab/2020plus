@@ -20,8 +20,8 @@ def count_primary_tissues(gene, conn):
     """
     logger.info('Counting %s mutations for each primary tissue ...' % gene)
     sql = ("SELECT PrimaryTissue, COUNT(*) as Counts"
-           " FROM nucleotide nuc"
-           " WHERE nuc.Gene='%s'"
+           " FROM cosmic_mutation cm"
+           " WHERE cm.Gene='%s'"
            " GROUP BY PrimaryTissue"
            " ORDER BY Counts Desc;" % gene)
     df = psql.frame_query(sql, con=conn)
@@ -42,14 +42,14 @@ def count_types_primary_tissue(gene, recurrent_min, conn):
         connection to database with `nucleotide` table
     """
     sql = ("SELECT PrimaryTissue, Nucleotide, AminoAcid "
-           "FROM nucleotide nuc "
-           "WHERE nuc.Gene='%s' "
+           "FROM cosmic_mutation cm "
+           "WHERE cm.Gene='%s' "
            "ORDER BY PrimaryTissue" % gene)
     df = psql.frame_query(sql, con=conn)
 
     sql = ("SELECT PrimaryTissue, COUNT(*) as Counts "
-           "FROM nucleotide nuc "
-           "WHERE nuc.Gene='%s' "
+           "FROM cosmic_mutation cm "
+           "WHERE cm.Gene='%s' "
            "GROUP BY PrimaryTissue "
            "ORDER BY Counts Desc" % gene)
     sorted_df = psql.frame_query(sql, con=conn)

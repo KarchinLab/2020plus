@@ -34,7 +34,7 @@ def count_gene_mutations(conn):
     logger.info('Counting number of mutations for each gene . . .')
 
     sql = ('SELECT Gene, COUNT(*) as count'
-          ' FROM nucleotide GROUP BY Gene'
+          ' FROM cosmic_mutation GROUP BY Gene'
           ' ORDER BY count DESC;')
     logger.debug('Gene mutation count SQL statement: ' + sql)
 
@@ -62,7 +62,7 @@ def main(recurrent, recurrent_max, db, classify_only):
         conn = sqlite3.connect(genes_db_path)
 
         if not classify_only:
-            missense.main(conn, 'nucleotide')  # specify different table name
+            missense.main(conn, 'cosmic_mutation')  # specify different table name
 
     feature_matrix.main(recurrent, recurrent_max, conn)  # generate mutation count feature matrix
     position_entropy.main(conn)
