@@ -9,9 +9,12 @@ class Nucleotide(object):
     (http://www.hgvs.org/mutnomen/recs-DNA.html).
     """
 
-    def __init__(self, hgvs='', occurrence=1):
+    def __init__(self, hgvs='', occurrence=1,
+                 len5ss=2, len3ss=-2):
         self.logger = logging.getLogger(__name__)
         self.occurrence = occurrence
+        self.len5ss = len5ss  # 5' splice site len
+        self.len3ss = len3ss  # 3' splice site len
 
         self.hgvs_original = hgvs  # unmodified hgvs copy
         self.hgvs = hgvs if not hgvs.startswith('c.') else hgvs[2:]  # modified
@@ -55,24 +58,24 @@ class Nucleotide(object):
 
     def __set_splice_mutation(self):
         """Set the is_splicing_mutation flag"""
-        len5ss = 6  # positive number since 5SS
-        len3ss = -20  # use negative syntax like HGVS
+        #len5ss = 6  # positive number since 5SS
+        #len3ss = -20  # use negative syntax like HGVS
         if type(self.intron_pos) == int:
             # SNV case, only one position
-            if len3ss <= self.intron_pos <= len5ss:
+            if self.len3ss <= self.intron_pos <= self.len5ss:
                 self.is_splicing_mutation = True
             else:
                 self.is_splicing_mutation = False
         elif type(self.intron_pos) == list:
             # deletion case, now have a window to check overlap
             if self.intron_pos[0]:
-                first_in_splice = len3ss <= self.intron_pos[0] <= len5ss
+                first_in_splice = self.len3ss <= self.intron_pos[0] <= self.len5ss
                 tmp_pos1 = self.intron_pos[0]
             else:
                 first_in_splice = False
                 tmp_pos1 = 0
             if self.intron_pos[1]:
-                second_in_splice = len3ss <= self.intron_pos[1] <= len5ss
+                second_in_splice = self.len3ss <= self.intron_pos[1] <= self.len5ss
                 tmp_pos2 = self.intron_pos[1]
             else:
                 second_in_splice = False
@@ -81,7 +84,7 @@ class Nucleotide(object):
             # set splice site mutation flag
             if first_in_splice or second_in_splice:
                 self.is_splicing_mutation = True
-            elif (tmp_pos1 == 0 and tmp_pos2 > len5ss) or (tmp_pos1 < len3ss and tmp_pos2 == 0):
+            elif (tmp_pos1 == 0 and tmp_pos2 > self.len5ss) or (tmp_pos1 < self.len3ss and tmp_pos2 == 0):
                 self.is_splicing_mutation = True
             else:
                 self.is_splicing_mutation = False
