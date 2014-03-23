@@ -19,7 +19,7 @@ def calc_onco_info(df, onco_pct, tsg_pct, min_ct):
     vclf = VogelsteinClassifier(onco_pct, tsg_pct, min_count=min_ct)
     df['total'] = df.T.sum()
     input_list = ((row['recurrent missense'] + row['recurrent indel'],
-                   row['frame shift'] + row['nonsense'] + row['lost stop'] + row['no protein'],
+                   row['frame shift'] + row['nonsense'] + row['lost stop'] + row['no protein'] + row['splicing mutation'],
                    row['total'])
                   for i, row in df.iterrows())
     df['2020 class'] = vclf.predict_list(input_list)
@@ -86,9 +86,9 @@ def generate_2020_result(onco_pct, tsg_pct, min_ct):
     df = pd.read_csv(in_cfg['gene_feature'], sep='\t', index_col=0)
     # df['total'] = df.T.sum()
     df['total recurrent count'] = df['total'] * (df['recurrent missense'] + df['recurrent indel'])
-    df['total deleterious count'] = df['total'] * (df['frame shift'] + df['nonsense'] + df['lost stop'] + df['no protein'])
+    df['total deleterious count'] = df['total'] * (df['frame shift'] + df['nonsense'] + df['lost stop'] + df['no protein'] + df['splicing mutation'])
     df['oncogene score'] = df['recurrent missense'] + df['recurrent indel']
-    df['tsg score'] = df['frame shift'] + df['nonsense'] + df['lost stop'] + df['no protein']
+    df['tsg score'] = df['frame shift'] + df['nonsense'] + df['lost stop'] + df['no protein'] + df['splicing mutation']
     #df['oncogene score'] = df['total recurrent count'].astype(float).div(df['total'])
     #df['tsg score'] = df['total deleterious count'].astype(float).div(df['total'])
 
