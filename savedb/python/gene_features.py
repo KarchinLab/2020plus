@@ -21,6 +21,32 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+def cnv_gain(db_path):
+    conn = sqlite3.connect(db_path)  # open connection
+    sql = ('SELECT x.gene as gene, SUM(x.cnv_indicator) as cnv_gain '
+           'FROM( '
+           '    SELECT gf.gene, 1 as cnv_indicator'
+           '    FROM cosmic_cnv as cc, gene_features as gf'
+           '    WHERE cc.MUT_TYPE="gain" AND (cc.Chromosome=gf.chr AND (cc.G_Start<=gf.start AND cc.G_Stop>=gf.end))'
+           ') x GROUP BY x.gene')
+    cnv_gain_df = psql.frame_query(sql, con=conn)
+    conn.close()
+    return cnv_gain_df
+
+
+def cnv_loss(db_path):
+    conn = sqlite3.connect(db_path)  # open connection
+    sql = ('SELECT x.gene as gene, SUM(x.cnv_indicator) as cnv_loss '
+           ' FROM( '
+           '     SELECT gf.gene, 1 as cnv_indicator '
+           '     FROM cosmic_cnv as cc, gene_features as gf '
+           '     WHERE cc.MUT_TYPE="loss" AND (cc.Chromosome=gf.chr AND ((cc.G_Start<=gf.start AND cc.G_Stop>=gf.end) OR (cc.G_Start<gf.end AND cc.G_Start>gf.start) OR (cc.G_Stop<gf.end AND cc.G_STOP>gf.start))) '
+           ' ) x GROUP BY x.gene')
+    cnv_loss_df = psql.frame_query(sql, con=conn)
+    conn.close()
+    return cnv_loss_df
+
+
 def calc_gene_length(file_path):
     """Read in a FASTA file and calculate sequence length.
 
@@ -116,11 +142,22 @@ def main(db_path):
     df = pd.merge(gene_length_df, df, how='left', on='gene')  # merge the data frames
     biogrid_df = pd.read_csv('data/biogrid_stats.txt', sep='\t')
     df = pd.merge(df, biogrid_df, how='left', on='gene')
+
+    # path to database
+    db_path = db_path if db_path else db_opts['db']
+
+    # get info on cnv's overlapping genes
+    tmp_gain = cnv_gain(db_path)
+    df = pd.merge(df, tmp_gain, on='gene', how='left')
+    df['cnv_gain'] = df['cnv_gain'].fillna(0)
+    tmp_loss = cnv_loss(db_path)
+    df = pd.merge(df, tmp_loss, on='gene', how='left')
+    df['cnv_loss'] = df['cnv_loss'].fillna(0)
+
     #df['gene length'] = gene_length_series
     #df['gene'] = df.index  # add gene names as a column (not just an index)
-    logger.info('Finished processing features for gene_features table.')
 
-    db_path = db_path if db_path else db_opts['db']
+    logger.info('Finished processing features for gene_features table.')
 
     # save database
     save_db(df, db_path)

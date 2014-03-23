@@ -158,7 +158,8 @@ def filter_hypermutators(hypermutator_count, conn, db_path=''):
                      if_exists='replace')
 
 
-def save_db(hypermutator_ct, tsv_path, genedb_path):
+def save_db(hypermutator_ct, gene_tsv_path,
+            cnv_tsv_path, genedb_path):
     """Saves tab delim gene mutation file to a sqlite3 db.
 
     NOTE: Uses pandas to store all contents in memory and then
@@ -168,12 +169,15 @@ def save_db(hypermutator_ct, tsv_path, genedb_path):
 
     hypermutator_ct : int
         filter for overly mutated samples
-    tsv_path : str
+    gene_tsv_path : str
         path to tab delim file containing all gene mutations
+    cnv_tsv_path : str
+        path to tab delim file containing cosmic cnv mutations
     genedb_pah : str
         path to sqlite3 db
     """
-    df = pd.read_csv(tsv_path, sep='\t')  # read data
+    df = pd.read_csv(gene_tsv_path, sep='\t')  # read data
+    cnv_df = pd.read_csv(cnv_tsv_path, sep=r'\t|:|\.\.')
 
     # fix types that pandas gets wrong
     # see http://pandas.pydata.org/pandas-docs/dev/gotchas.html
@@ -193,12 +197,18 @@ def save_db(hypermutator_ct, tsv_path, genedb_path):
 
     # drop table if already exists
     _utils.drop_table('nucleotide', genedb_path, kind='sqlite')
+    _utils.drop_table('cosmic_cnv', genedb_path, kind='sqlite')
 
     conn = sqlite3.connect(genedb_path)  # open connection
 
     # save tsv to sqlite3 database
     psql.write_frame(df,  # pandas dataframe
                      'nucleotide',  # table name
+                     con=conn,  # connection
+                     flavor='sqlite',  # use sqlite
+                     if_exists='replace')  # drop table if exists
+    psql.write_frame(cnv_df,  # pandas dataframe
+                     'cosmic_cnv',  # table name
                      con=conn,  # connection
                      flavor='sqlite',  # use sqlite
                      if_exists='replace')  # drop table if exists
@@ -230,6 +240,7 @@ def main(hypermutator_count, gene_dir, db_path):
     cosmic_dir = in_opts['cosmic_dir']
     out_opts = _utils.get_output_config('gene_tsv')
     out_path = out_opts['gene_tsv']
+    cnv_path = out_opts['cnv_tsv']
     db_opts = _utils.get_db_config('genes')
     out_db = db_opts['db']
 
@@ -241,4 +252,4 @@ def main(hypermutator_count, gene_dir, db_path):
     out_db = db_path if db_path else out_db
 
     # save info into a txt file and sqlite3 database
-    save_db(hypermutator_count, out_path, out_db)
+    save_db(hypermutator_count, out_path, cnv_path, out_db)
