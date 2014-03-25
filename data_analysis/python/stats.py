@@ -58,7 +58,7 @@ def main(recurrent, recurrent_max, db, classify_only):
             cosmic_genomic.main()  # check cosmic_genomic table
     else:
         # connect to sqlite db at data/genes.db
-        genes_db_path = _utils.get_db_config('genes')['db']
+        genes_db_path = _utils.get_db_config('champ')['db']
         conn = sqlite3.connect(genes_db_path)
 
         if not classify_only:

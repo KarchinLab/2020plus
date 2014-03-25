@@ -1,11 +1,10 @@
 """The gene_features module generates a DB table for features
-like gene length and misc. features from the MutSigCV paper.
+like gene length and misc. features from the MutSigCV paper (fig s5).
 
 The MutSigCV paper can be found here:
     http://www.nature.com/nature/journal/v499/n7457/full/nature12213.html
 
-All features except gene length are taken from Table S5. The MutSigCV
-paper suggested that the background mutation rate for genes is important
+The MutSigCV paper suggested that the background mutation rate for genes is important
 for identifying statistically significant cancer genes. However, it is
 not clear how important those features are for supervised learning on
 "known" oncogenes and tsgs.
@@ -131,7 +130,7 @@ def save_db(df, genedb_path):
 def main(db_path):
     # get config files
     in_opts = _utils.get_input_config('input')
-    db_opts = _utils.get_db_config('genes')
+    db_opts = _utils.get_db_config('champ')
 
     # get data for gene_features table
     logger.info('Processing features for gene_features table ...')
