@@ -22,15 +22,15 @@ def calc_onco_info(df, onco_pct, tsg_pct, min_ct):
                    row['frame shift'] + row['nonsense'] + row['lost stop'] + row['no protein'] + row['splicing mutation'],
                    row['total'])
                   for i, row in df.iterrows())
-    df['2020 class'] = vclf.predict_list(input_list)
-    class_cts = df['2020 class'].value_counts()
+    df['20/20 predicted class'] = vclf.predict_list(input_list)
+    class_cts = df['20/20 predicted class'].value_counts()
 
     # calculate the pct of known oncogenes found
-    df['curated class'] = [_utils.classify_gene(gene)
+    df['true class'] = [_utils.classify_gene(gene)
                            for gene in df.index.tolist()]
     tmpdf = df.copy()  # prevent wierd behavior
-    known_onco = tmpdf[tmpdf['curated class']=='oncogene']
-    num_onco_found = len(known_onco[known_onco['2020 class']=='oncogene'])
+    known_onco = tmpdf[tmpdf['true class']=='oncogene']
+    num_onco_found = len(known_onco[known_onco['20/20 predicted class']=='oncogene'])
     total_onco = len(known_onco)  # total number of oncogenes with counts
     pct_onco_found = num_onco_found / total_onco
 
@@ -85,8 +85,8 @@ def generate_2020_result(onco_pct, tsg_pct, min_ct):
     in_cfg = _utils.get_input_config('classifier')  # get directory
     df = pd.read_csv(in_cfg['gene_feature'], sep='\t', index_col=0)
     # df['total'] = df.T.sum()
-    df['total recurrent count'] = df['total'] * (df['recurrent missense'] + df['recurrent indel'])
-    df['total deleterious count'] = df['total'] * (df['frame shift'] + df['nonsense'] + df['lost stop'] + df['no protein'] + df['splicing mutation'])
+    #df['total recurrent count'] = df['total'] * (df['recurrent missense'] + df['recurrent indel'])
+    #df['total deleterious count'] = df['total'] * (df['frame shift'] + df['nonsense'] + df['lost stop'] + df['no protein'] + df['splicing mutation'])
     df['oncogene score'] = df['recurrent missense'] + df['recurrent indel']
     df['tsg score'] = df['frame shift'] + df['nonsense'] + df['lost stop'] + df['no protein'] + df['splicing mutation']
     #df['oncogene score'] = df['total recurrent count'].astype(float).div(df['total'])
@@ -94,11 +94,11 @@ def generate_2020_result(onco_pct, tsg_pct, min_ct):
 
     # predict using the "20/20" rule
     vclf = VogelsteinClassifier(onco_pct, tsg_pct, min_count=min_ct)
-    input_list = ((row['total recurrent count'], row['total deleterious count'], row['total'])
+    input_list = ((row['recurrent count'], row['deleterious count'], row['total'])
                   for i, row in df.iterrows())
-    df['2020 class'] = vclf.predict_list(input_list)
-    df['curated class'] = [_utils.classify_gene(gene)
-                           for gene in df.index.tolist()]
+    df['20/20 predicted class'] = vclf.predict_list(input_list)
+    df['true class'] = [_utils.classify_gene(gene)
+                        for gene in df.index.tolist()]
     return df
 
 
@@ -122,15 +122,15 @@ def rand_forest_pred(clf, data, result_path):
     onco_prob, tsg_prob, other_prob = clf.kfold_prediction()
     true_class = clf.y
     tmp_df = data.copy()
-    tmp_df['true class'] = true_class
-    tmp_df['onco prob class'] = onco_prob
-    tmp_df['tsg prob class'] = tsg_prob
-    tmp_df['other prob class'] = other_prob
-    pred_class = tmp_df[['other prob class', 'onco prob class', 'tsg prob class']].values.argmax(axis=1)
+    tmp_df['oncogene probability'] = onco_prob
+    tmp_df['tsg probability'] = tsg_prob
+    tmp_df['other probability'] = other_prob
+    pred_class = tmp_df[['other probability', 'oncogene probability', 'tsg probability']].values.argmax(axis=1)
     tmp_df['predicted class'] = pred_class
-    tmp_df['predicted cancer gene'] = ((tmp_df['onco prob class'] + tmp_df['tsg prob class']) > .5).astype(int)
+    tmp_df['predicted cancer gene'] = ((tmp_df['oncogene probability'] + tmp_df['tsg probability']) > .5).astype(int)
+    tmp_df['true class'] = true_class
     tmp_df = tmp_df.fillna(0)
-    tmp_df = tmp_df.sort(['onco prob class', 'tsg prob class'], ascending=False)
+    tmp_df = tmp_df.sort(['oncogene probability', 'tsg probability'], ascending=False)
     tmp_df.to_csv(result_path, sep='\t')
     return tmp_df
 
@@ -157,7 +157,7 @@ def main(cli_opts):
     result_df.to_csv(_utils.clf_result_dir + cfg_opts['vogelstein_predictions'], sep='\t')
     # plot results
     label_to_int = {'oncogene': 1, 'other': 0, 'tsg': 2}  # labels to integer code
-    result_df['true class'] = result_df['curated class'].apply(lambda x: label_to_int[x])
+    result_df['true class'] = result_df['true class'].apply(lambda x: label_to_int[x])
     plot_data.prob_kde(result_df, 'oncogene score',
                        _utils.clf_plot_dir + cfg_opts['onco_score_kde'],
                        title='Distribution of Oncogene Scores',
@@ -223,11 +223,11 @@ def main(cli_opts):
                            plot_path=_utils.clf_plot_dir + cfg_opts['rrand_forest_plot'],
                            title='R\'s Random Forest Predictions')
     plot_data.prob_kde(result_df,
-                       col_name='onco prob class',
+                       col_name='oncogene probability',
                        save_path=_utils.clf_plot_dir + cfg_opts['onco_kde_rrand_forest'],
                        title='Distribution of Oncogene Probabilities (sub-sampled random forest)')
     plot_data.prob_kde(result_df,
-                       col_name='tsg prob class',
+                       col_name='tsg probability',
                        save_path=_utils.clf_plot_dir + cfg_opts['tsg_kde_rrand_forest'],
                        title='Distribution of TSG Probabilities (sub-sampled random forest)')
     logger.info('Finished running R\'s Random Forest')
@@ -255,11 +255,11 @@ def main(cli_opts):
                            plot_path=_utils.clf_plot_dir + cfg_opts['rand_forest_plot'],
                            title='Random Forest Predictions')
     plot_data.prob_kde(result_df,
-                       col_name='onco prob class',
+                       col_name='oncogene probability',
                        save_path=_utils.clf_plot_dir + cfg_opts['onco_kde_rand_forest'],
                        title='Distribution of Oncogene Probabilities (random forest)')
     plot_data.prob_kde(result_df,
-                       col_name='tsg prob class',
+                       col_name='tsg probability',
                        save_path=_utils.clf_plot_dir + cfg_opts['tsg_kde_rand_forest'],
                        title='Distribution of TSG Probabilities (random forest)')
     logger.info('Finished running Random Forest')

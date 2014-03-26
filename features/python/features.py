@@ -190,7 +190,7 @@ def main(options):
     out_opts = _utils.get_output_config('features')
     count_opts = _utils.get_output_config('feature_matrix')
     result_opts = _utils.get_input_config('result')
-    db_cfg = _utils.get_db_config('genes')
+    db_cfg = _utils.get_db_config('champ')
 
     # read in mutation counts generated in data_analysis folder
     logger.info('Getting count features . . .')

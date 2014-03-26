@@ -96,7 +96,7 @@ def retrieve_gene_features(opts):
     """Wrapper arround the retrieve_gene_features function in the
     features module."""
     # get additional features
-    db_cfg = _utils.get_db_config('genes')
+    db_cfg = _utils.get_db_config('champ')
     conn = sqlite3.connect(db_cfg['db'])
     additional_features = features.retrieve_gene_features(conn, opts)
     conn.close()
