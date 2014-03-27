@@ -1,3 +1,7 @@
+"""Calculates gene betweeness and gene degree from biogrid
+tab2 format file.
+"""
+
 import networkx as nx
 import pandas as pd
 import argparse
@@ -5,6 +9,7 @@ import csv
 
 
 def parse_arguments():
+    """Parses command line arguments"""
     description = 'Creates a biogrid interaction network.'
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('-b', '--biogrid',
