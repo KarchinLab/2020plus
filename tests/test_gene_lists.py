@@ -10,9 +10,9 @@ def test_vogelstein_oncogenes():
     num_oncogenes = len(onco_list)  # correspondig number of oncogenes
 
     # query COSMIC_nuc
-    genes_db_path = _utils.get_db_config('genes')['db']
+    genes_db_path = _utils.get_db_config('champ')['db']
     conn = sqlite3.connect(genes_db_path)
-    sql = ("SELECT Count(DISTINCT(Gene)) as NumOncoFound FROM nucleotide "
+    sql = ("SELECT Count(DISTINCT(Gene)) as NumOncoFound FROM cosmic_mutation "
            "WHERE Gene in " + str(tuple(onco_list)))
     df = psql.frame_query(sql, con=conn)
     num_found_oncogenes = df['NumOncoFound'][0]
@@ -30,9 +30,9 @@ def test_vogelstein_tsg():
     num_tsg = len(tsg_list)  # correspondig number of oncogenes
 
     # query COSMIC_nuc
-    genes_db_path = _utils.get_db_config('genes')['db']
+    genes_db_path = _utils.get_db_config('champ')['db']
     conn = sqlite3.connect(genes_db_path)
-    sql = ("SELECT Count(DISTINCT(Gene)) as NumTsgFound FROM nucleotide "
+    sql = ("SELECT Count(DISTINCT(Gene)) as NumTsgFound FROM cosmic_mutation "
            "WHERE Gene in " + str(tuple(tsg_list)))
     df = psql.frame_query(sql, con=conn)
     num_found_tsg = df['NumTsgFound'][0]
@@ -50,9 +50,9 @@ def test_kandoth_smg():
     num_smg = len(smg_list)  # correspondig number of oncogenes
 
     # query COSMIC_nuc
-    genes_db_path = _utils.get_db_config('genes')['db']
+    genes_db_path = _utils.get_db_config('champ')['db']
     conn = sqlite3.connect(genes_db_path)
-    sql = ("SELECT Count(DISTINCT(Gene)) as NumSmgFound FROM nucleotide "
+    sql = ("SELECT Count(DISTINCT(Gene)) as NumSmgFound FROM cosmic_mutation "
            "WHERE Gene in " + str(tuple(smg_list)))
     df = psql.frame_query(sql, con=conn)
     num_found_smg = df['NumSmgFound'][0]
@@ -61,3 +61,48 @@ def test_kandoth_smg():
     assert_str =  'SMG: Number found (%d) is less than total (%s)' % (num_found_smg,
                                                                       num_smg)
     assert num_smg == num_found_smg, assert_str
+
+
+def test_cancer_gene_census():
+    """Tests CGC list in the utils module. All genes should be
+    found in the COSMIC_nuc database"""
+    cgc_list = _utils.cgc_list  # oncogenes according to paper
+    num_cgc= len(cgc_list)  # correspondig number of oncogenes
+
+    # query COSMIC_nuc
+    genes_db_path = _utils.get_db_config('champ')['db']
+    conn = sqlite3.connect(genes_db_path)
+    sql = ("SELECT Count(DISTINCT(Gene)) as NumCGCFound FROM cosmic_mutation "
+           "WHERE Gene in " + str(tuple(cgc_list)))
+    df = psql.frame_query(sql, con=conn)
+    num_found_cgc = df['NumCGCFound'][0]
+    conn.close()
+
+    assert_str =  'CGC: Number found (%d) is less than total (%s)' % (num_found_cgc,
+                                                                      num_cgc)
+    assert num_cgc == num_found_cgc, assert_str
+
+
+def test_missing_cancer_gene_census():
+    """Checks how many cancer gene census genes are
+    missing in the COSMIC database"""
+    cgc_path = _utils.get_input_config('input')['cgc']
+    with open(cgc_path) as handle:
+        cgc_list = tuple(gene.strip() for gene in handle.readlines())
+    num_cgc = len(cgc_list)
+
+    # query COSMIC_nuc
+    genes_db_path = _utils.get_db_config('champ')['db']
+    conn = sqlite3.connect(genes_db_path)
+    sql = ("SELECT Count(DISTINCT(Gene)) as NumCGCFound FROM cosmic_mutation "
+           "WHERE Gene in " + str(tuple(cgc_list)))
+    df = psql.frame_query(sql, con=conn)
+    num_found_cgc = df['NumCGCFound'][0]
+    conn.close()
+
+    assert_str =  'CGC: Number found (%d) is less than total (%s)' % (num_found_cgc,
+                                                                      num_cgc)
+    assert num_cgc == num_found_cgc, assert_str
+
+
+

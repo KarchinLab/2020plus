@@ -104,7 +104,7 @@ def read_smg():
     # open connection
     try:
         # if DB is not created this will throw an error
-        gene_db_path = get_db_config('genes')['db']
+        gene_db_path = get_db_config('champ')['db']
         conn = sqlite3.connect(gene_db_path)
 
         sql = ("SELECT DISTINCT Gene"
@@ -114,12 +114,48 @@ def read_smg():
         conn.close()  # close connection
 
         # get significantly mutated genes found in database
-        smgs_in_database = tuple(df['Gene'])
+        smgs_in_database = tuple(df['Gene'].astype(str))
         logger.info('There are only %d/%d significantly mutated genes found in the database.'
                     % (len(smgs_in_database), len(smgs)))
     except:
         smgs_in_database = smgs
     return smgs_in_database
+
+
+def read_cgc():
+    """Gets the genes from the cancer gene census.
+
+    Data from CGC is available from here:
+    http://cancer.sanger.ac.uk/cancergenome/projects/census/
+
+    **Returns**
+
+    cgc_in_database : tuple
+        tuple of gene names in cancer gene census also in COSMIC
+    """
+    cfg_opts = get_input_config('input')
+    with open(cfg_opts['cgc'], 'r') as handle:
+        cgc = tuple(gene.strip() for gene in handle.readlines())
+
+    # open connection
+    try:
+        # if DB is not created this will throw an error
+        gene_db_path = get_db_config('champ')['db']
+        conn = sqlite3.connect(gene_db_path)
+
+        sql = ("SELECT DISTINCT Gene"
+              " FROM cosmic_mutation"
+              " WHERE Gene in " + str(cgc))
+        df = psql.frame_query(sql, con=conn)
+        conn.close()  # close connection
+
+        # get significantly mutated genes found in database
+        cgc_in_database = tuple(df['Gene'].astype(str))
+        logger.info('There are only %d/%d CGC genes found in the database.'
+                    % (len(cgc_in_database), len(cgc)))
+    except:
+        cgc_in_database = cgc
+    return cgc_in_database
 
 
 def read_olfactory_receptors():
@@ -321,6 +357,10 @@ tsg_set = set(tsg_list)
 # significantly mutate genes from kandoth et al
 smg_list = read_smg()
 smg_set = set(smg_list)
+
+# cancer gene census
+cgc_list = read_cgc()
+cgc_set = set(cgc_list)
 
 # olfactory receptors from mutsigcv
 olfactory_list = read_olfactory_receptors()
