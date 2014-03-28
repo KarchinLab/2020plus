@@ -151,7 +151,8 @@ class RRandomForest(GenericClassifier):
         # self.set_min_count(min_ct)
         self.is_weighted_sample = weight
 
-        df = df.drop('total', axis=1)
+        if 'total' in df.columns:
+            df = df.drop('total', axis=1)
         df = df.fillna(df.mean())
 
         #myfeatures = {'nonsense': df['nonsense'],

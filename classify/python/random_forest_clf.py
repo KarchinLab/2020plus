@@ -18,7 +18,8 @@ class RandomForest(GenericClassifier):
         self.is_weighted_sample = weight
 
         # process data
-        df = df.drop('total', axis=1)
+        if 'total' in df.columns:
+            df = df.drop('total', axis=1)
         df = df.fillna(df.mean())
         #myfeatures = {'nonsense': df['nonsense'],
                       #'no protein': df['no protein'],
