@@ -16,6 +16,7 @@ PROPERTY_COL = 3
                           #delimiter='\t'))[1:]
 aa_prop = list(csv.reader(open(_utils.config_dir + 'aa_properties.txt', 'r'),
                           delimiter='\t'))[1:]
+aa_letters = list(aa[LETTER_COL] for aa in aa_prop)
 
 # convenience dicts for mapping amino acid letter to other atributes
 one_to_three_letter = dict([[row[LETTER_COL], row[THREE_LETTER_COL]]
