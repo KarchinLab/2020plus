@@ -1,5 +1,5 @@
 from utils.python.amino_acid import AminoAcid
-import utils.python
+import utils.python as up
 import utils.python.util as _utils
 import plot_data
 import pandas as pd
@@ -66,8 +66,8 @@ def save_missense(aacounter,
     # re-slice the mutation data
     df = pd.read_csv(missense_save, sep='\t')
     # add properties of initial/mutated amino acids
-    df['initial_prop'] = df['initial'].apply(lambda x: utils.python.letter_to_prop[x])
-    df['mutated_prop'] = df['mutated'].apply(lambda x: utils.python.letter_to_prop[x])
+    df['initial_prop'] = df['initial'].apply(lambda x: 'NA' if x not in up.aa_letters else up.letter_to_prop[x])
+    df['mutated_prop'] = df['mutated'].apply(lambda x: 'NA' if x not in up.aa_letters else up.letter_to_prop[x])
     ptable = pd.pivot_table(df,
                             values='count',
                             rows='initial_prop',
