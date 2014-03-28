@@ -73,7 +73,7 @@ class AminoAcid(object):
                 elif self.is_missense:
                     self.mutation_type = 'missense'
                 elif self.is_indel:
-                    self.mutation_type = 'indel'
+                    self.mutation_type = 'inframe indel'
                 elif self.is_nonsense_mutation:
                     self.mutation_type = 'nonsense'
                 elif self.is_frame_shift:

@@ -55,7 +55,7 @@ def generate_feature_matrix(recurrency_threshold,
                                     ['frame shift', 0],
                                     ['synonymous', 0],
                                     #['not valid', 0],
-                                    ['indel', 0],
+                                    ['inframe indel', 0],
                                     ['no protein', 0],
                                     ['lost stop', 0],
                                     ['splicing mutation', 0],
@@ -71,7 +71,7 @@ def generate_feature_matrix(recurrency_threshold,
                     # keep track of missense pos for recurrency
                 #    gene_pos_counter.setdefault(aa.pos, 0)
                 #    gene_pos_counter[aa.pos] += 1
-                if aa.mutation_type == 'indel' and tmp_df['mut_types'].iloc[i] != 'splicing mutation':
+                if aa.mutation_type == 'inframe indel' and tmp_df['mut_types'].iloc[i] != 'splicing mutation':
                     # keep track of missense pos for recurrency
                     identical_indel.setdefault(aa.hgvs_original, 0)
                     identical_indel[aa.hgvs_original] += 1
@@ -93,7 +93,7 @@ def generate_feature_matrix(recurrency_threshold,
             identical_cts = sum([cts for cts in identical_indel.values()
                                  if cts >= recurrency_threshold])
             #mut_type_ctr['missense'] -= recurrent_cts  # subtract off the recurrent missense
-            mut_type_ctr['indel'] -= identical_cts  # subtract off the recurrent missense
+            mut_type_ctr['inframe indel'] -= identical_cts  # subtract off the recurrent missense
             design_matrix.append([gene, recur_ct, identical_cts] + list(mut_type_ctr.values()))
     header = [['gene', 'recurrent missense', 'recurrent indel'] + list(mut_type_ctr)]
     logger.info('Finished creating feature matrix.')
