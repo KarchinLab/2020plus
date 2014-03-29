@@ -21,6 +21,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 def cnv_gain(db_path):
+    logger.info('Calculating CNV gain features . . .')
     conn = sqlite3.connect(db_path)  # open connection
     sql = ('SELECT x.gene as gene, SUM(x.cnv_indicator) as cnv_gain '
            'FROM( '
@@ -30,10 +31,12 @@ def cnv_gain(db_path):
            ') x GROUP BY x.gene')
     cnv_gain_df = psql.frame_query(sql, con=conn)
     conn.close()
+    logger.info('Finished calculating CNV gain features.')
     return cnv_gain_df
 
 
 def cnv_loss(db_path):
+    logger.info('Calculating CNV loss features . . .')
     conn = sqlite3.connect(db_path)  # open connection
     sql = ('SELECT x.gene as gene, SUM(x.cnv_indicator) as cnv_loss '
            ' FROM( '
@@ -43,6 +46,7 @@ def cnv_loss(db_path):
            ' ) x GROUP BY x.gene')
     cnv_loss_df = psql.frame_query(sql, con=conn)
     conn.close()
+    logger.info('Finished calculating CNV loss features.')
     return cnv_loss_df
 
 
