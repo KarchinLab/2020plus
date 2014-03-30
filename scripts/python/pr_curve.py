@@ -79,6 +79,10 @@ def parse_arguments():
     parser.add_argument('-pt', '--performance-type',
                         type=str, required=True,
                         help=help_str)
+    help_str = 'Figure title'
+    parser.add_argument('-ft', '--figure-title',
+                        type=str, default='Precision-Recall Curve',
+                        help=help_str)
     args = parser.parse_args()
     return vars(args)
 
@@ -107,7 +111,7 @@ def main(opts):
         new_name = orig_name + ' (AUC={0:.3f})'.format(all_pr_metrics[i][2])
         prec_df[new_name] = all_pr_metrics[i][0]
 
-    plot_pr_curve(prec_df, recall, opts['save_path'], 'Precision-Recall Curve')
+    plot_pr_curve(prec_df, recall, opts['save_path'], opts['figure_title'])
 
 
 if __name__ == "__main__":
