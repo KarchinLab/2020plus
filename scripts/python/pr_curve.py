@@ -40,12 +40,12 @@ def calc_all_pr_metrics(truth, perf_df, ptypes):
 
 
 def construct_performance_df(perf_files, header_names, names_list):
-    perf_df = None
+    perf_df = pd.DataFrame()
+    index_set = set()
     for i, f in enumerate(perf_files):
         tmp_df = pd.read_csv(f, sep='\t', index_col=0)
-        if not perf_df:
-            # initialize df if not yet
-            perf_df = pd.DataFrame(index=tmp_df.index)
+        perf_df = perf_df.reindex(list(set(tmp_df.index) | index_set))
+        index_set = set(tmp_df.index) | index_set
         perf_df[names_list[i]] = tmp_df[header_names[i]]
     return perf_df
 
