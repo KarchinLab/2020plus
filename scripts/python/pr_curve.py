@@ -30,10 +30,12 @@ def calc_pr_metrics(truth_df, score_df):
     return precision_array, recall_array, pr_auc
 
 
-def calc_all_pr_metrics(truth, perf_df):
+def calc_all_pr_metrics(truth, perf_df, ptypes):
     all_pr_metrics = []
-    for col in perf_df.columns:
-        all_pr_metrics.append(calc_pr_metrics(truth, perf_df[col]))
+    for i, col in enumerate(perf_df.columns):
+        myseries = perf_df[col].dropna()
+        all_pr_metrics.append(calc_pr_metrics(truth.ix[myseries.index],
+                                              ptypes[i] * myseries))
     return all_pr_metrics
 
 
@@ -72,6 +74,11 @@ def parse_arguments():
     parser.add_argument('-s', '--save-path',
                         type=str, required=True,
                         help='path to save pr curve')
+    help_str = ('comma separated list of "-1" and "+1", which indicate'
+                'performance metric is a p/q-value vs probability, respectively')
+    parser.add_argument('-pt', '--performance-type',
+                        type=str, required=True,
+                        help=help_str)
     args = parser.parse_args()
     return vars(args)
 
@@ -83,14 +90,16 @@ def main(opts):
     names_list = re.split('\s*,\s*', opts['names'])
     with open(opts['truth']) as handle:
         truth = [line.strip() for line in handle.readlines()]
+    perf_types = [int(x) for x in re.split('\s*,\s*', opts['performance_type'])]
 
     # construct all the performance columns to make pr curves
     perf_df = construct_performance_df(perf_files, header_names, names_list)
 
     # 1/0 series for being in "truth" list (i.e. training list)
     truth_df = perf_df.index.to_series().apply(lambda x: 1 if x in truth else 0)
+    truth_df = truth_df.reindex(perf_df.index)
 
-    all_pr_metrics = calc_all_pr_metrics(truth_df, perf_df)
+    all_pr_metrics = calc_all_pr_metrics(truth_df, perf_df, perf_types)
     recall = all_pr_metrics[0][1]
     prec_df = pd.DataFrame(index=recall)
     for i, m in enumerate(all_pr_metrics):
@@ -98,7 +107,7 @@ def main(opts):
         new_name = orig_name + ' (AUC={0:.3f})'.format(all_pr_metrics[i][2])
         prec_df[new_name] = all_pr_metrics[i][0]
 
-    plot_pr_curve(prec_df, recall, opts['save_path'], 'Precission-Recall Curve')
+    plot_pr_curve(prec_df, recall, opts['save_path'], 'Precision-Recall Curve')
 
 
 if __name__ == "__main__":
