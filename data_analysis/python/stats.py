@@ -8,9 +8,9 @@ import single_gene
 import recurrent_mutation
 import position_entropy
 import feature_matrix
-import tables.sample_name as sample_name
 import tables.cosmic_aa as cosmic_aa
 import tables.cosmic_genomic as cosmic_genomic
+import sample
 import missense
 import pandas.io.sql as psql
 import sqlite3
@@ -86,7 +86,7 @@ def main(recurrent, recurrent_max, db, classify_only):
 
         recurrent_mutation.main(conn)
 
-        sample_name.main(conn)  # info related to mutations for each sample
+        sample.main(conn)  # info related to mutations for each sample
 
         # handle DNA substitutions
         dna_substitutions.main(conn)

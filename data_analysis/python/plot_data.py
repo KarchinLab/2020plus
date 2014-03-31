@@ -24,8 +24,8 @@ def aa_missense_heatmap(file_path, save_path):
     the mutation transition probability. The y-axis represents the initial amino
     acid and the x-axis represents the mutated amino acid.
 
-    Parameters
-    ----------
+    **Parameters**
+
     file_path : str
         file to data containing missense mutation counts
     save_path : str
@@ -70,8 +70,8 @@ def nuc_substitution_heatmap(file_path, save_path, title=''):
     heatmap represents the mutation transition probability. The y-axis represents the
     initial nucleotide and the x-axis represents the mutated nucleotide.
 
-    Parameters
-    ----------
+    **Parameters**
+
     file_path : str
         file to data containing substiution mutation counts
     save_path : str
@@ -165,8 +165,8 @@ def mutation_types_barplot(mutation_cts,
     Currently synonymous, missense, nonsense, frame shift, and indels
     are plotted for amino acids in the bar graph.
 
-    Parameters
-    ----------
+    **Parameters**
+
     mutation_cts : pd.Series
         unique counts for mutation types
     save_path : str
@@ -345,3 +345,24 @@ def entropy_kde(df,
     plt.legend(loc='best')
     plt.savefig(save_path)
     plt.close()
+
+
+def sample_barplot(df, save_path, title='', xlabel='', ylabel=''):
+    logger.info('plotting number of mutation give sample size . . .')
+    df['category'] = ''
+    tmp_ix = df[df['MutationCounts']>100].index
+    df['category'].ix[tmp_ix] = '100+'
+    tmp_ix = df[(df['MutationCounts']>75) & (df['MutationCounts']<=100)].index
+    df['category'].ix[tmp_ix] = '75-100'
+    tmp_ix = df[(df['MutationCounts']>50) & (df['MutationCounts']<=75)].index
+    df['category'].ix[tmp_ix] = '50-75'
+    tmp_ix = df[(df['MutationCounts']>25) & (df['MutationCounts']<=50)].index
+    df['category'].ix[tmp_ix] = '25-50'
+    tmp_ix = df[(df['MutationCounts']>=1) & (df['MutationCounts']<=25)].index
+    df['category'].ix[tmp_ix] = '1-25'
+    category_cts = df.groupby('category').aggregate(sum)
+    myplt.barplot(category_cts,
+                  save_path,
+                  title=title,
+                  ylabel='Counts')
+    logger.info('Finished plotting number of mutation given sample size.')
