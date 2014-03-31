@@ -40,12 +40,15 @@ def _count_mutation_position(hgvs_iterable):
     return gene_pos_ctr, total_mutation_ctr
 
 
-def mutation_position_entropy(conn):
-    logger.info('Calculating mutation position entropy . . .')
-
-    # query database
+def query_amino_acid(conn):
     sql = "SELECT Gene, AminoAcid FROM cosmic_mutation"  # get everything from table
     df = psql.frame_query(sql, con=conn)
+    return df
+
+
+def mutation_position_entropy(df):
+    logger.info('Calculating mutation position entropy . . .')
+
     gene_to_indexes = df.groupby('Gene').groups
 
     # calculate missense position entropy by gene
@@ -69,12 +72,9 @@ def mutation_position_entropy(conn):
     return result_df
 
 
-def missense_position_entropy(conn):
+def missense_position_entropy(df):
     logger.info('Calculating missense position entropy . . .')
 
-    # query database
-    sql = "SELECT Gene, AminoAcid FROM cosmic_mutation"  # get everything from table
-    df = psql.frame_query(sql, con=conn)
     gene_to_indexes = df.groupby('Gene').groups
 
     # calculate missense position entropy by gene
@@ -103,8 +103,11 @@ def missense_position_entropy(conn):
 def main(conn):
     cfg_opts = _utils.get_output_config('position_entropy')
 
+    # query for amino acid mutations
+    aa_df = query_amino_acid(conn)
+
     # get information about missense position entropy
-    entropy_df = missense_position_entropy(conn)
+    entropy_df = missense_position_entropy(aa_df)
     entropy_df['true class'] = 0
     onco_mask = [True if gene in _utils.oncogene_set else False for gene in entropy_df.index]
     tsg_mask = [True if gene in _utils.tsg_set else False for gene in entropy_df.index]
@@ -126,7 +129,7 @@ def main(conn):
 
 
     # get information about mutation position entropy
-    entropy_df = mutation_position_entropy(conn)
+    entropy_df = mutation_position_entropy(aa_df)
     entropy_df['true class'] = 0
     onco_mask = [True if gene in _utils.oncogene_set else False for gene in entropy_df.index]
     tsg_mask = [True if gene in _utils.tsg_set else False for gene in entropy_df.index]
