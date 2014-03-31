@@ -14,17 +14,16 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def generate_feature_matrix(recurrency_threshold,
-                            conn,
+def generate_feature_matrix(df, recurrency_threshold,
                             recurrency_cap=float('inf')):
     """Generate a feature matrix potentially useful for classifying genes.
 
     **Parameters**
 
+    df : pd.DataFrame
+        data frame consisting of cosmic mutations from db
     recurrency_threshold : int
         minimum number of mutations to define recurrency
-    conn : db connection
-        database connection to mysql/sqlite
     recurrency_cap : int
         maximum number of mutations to define recurrency
 
@@ -36,7 +35,6 @@ def generate_feature_matrix(recurrency_threshold,
     logger.info('Creating design matrix . . .')
 
     # query database
-    df = psql.frame_query("SELECT * FROM cosmic_mutation", con=conn)  # get all
     mtypes = _utils.get_mutation_types(df['AminoAcid'],
                                        df['Nucleotide'])
     df['mut_types'] = mtypes  # add mutation types to SQL output
@@ -103,8 +101,11 @@ def generate_feature_matrix(recurrency_threshold,
 def main(recurrent, recurrent_max, conn):
     cfg_opts = _utils.get_output_config('feature_matrix')  # get config
 
+    # query db for all mutations
+    df = psql.frame_query("SELECT * FROM cosmic_mutation", con=conn)  # get all
+
     # generate features
-    feature_matrix = generate_feature_matrix(recurrent, conn,
+    feature_matrix = generate_feature_matrix(df, recurrent,
                                              recurrency_cap=recurrent_max)
 
     # save features
