@@ -11,6 +11,8 @@ logger = logging.getLogger(__name__)
 
 config_dir = 'config/'
 
+onco_label, tsg_label, other_label = 1, 2, 0
+
 def get_input_config(section):
     """Returns the config object to input.cfg."""
     cfg = ConfigParser.ConfigParser()
