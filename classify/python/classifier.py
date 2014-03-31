@@ -119,8 +119,11 @@ def rand_forest_pred(clf, data, result_path):
     tmp_df : pd.DataFrame
         random forest results (already saved to file)
     """
+    # perform prediction
     onco_prob, tsg_prob, other_prob = clf.kfold_prediction()
     true_class = clf.y
+
+    # save features/prediction results
     tmp_df = data.copy()
     tmp_df['oncogene probability'] = onco_prob
     tmp_df['tsg probability'] = tsg_prob
@@ -132,6 +135,7 @@ def rand_forest_pred(clf, data, result_path):
     tmp_df = tmp_df.fillna(0)
     tmp_df = tmp_df.sort(['oncogene probability', 'tsg probability'], ascending=False)
     tmp_df.to_csv(result_path, sep='\t')
+
     return tmp_df
 
 
@@ -217,11 +221,27 @@ def main(cli_opts):
     rrclf_tsg_precision, rrclf_tsg_recall, rrclf_tsg_mean_pr_auc = rrclf.get_tsg_pr_metrics()
 
     # run predictions using R's random forest
-    result_df = rand_forest_pred(rrclf, df,
-                                 result_path=_utils.clf_result_dir + cfg_opts['rrand_forest_pred'])
+    pred_results_path = _utils.clf_result_dir + cfg_opts['rrand_forest_pred']
+    result_df = rand_forest_pred(rrclf, df, result_path=pred_results_path)
+
+    # save a list of oncogenes/tsgs in separate files
+    pred_onco = result_df[result_df['predicted class']==_utils.onco_label].index.to_series()
+    novel_onco = result_df[(result_df['predicted class']==_utils.onco_label) & (result_df['true class']!=_utils.onco_label)].index.to_series()
+    pred_tsg = result_df[result_df['predicted class']==_utils.tsg_label].index.to_series()
+    novel_tsg = result_df[(result_df['predicted class']==_utils.tsg_label) & (result_df['true class']!=_utils.tsg_label)].index.to_series()
+    pred_onco.to_csv(_utils.clf_result_dir + cfg_opts['rrf_onco'], sep='\t', index=False, header=None)
+    novel_onco.to_csv(_utils.clf_result_dir + cfg_opts['rrf_novel_onco'], sep='\t', index=False, header=None)
+    pred_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rrf_tsg'], sep='\t', index=False, header=None)
+    novel_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rrf_novel_tsg'], sep='\t', index=False, header=None)
+    log_str = ('R Random forest: {0} ({1} novel) oncogenes, '
+               '{2} ({3} novel) tsg'.format(len(pred_onco), len(novel_onco),
+                                            len(pred_tsg), len(novel_tsg)))
+    logger.info(log_str)
+
+    # plot r random forest results
     plot_data.prob_scatter(result_df,
                            plot_path=_utils.clf_plot_dir + cfg_opts['rrand_forest_plot'],
-                           title='R\'s Random Forest Predictions')
+                           title='Sub-sampled Random Forest Predictions')
     plot_data.prob_kde(result_df,
                        col_name='oncogene probability',
                        save_path=_utils.clf_plot_dir + cfg_opts['onco_kde_rrand_forest'],
@@ -230,7 +250,7 @@ def main(cli_opts):
                        col_name='tsg probability',
                        save_path=_utils.clf_plot_dir + cfg_opts['tsg_kde_rrand_forest'],
                        title='Distribution of TSG Probabilities (sub-sampled random forest)')
-    logger.info('Finished running R\'s Random Forest')
+    logger.info('Finished running sub-sampled Random Forest')
 
     # scikit learns' random forest
     logger.info('Running Random forest . . .')
@@ -244,13 +264,28 @@ def main(cli_opts):
     # plot feature importance
     mean_df = rclf.mean_importance
     std_df = rclf.std_importance
-    plot_data.feature_importance_barplot(mean_df,
-                                         std_df,
-                                         _utils.clf_plot_dir + cfg_opts['feature_importance_plot'])
+    feat_path = _utils.clf_plot_dir + cfg_opts['feature_importance_plot']
+    plot_data.feature_importance_barplot(mean_df, std_df, feat_path)
 
     # predict using scikit learn's random forest
-    result_df = rand_forest_pred(rclf, df,
-                                 result_path=_utils.clf_result_dir + cfg_opts['rand_forest_pred'])
+    pred_path = _utils.clf_result_dir + cfg_opts['rand_forest_pred']
+    result_df = rand_forest_pred(rclf, df, result_path=pred_path)
+
+    # save a list of oncogenes/tsgs in separate files
+    pred_onco = result_df[result_df['predicted class']==_utils.onco_label].index.to_series()
+    novel_onco = result_df[(result_df['predicted class']==_utils.onco_label) & (result_df['true class']!=_utils.onco_label)].index.to_series()
+    pred_tsg = result_df[result_df['predicted class']==_utils.tsg_label].index.to_series()
+    novel_tsg = result_df[(result_df['predicted class']==_utils.tsg_label) & (result_df['true class']!=_utils.tsg_label)].index.to_series()
+    pred_onco.to_csv(_utils.clf_result_dir + cfg_opts['rf_onco'], sep='\t', index=False, header=None)
+    novel_onco.to_csv(_utils.clf_result_dir + cfg_opts['rf_novel_onco'], sep='\t', index=False, header=None)
+    pred_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rf_tsg'], sep='\t', index=False, header=None)
+    novel_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rf_novel_tsg'], sep='\t', index=False, header=None)
+    log_str = ('Random forest: {0} ({1} novel) oncogenes, '
+               '{2} ({3} novel) tsg'.format(len(pred_onco), len(novel_onco),
+                                            len(pred_tsg), len(novel_tsg)))
+    logger.info(log_str)
+
+    # plot random forest result
     plot_data.prob_scatter(result_df,
                            plot_path=_utils.clf_plot_dir + cfg_opts['rand_forest_plot'],
                            title='Random Forest Predictions')
@@ -297,8 +332,8 @@ def main(cli_opts):
     nbclf_onco_mean_tpr = np.mean(nbclf_onco_tpr, axis=0)
     dclf_onco_mean_tpr = np.mean(dclf_onco_tpr, axis=0)
     df = pd.DataFrame({random_forest_str: rclf_onco_mean_tpr,
-                       naive_bayes_str: nbclf_onco_mean_tpr,
                        rrandom_forest_str: rrclf_onco_mean_tpr,
+                       naive_bayes_str: nbclf_onco_mean_tpr,
                        dummy_str: dclf_onco_mean_tpr},
                       index=rclf_onco_fpr)
     line_style = {dummy_str: '--',
