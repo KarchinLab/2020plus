@@ -12,6 +12,9 @@ logger = logging.getLogger(__name__)
 config_dir = 'config/'
 
 onco_label, tsg_label, other_label = 1, 2, 0
+class_to_label = {'oncogene': onco_label,
+                  'tsg': tsg_label,
+                  'other': other_label}
 
 def get_input_config(section):
     """Returns the config object to input.cfg."""

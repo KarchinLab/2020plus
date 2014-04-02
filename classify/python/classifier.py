@@ -160,8 +160,8 @@ def main(cli_opts):
     # save result
     result_df.to_csv(_utils.clf_result_dir + cfg_opts['vogelstein_predictions'], sep='\t')
     # plot results
-    label_to_int = {'oncogene': 1, 'other': 0, 'tsg': 2}  # labels to integer code
-    result_df['true class'] = result_df['true class'].apply(lambda x: label_to_int[x])
+    #label_to_int = {'oncogene': 1, 'other': 0, 'tsg': 2}  # labels to integer code
+    result_df['true class'] = result_df['true class'].apply(lambda x: _utils.class_to_label[x])
     plot_data.prob_kde(result_df, 'oncogene score',
                        _utils.clf_plot_dir + cfg_opts['onco_score_kde'],
                        title='Distribution of Oncogene Scores',
