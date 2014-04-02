@@ -32,4 +32,6 @@ def max_shannon_entropy(n):
 
     max possible shannon entropy in bits
     """
-    return np.log2(n)
+    if n <= 0:
+        return 0.
+    return float(np.log2(n))

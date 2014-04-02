@@ -61,13 +61,20 @@ def mutation_position_entropy(df):
     for gene, indexes in gene_items:
         tmp_df = df.ix[indexes]
         myct, total_ct = _count_mutation_position(tmp_df['AminoAcid'])
-        pos_ct = np.array(myct.values())  # convert to numpy array
-        p = pos_ct / float(total_ct)  # normalize to a probability
-        mutation_entropy = mymath.shannon_entropy(p)  # calc shannon entropy
-        percent_mutation_entropy = mutation_entropy / mymath.max_shannon_entropy(total_ct)  # percent of max entropy
+        if total_ct > 0:
+            pos_ct = np.array(myct.values())  # convert to numpy array
+            p = pos_ct / float(total_ct)  # normalize to a probability
+            mutation_entropy = mymath.shannon_entropy(p)  # calc shannon entropy
+            if total_ct > 1:
+                max_ent = mymath.max_shannon_entropy(total_ct) if total_ct > 1 else 1
+                percent_mutation_entropy = mutation_entropy / max_ent  # percent of max entropy
+            else:
+                percent_mutation_entropy = 0
+        else:
+            mutation_entropy = 0
+            percent_mutation_entropy = 0
         result_df.ix[gene, 'mutation position entropy'] = mutation_entropy  # store result
         result_df.ix[gene, 'pct of uniform mutation entropy'] = percent_mutation_entropy  # store result
-
     logger.info('Finsihed calculating mutation position entropy.')
     return result_df
 
@@ -88,11 +95,19 @@ def missense_position_entropy(df):
         tmp_df = df.ix[indexes]
         # myct = recurrent_mutation.count_recurrent_by_number(tmp_df['AminoAcid'])
         myct, total_missense = recurrent_mutation._count_recurrent_missense(tmp_df['AminoAcid'])
-        pos_ct = np.array(myct.values())  # convert to numpy array
-        total_missense = np.sum(pos_ct)  # total number of missense
-        p = pos_ct / float(total_missense)  # normalize to a probability
-        missense_entropy = mymath.shannon_entropy(p)  # calc shannon entropy
-        percent_missense_entropy = missense_entropy / mymath.max_shannon_entropy(total_missense)
+        if total_missense > 0:
+            pos_ct = np.array(myct.values())  # convert to numpy array
+            total_missense = np.sum(pos_ct)  # total number of missense
+            p = pos_ct / float(total_missense)  # normalize to a probability
+            missense_entropy = mymath.shannon_entropy(p)  # calc shannon entropy
+            if total_missense > 1:
+                max_ent = mymath.max_shannon_entropy(total_missense)
+                percent_missense_entropy = missense_entropy / max_ent
+            else:
+                percent_missense_entropy = 0
+        else:
+            missense_entropy = 0
+            percent_missense_entropy = 0
         result_df.ix[gene, 'missense position entropy'] = missense_entropy  # store result
         result_df.ix[gene, 'pct of uniform missense entropy'] = percent_missense_entropy  # store result
 
