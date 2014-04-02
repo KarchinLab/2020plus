@@ -83,17 +83,17 @@ def retrieve_gene_features(conn, opts):
 def label_gene(gene,
                oncogene=True,
                tsg=True,
-               kind='vogelstein'):
-    """Label a gene according to Vogelstein's list of oncogenes
+               kind='onco_tsg'):
+    """Label a gene according to list of oncogenes
     and tsg."""
     # set integer representation of classes
-    other_num = 0
-    if oncogene: onco_num = 1
-    if tsg: tsg_num = 2 if oncogene else 1
+    other_num = _utils.other_label
+    if oncogene: onco_num = _utils.onco_label
+    if tsg: tsg_num = _utils.tsg_label if oncogene else _utils.onco_label
     smg_num = 1
 
     # classify genes
-    if kind == 'vogelstein':
+    if kind == 'onco_tsg':
         if gene in _utils.oncogene_set:
             return onco_num
         elif gene in _utils.tsg_set:
