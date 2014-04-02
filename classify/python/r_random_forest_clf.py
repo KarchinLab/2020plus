@@ -83,6 +83,7 @@ class MyClassifier(object):
                     label_counts[self.onco_num],
                     label_counts[self.tsg_num]]
         self.set_sample_size(sampsize)
+        ytrain.index = xtrain.index  # ensure indexes match
         xtrain['true_class'] = ytrain
         r_xtrain = com.convert_to_r_dataframe(xtrain)
         self.rf = self.rf_fit(r_xtrain, self.ntrees, self.sample_size)
