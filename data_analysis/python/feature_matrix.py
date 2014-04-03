@@ -37,6 +37,7 @@ def generate_feature_matrix(df, recurrency_threshold,
     # query database
     mtypes = _utils.get_mutation_types(df['AminoAcid'],
                                        df['Nucleotide'])
+    mtypes.index = df.index  # make sure indexes match the data frame
     df['mut_types'] = mtypes  # add mutation types to SQL output
     gene_to_indexes = df.groupby('Gene').groups
 
