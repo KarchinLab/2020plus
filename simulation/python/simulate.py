@@ -6,6 +6,7 @@ from classify.python.multinomial_nb_clf import MultinomialNaiveBayes
 from classify.python.vogelstein_classifier import VogelsteinClassifier
 import sklearn.metrics as metrics
 from bootstrap import Bootstrap
+from random_sample_names import RandomSampleNames
 import plot_data
 import pandas as pd
 import numpy as np
@@ -100,6 +101,12 @@ def retrieve_gene_features(opts):
     conn = sqlite3.connect(db_cfg['db'])
     additional_features = features.retrieve_gene_features(conn, opts)
     conn.close()
+
+    # drop mutation entropy features
+    additional_features = additional_features.drop('mutation position entropy', 1)
+    additional_features = additional_features.drop('missense position entropy', 1)
+    additional_features = additional_features.drop('pct of uniform mutation entropy', 1)
+    additional_features = additional_features.drop('pct of uniform missense entropy', 1)
     return additional_features
 
 
@@ -108,7 +115,6 @@ def merge_feature_df(count_features,
     # merge the features into one data frame
     all_features = pd.merge(count_features, additional_features,
                             how='left', on='gene')
-    all_features = all_features.set_index('gene')
 
     # re-order columns
     #cols = all_features.columns.tolist()
@@ -171,6 +177,8 @@ def calculate_stats(result_dict,
 def main(cli_opts):
     out_opts = _utils.get_output_config('feature_matrix')
     sim_opts = _utils.get_output_config('simulation')
+    champ_db_path = _utils.get_db_config('champ')['db']
+    conn = sqlite3.connect(champ_db_path)
 
     gene_df = retrieve_gene_features(cli_opts)  # features like gene length, etc
 
@@ -182,21 +190,34 @@ def main(cli_opts):
     for sample_rate in np.linspace(cli_opts['lower_sample_rate'],
                                    cli_opts['upper_sample_rate'],
                                    cli_opts['num_sample_rate']):
-        # bootstrap object for sub-sampling
-        bs = Bootstrap(df.copy(),
-                       subsample=sample_rate,
-                       num_samples=cli_opts['samples'])
+        if cli_opts['bootstrap']:
+            # bootstrap object for sub-sampling
+            dfg = Bootstrap(df.copy(),
+                            subsample=sample_rate,
+                            num_samples=cli_opts['samples'])
+        else:
+            # sample with out replacement of sample names
+            dfg = RandomSampleNames(sub_sample=sample_rate,
+                                    num_iter=cli_opts['samples'],
+                                    db_conn=conn)
 
         # iterate through each sampled data set
         r_sim_results, py_sim_results, nb_sim_results, v_sim_results = {}, {}, {}, {}
-        for i, bs_df in enumerate(bs.dataframe_generator()):
-            # create feature matrix for bootstrap sample
-            bs_df = features.process_features(bs_df, 0)
-            all_df = merge_feature_df(bs_df, gene_df)  # all feature info
-            all_df = all_df.drop('mutation position entropy', 1)
-            all_df = all_df.drop('missense position entropy', 1)
-            all_df = all_df.drop('pct of uniform mutation entropy', 1)
-            all_df = all_df.drop('pct of uniform missense entropy', 1)
+        for i, all_df in enumerate(dfg.dataframe_generator()):
+            if cli_opts['bootstrap']:
+                # create feature matrix for bootstrap sample
+                all_df = features.process_features(all_df, 0)
+
+            # merge gene features
+            all_df = merge_feature_df(all_df, gene_df)  # all feature info
+            all_df = all_df.set_index('gene')  # get rid of gene column
+
+            # drop entropy columns for bootstrap sampling
+            #if cli_opts['bootstrap']:
+                #all_df = all_df.drop('mutation position entropy', 1)
+                #all_df = all_df.drop('missense position entropy', 1)
+                #all_df = all_df.drop('pct of uniform mutation entropy', 1)
+                #all_df = all_df.drop('pct of uniform missense entropy', 1)
 
             # run classifiers on bootstrap sampled counts
             r_sim_results[i] = r_random_forest(all_df, cli_opts)

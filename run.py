@@ -205,6 +205,10 @@ if __name__ == '__main__':
     parser_simulation = subparser.add_parser('simulation',
                                              help='Run simulation scripts'
                                              ' in the simulation folder')
+    parser_simulation.add_argument('-b', '--bootstrap',
+                                   action='store_true',
+                                   default=False,
+                                   help='Perform bootstrap (sample with replacement) on mutations')
     parser_simulation.add_argument('-l', '--lower-sample-rate',
                                    type=float,
                                    action='store',
@@ -279,6 +283,21 @@ if __name__ == '__main__':
                                    default=False,
                                    help='Add gene expression to'
                                    ' features for simulation command')
+    help_msg = 'Number of CNV gains overlapping gene'
+    parser_simulation.add_argument('--cnv-gain',
+                                   action='store_true',
+                                   default=False,
+                                   help=help_msg)
+    help_msg = 'Number of CNV losses overlapping gene'
+    parser_simulation.add_argument('--cnv-loss',
+                                   action='store_true',
+                                   default=False,
+                                   help=help_msg)
+    help_msg = 'Ratio of CNV gain/CNV loss'
+    parser_simulation.add_argument('--cnv-ratio',
+                                   action='store_true',
+                                   default=False,
+                                   help=help_msg)
     parser_simulation.set_defaults(func=_simulation)
 
     # savedb sub-command
