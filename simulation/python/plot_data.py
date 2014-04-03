@@ -1,13 +1,13 @@
 import utils.python.plot as myplt
 
-def oncogene_precision_errorbar(panel_dict, save_path,
-                                title='', xlabel='', ylabel=''):
+def precision_errorbar(panel_dict, gene_type, save_path,
+                       title='', xlabel='', ylabel=''):
     path_holder = ''
     counter, dict_len,  = 0, len(panel_dict)
     for label, wp in panel_dict.iteritems():
         samprates = wp.items
-        mean_prec = wp.ix[:, 'oncogene', 'precision mean']
-        sem_prec = wp.ix[:, 'oncogene', 'precision sem']
+        mean_prec = wp.ix[:, gene_type, 'precision mean']
+        sem_prec = wp.ix[:, gene_type, 'precision sem']
         ci_prec = 1.96 * sem_prec  # confidence interval
 
         # figure out whether to save yet
@@ -21,14 +21,14 @@ def oncogene_precision_errorbar(panel_dict, save_path,
                         ylabel=ylabel, label=label)
 
 
-def oncogene_recall_errorbar(panel_dict, save_path,
-                             title='', xlabel='', ylabel=''):
+def recall_errorbar(panel_dict, gene_type, save_path,
+                    title='', xlabel='', ylabel=''):
     path_holder = ''
     counter, dict_len,  = 0, len(panel_dict)
     for label, wp in panel_dict.iteritems():
         samprates = wp.items
-        mean_rec = wp.ix[:, 'oncogene', 'recall mean']
-        sem_rec = wp.ix[:, 'oncogene', 'recall sem']
+        mean_rec = wp.ix[:, gene_type, 'recall mean']
+        sem_rec = wp.ix[:, gene_type, 'recall sem']
         ci_rec = 1.96 * sem_rec  # confidence interval
 
         # figure out whether to save yet
@@ -42,14 +42,14 @@ def oncogene_recall_errorbar(panel_dict, save_path,
                         ylabel=ylabel, label=label)
 
 
-def oncogene_pr_auc_errorbar(panel_dict, save_path,
-                             title='', xlabel='', ylabel=''):
+def pr_auc_errorbar(panel_dict, gene_type, save_path,
+                    title='', xlabel='', ylabel=''):
     path_holder = ''
     counter, dict_len,  = 0, len(panel_dict)
     for label, wp in panel_dict.iteritems():
         samprates = wp.items
-        mean_rec = wp.ix[:, 'oncogene', 'PR AUC mean']
-        sem_rec = wp.ix[:, 'oncogene', 'PR AUC sem']
+        mean_rec = wp.ix[:, gene_type, 'PR AUC mean']
+        sem_rec = wp.ix[:, gene_type, 'PR AUC sem']
         ci_rec = 1.96 * sem_rec  # confidence interval
 
         # figure out whether to save yet
@@ -63,14 +63,14 @@ def oncogene_pr_auc_errorbar(panel_dict, save_path,
                         ylabel=ylabel, label=label)
 
 
-def oncogene_roc_auc_errorbar(panel_dict, save_path,
-                              title='', xlabel='', ylabel=''):
+def roc_auc_errorbar(panel_dict, gene_type, save_path,
+                     title='', xlabel='', ylabel=''):
     path_holder = ''
     counter, dict_len,  = 0, len(panel_dict)
     for label, wp in panel_dict.iteritems():
         samprates = wp.items
-        mean_rec = wp.ix[:, 'oncogene', 'ROC AUC mean']
-        sem_rec = wp.ix[:, 'oncogene', 'ROC AUC sem']
+        mean_rec = wp.ix[:, gene_type, 'ROC AUC mean']
+        sem_rec = wp.ix[:, gene_type, 'ROC AUC sem']
         ci_rec = 1.96 * sem_rec  # confidence interval
 
         # figure out whether to save yet

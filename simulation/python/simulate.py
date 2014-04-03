@@ -212,13 +212,6 @@ def main(cli_opts):
             all_df = merge_feature_df(all_df, gene_df)  # all feature info
             all_df = all_df.set_index('gene')  # get rid of gene column
 
-            # drop entropy columns for bootstrap sampling
-            #if cli_opts['bootstrap']:
-                #all_df = all_df.drop('mutation position entropy', 1)
-                #all_df = all_df.drop('missense position entropy', 1)
-                #all_df = all_df.drop('pct of uniform mutation entropy', 1)
-                #all_df = all_df.drop('pct of uniform missense entropy', 1)
-
             # run classifiers on bootstrap sampled counts
             r_sim_results[i] = r_random_forest(all_df, cli_opts)
             py_sim_results[i] = py_random_forest(all_df, cli_opts)
@@ -236,39 +229,75 @@ def main(cli_opts):
         v_result[sample_rate] = tmp_results
 
     # aggregate results for plotting
-    results = {'sub-sampled random forest': pd.Panel(r_result),
+    results = {'20/20+ classifier': pd.Panel(r_result),
                'random forest': pd.Panel(py_result),
                'naive bayes': pd.Panel(nb_result)}
 
-    # plot results of simulations
-    tmp_save_path = _utils.sim_plot_dir + sim_opts['pr_plot']
-    plot_data.oncogene_pr_auc_errorbar(results,
-                                       save_path=tmp_save_path,
-                                       title='Oncogene PR AUC vs. DB size',
-                                       xlabel='Sample rate',
-                                       ylabel='PR AUC')
-    tmp_save_path = _utils.sim_plot_dir + sim_opts['roc_plot']
-    plot_data.oncogene_roc_auc_errorbar(results,
-                                        save_path=tmp_save_path,
-                                        title='Oncogene ROC AUC vs. DB size',
-                                        xlabel='Sample rate',
-                                        ylabel='ROC AUC')
+    # plot oncogene results of simulations
+    tmp_save_path = _utils.sim_plot_dir + sim_opts['onco_pr_plot']
+    plot_data.pr_auc_errorbar(results,
+                              gene_type='oncogene',
+                              save_path=tmp_save_path,
+                              title='Oncogene PR AUC vs. DB size',
+                              xlabel='Sample rate',
+                              ylabel='PR AUC')
+    tmp_save_path = _utils.sim_plot_dir + sim_opts['onco_roc_plot']
+    plot_data.roc_auc_errorbar(results,
+                               gene_type='oncogene',
+                               save_path=tmp_save_path,
+                               title='Oncogene ROC AUC vs. DB size',
+                               xlabel='Sample rate',
+                               ylabel='ROC AUC')
+
+    # plot TSG results of simulations
+    tmp_save_path = _utils.sim_plot_dir + sim_opts['tsg_pr_plot']
+    plot_data.pr_auc_errorbar(results,
+                              gene_type='tsg',
+                              save_path=tmp_save_path,
+                              title='TSG PR AUC vs. DB size',
+                              xlabel='Sample rate',
+                              ylabel='PR AUC')
+    tmp_save_path = _utils.sim_plot_dir + sim_opts['tsg_roc_plot']
+    plot_data.roc_auc_errorbar(results,
+                               gene_type='tsg',
+                               save_path=tmp_save_path,
+                               title='TSG ROC AUC vs. DB size',
+                               xlabel='Sample rate',
+                               ylabel='ROC AUC')
 
     # since the vogelstein classifier doesn't predict probabilities
     # I can't generate a PR or ROC curve. However, I can evaluate
     # metrics like precision and recall
-    results['20/20 classifier'] = pd.Panel(v_result)
+    results['20/20 rule'] = pd.Panel(v_result)
 
-    tmp_save_path = _utils.sim_plot_dir + sim_opts['precision_plot']
-    plot_data.oncogene_precision_errorbar(results,
-                                          save_path=tmp_save_path,
-                                          title='Oncogene Precision vs. DB size',
-                                          xlabel='Sample rate',
-                                          ylabel='Precision')
-    tmp_save_path = _utils.sim_plot_dir + sim_opts['recall_plot']
-    plot_data.oncogene_recall_errorbar(results,
-                                       save_path=tmp_save_path,
-                                       title='Oncogene Recall vs. DB size',
-                                       xlabel='Sample rate',
-                                       ylabel='Recall')
+    # plot oncogene precision/recall
+    tmp_save_path = _utils.sim_plot_dir + sim_opts['onco_precision_plot']
+    plot_data.precision_errorbar(results,
+                                 gene_type='oncogene',
+                                 save_path=tmp_save_path,
+                                 title='Oncogene Precision vs. DB size',
+                                 xlabel='Sample rate',
+                                 ylabel='Precision')
+    tmp_save_path = _utils.sim_plot_dir + sim_opts['onco_recall_plot']
+    plot_data.recall_errorbar(results,
+                              gene_type='oncogene',
+                              save_path=tmp_save_path,
+                              title='Oncogene Recall vs. DB size',
+                              xlabel='Sample rate',
+                              ylabel='Recall')
 
+    # plot TSG precision/recall
+    tmp_save_path = _utils.sim_plot_dir + sim_opts['tsg_precision_plot']
+    plot_data.precision_errorbar(results,
+                                 gene_type='tsg',
+                                 save_path=tmp_save_path,
+                                 title='TSG Precision vs. DB size',
+                                 xlabel='Sample rate',
+                                 ylabel='Precision')
+    tmp_save_path = _utils.sim_plot_dir + sim_opts['tsg_recall_plot']
+    plot_data.recall_errorbar(results,
+                              gene_type='tsg',
+                              save_path=tmp_save_path,
+                              title='TSG Recall vs. DB size',
+                              xlabel='Sample rate',
+                              ylabel='Recall')
