@@ -11,6 +11,8 @@ import simulation.python.simulate
 import features.python.features
 import savedb.python.gene_tsv
 import savedb.python.gene_features
+import savedb.python.gene_maf
+import savedb.python.merge_mutations
 import utils.python.util as _utils
 
 # define exit status
@@ -104,6 +106,12 @@ def _savedb():
     savedb.python.gene_tsv.main(args.hypermutator,
                                 args.input,
                                 args.output)  # populate the nucleotide table
+    if args.maf:
+        # include MAF file if provided
+        savedb.python.gene_maf.main(args.maf,
+                                    args.output,
+                                    args.hypermutator)
+        # savedb.python.merge_mutations.main(args.output)
 
 
 def _features():
@@ -317,13 +325,17 @@ if __name__ == '__main__':
     parser_savedb.add_argument('-i', '--input',
                                type=str, default='',
                                help=help_str)
-    parser_savedb.add_argument('-m', '--hypermutator',
+    parser_savedb.add_argument('-hm', '--hypermutator',
                                type=int,
                                action='store',
                                default=500,
                                help='Number of mutations to define a sample '
                                'as a hypermutator. Hypermutator samples are filtered '
                                ' from further analysis. (default: 500)')
+    parser_savedb.add_argument('-m', '--maf',
+                               type=str, default='',
+                               help='MAF file to augment mutations '
+                               'found in COSMIC')
 
     # features sub-command
     help_string = ('Generate the features used in classification.'
