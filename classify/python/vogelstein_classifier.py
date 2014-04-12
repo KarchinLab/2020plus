@@ -23,7 +23,8 @@ class VogelsteinClassifier(object):
                  kind='vogelstein',
                  min_count=0,
                  tsg_min=7,
-                 onco_min=10):
+                 onco_min=10,
+                 db_size=404863):  # db size is as reported from Cancer Genome Landscapes paper
         # check valid percentage
         if not 0 < onco_threshold < 1:
             raise ValueError("Oncogene threshold is invalid")
@@ -31,6 +32,11 @@ class VogelsteinClassifier(object):
             raise ValueError("TSG threshold is invalid")
 
         self.kind = kind  # either 'vogelstein' or 'min'
+
+        # set parameters as reported in Cancer genome landscapes paper
+        self.db_size = db_size
+        self.db_tsg_min = tsg_min
+        self.db_onco_min = onco_min
 
         # assign percentage thresholds
         self.onco_threshold = onco_threshold
@@ -46,8 +52,19 @@ class VogelsteinClassifier(object):
         self.tsg_label = "tsg"
         self.other_label = "other"
 
-    def predict_list(self, input_list, kind='count'):
+    def predict_list(self, input_list,
+                     kind='count', scale_type='linear'):
         """Predict a list of inputs as either oncogene/tsg/other."""
+        # scale count thresholds
+        all_cts = sum([x[-1] for x in input_list])
+        if scale_type:
+            self.tsg_min = self.db_tsg_min * float(all_cts)/self.db_size
+            self.onco_min = self.db_onco_min * float(all_cts)/self.db_size
+        else:
+            self.tsg_min = self.db_tsg_min
+            self.onco_min = self.db_onco_min
+
+        # perform prediction
         gene_class_list = []
         if kind == 'count':
             for recur_ct, del_ct, total_ct in input_list:
