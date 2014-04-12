@@ -27,8 +27,8 @@ def count_missense(conn, table):
     # perform query
     if table == 'cosmic_aa':
         sql = 'SELECT aachange, occurrences FROM cosmic_aa'
-    elif table == 'cosmic_mutation':
-        sql = 'SELECT AminoAcid FROM cosmic_mutation'
+    elif table == 'mutation':
+        sql = 'SELECT Protein_Change as AminoAcid FROM mutation'
     df = psql.frame_query(sql, con=conn)
 
     # count amino acid missense mutations
@@ -38,11 +38,11 @@ def count_missense(conn, table):
         if table == 'cosmic_aa' :
             aa = AminoAcid(hgvs=row['aachange'],
                            occurrence=row['occurrences'])
-        elif table == 'cosmic_mutation':
+        elif table == 'mutation':
             aa = AminoAcid(hgvs=row['AminoAcid'])
 
         # count amino acid
-        if aa.is_missense and aa.is_valid and not aa.is_missing_info:
+        if aa.is_valid and aa.is_missense and not aa.is_missing_info:
             aa_change_counter.setdefault((aa.initial, aa.mutated), 0)
             aa_change_counter[(aa.initial, aa.mutated)] += aa.occurrence
     logger.info('Finished counting amino acid changes.')

@@ -36,9 +36,11 @@ def generate_feature_matrix(df, recurrency_threshold,
 
     # query database
     mtypes = _utils.get_mutation_types(df['AminoAcid'],
-                                       df['Nucleotide'])
+                                       df['Nucleotide'],
+                                       known_type=df['Variant_Classification'])
     mtypes.index = df.index  # make sure indexes match the data frame
     df['mut_types'] = mtypes  # add mutation types to SQL output
+    # gene_to_indexes = df.groupby('Gene').groups
     gene_to_indexes = df.groupby('Gene').groups
 
     # aggregate info
@@ -103,7 +105,8 @@ def main(recurrent, recurrent_max, conn):
     cfg_opts = _utils.get_output_config('feature_matrix')  # get config
 
     # query db for all mutations
-    df = psql.frame_query("SELECT * FROM cosmic_mutation", con=conn)  # get all
+    # df = psql.frame_query("SELECT * FROM cosmic_mutation", con=conn)  # get all
+    df = psql.frame_query("SELECT Gene, DNA_Change as Nucleotide, Protein_Change as AminoAcid, Variant_Classification FROM mutation", con=conn)  # get all
 
     # generate features
     feature_matrix = generate_feature_matrix(df, recurrent,

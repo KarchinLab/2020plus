@@ -84,7 +84,7 @@ def unique_missense_positions(conn):
     logger.info('Calculating unique missense positions. . .')
 
     # query database
-    sql = "SELECT Gene, AminoAcid FROM cosmic_mutation"  # get everything from table
+    sql = "SELECT Gene, AminoAcid FROM mutation"  # get everything from table
     df = psql.frame_query(sql, con=conn)
     gene_to_indexes = df.groupby('Gene').groups
 
@@ -107,7 +107,7 @@ def count_recurrent(conn):
     logger.info('Counting the number of recurrent positions . . .')
 
     # query database
-    sql = "SELECT Gene, AminoAcid FROM cosmic_mutation"  # get everything from table
+    sql = "SELECT Gene, Protein_Change as AminoAcid FROM mutation"  # get everything from table
     df = psql.frame_query(sql, con=conn)
     gene_to_indexes = df.groupby('Gene').groups
 

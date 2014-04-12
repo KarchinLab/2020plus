@@ -41,7 +41,7 @@ def _count_mutation_position(hgvs_iterable):
 
 
 def query_amino_acid(conn):
-    sql = "SELECT Gene, AminoAcid FROM cosmic_mutation"  # get everything from table
+    sql = "SELECT Gene, Protein_Change as AminoAcid FROM mutation"  # get everything from table
     df = psql.frame_query(sql, con=conn)
     return df
 

@@ -15,16 +15,20 @@ logger = logging.getLogger(__name__)  # module logger
 def count_amino_acids(conn):
     """Count the amino acid mutation types (missense, indel, etc.).
     """
-    df = psql.frame_query("""SELECT * FROM cosmic_mutation""", con=conn)
+    df = psql.frame_query("SELECT Protein_Change as AminoAcid, "
+                          "DNA_Change as Nucleotide, "
+                          "Variant_Classification "
+                          "FROM mutation", con=conn)
     unique_cts = _utils.count_mutation_types(df['AminoAcid'],
-                                             df['Nucleotide'])
+                                             df['Nucleotide'],
+                                             known_type=df['Variant_Classification'])
     return unique_cts
 
 
 def count_nucleotides(conn):
     """Count the nucleotide mutation types (substitution, indels)
     """
-    sql = "SELECT Nucleotide FROM cosmic_mutation"
+    sql = "SELECT DNA_Change as Nucleotide FROM mutation"
     df = psql.frame_query(sql, con=conn)
     unique_cts = _utils.count_mutation_types(df['Nucleotide'], kind='nucleotide')
     return unique_cts
@@ -49,14 +53,16 @@ def count_oncogenes(conn):
 
     # prepare sql statement
     oncogenes = _utils.oncogene_list
-    sql = "SELECT * FROM cosmic_mutation WHERE Gene in " + str(oncogenes)
+    sql = ("SELECT Gene, Protein_Change as AminoAcid, DNA_Change as Nucleotide, Variant_Classification "
+           "FROM mutation WHERE Gene in " + str(oncogenes))
     logger.debug('Oncogene SQL statement: ' + sql)
 
     df = psql.frame_query(sql, con=conn)  # execute query
 
     # count mutation types
     aa_counts = _utils.count_mutation_types(df['AminoAcid'],
-                                            df['Nucleotide'])
+                                            df['Nucleotide'],
+                                            known_type=df['Variant_Classification'])
     nuc_counts = _utils.count_mutation_types(df['Nucleotide'],
                                              kind='nucleotide')
     logger.info('Finished counting oncogene mutation types.')
@@ -82,14 +88,16 @@ def count_tsg(conn):
 
     # prepare sql statement
     tsgs = _utils.tsg_list
-    sql = "SELECT * FROM cosmic_mutation WHERE Gene in " + str(tsgs)
+    sql = ("SELECT Gene, DNA_Change as Nucleotide, Protein_Change as AminoAcid, Variant_Classification "
+           "FROM mutation WHERE Gene in " + str(tsgs))
     logger.debug('Oncogene SQL statement: ' + sql)
 
     df = psql.frame_query(sql, con=conn)  # execute query
 
     # count mutation types
     aa_counts = _utils.count_mutation_types(df['AminoAcid'],
-                                            df['Nucleotide'])
+                                            df['Nucleotide'],
+                                            known_type=df['Variant_Classification'])
     nuc_counts = _utils.count_mutation_types(df['Nucleotide'],
                                              kind='nucleotide')
     logger.info('Finished counting tumor suppressor gene mutation types.')

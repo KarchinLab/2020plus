@@ -28,7 +28,12 @@ class AminoAcid(object):
             # catches cases where wierd non-string input is used
             self.is_valid = False
             self.set_mutation_type()
-            print type(hgvs)
+        elif 'P.' not in hgvs.upper():
+            # don't use mutations without "p." syntax
+            # many cases, these are "junk" and clearly
+            # do not represent a mutation
+            self.is_valid = False
+            self.set_mutation_type()
         else:
             # expected case of string
             self.hgvs_original = hgvs

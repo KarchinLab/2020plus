@@ -58,6 +58,7 @@ def save_db(maf_path, db_path, hypermutator_count):
     # filter hypermutator samples
     filter_hypermutators(hypermutator_count, conn, db_path)
 
+
 def main(maf_path, db_path, hypermutator_count):
     db_opts = _utils.get_db_config('champ')
     out_db = db_opts['db']

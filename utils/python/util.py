@@ -219,6 +219,7 @@ def classify_gene(gene):
 
 def get_mutation_types(mut_iterable,
                        dna_series=None,
+                       known_type=None,
                        kind='amino acid'):
     """Classify each protein HGVS mutation as a certain type.
 
@@ -230,6 +231,8 @@ def get_mutation_types(mut_iterable,
     dna_series : pd.Series
         optional, only required to find splice mutations when a list of
         amino acids is given for mut_iterable
+    known_type : pd.Series
+        contains list of mutation types
 
     **Returns**
 
@@ -247,6 +250,8 @@ def get_mutation_types(mut_iterable,
             if nuc.is_splicing_mutation:
                 # check if mutation in splice site
                 mut_type.append('splicing mutation')
+            elif known_type is not None and known_type.iloc[i]=='Splice_Site':
+                mut_type.append('splicing mutation')
             else:
                 # if not in splice site, just add
                 mut_type.append(aa.mutation_type)
@@ -258,7 +263,7 @@ def get_mutation_types(mut_iterable,
     return mut_type_series
 
 
-def count_mutation_types(hgvs_iterable, dna_series=None, kind='amino acid'):
+def count_mutation_types(hgvs_iterable, dna_series=None, known_type=None, kind='amino acid'):
     """Count mutation types from HGVS protein strings (missense, indels, etc.)
     and DNA strings (substitutions, indels).
 
@@ -269,6 +274,8 @@ def count_mutation_types(hgvs_iterable, dna_series=None, kind='amino acid'):
     dna_iterable : iterable
         contains hgvs DNA mutations to classify splice mutations
         for amino acid. Only required if hgvs_iterable is AA mutations.
+    known_type : pd.Series
+        known mutation consequence type
 
     **Returns**
 
@@ -277,6 +284,7 @@ def count_mutation_types(hgvs_iterable, dna_series=None, kind='amino acid'):
     """
     mut_type_series = get_mutation_types(hgvs_iterable,
                                          dna_series=dna_series,
+                                         known_type=known_type,
                                          kind=kind)  # get mutation types
     unique_cts = mut_type_series.value_counts() # count mutation types
     return unique_cts
@@ -342,7 +350,7 @@ def drop_table(tbl_name,
     """
     if not genes_db_path:
         # if db not specified, use config file
-        genes_db_path = get_db_config('genes')['db']
+        genes_db_path = get_db_config('champ')['db']
     if kind == 'sqlite':
         with sqlite3.connect(genes_db_path) as cur:
             sql = "DROP TABLE IF EXISTS %s" % tbl_name
