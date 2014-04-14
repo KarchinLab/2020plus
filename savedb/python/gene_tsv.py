@@ -23,6 +23,15 @@ import pandas.io.sql as psql
 import sqlite3
 import string
 import os
+import re
+
+
+def parse_sample_name(sample):
+    if sample.startswith('TCGA'):
+        sample = re.sub('-[A-Za-z0-9]+$', '', sample)
+        return sample
+    else:
+        return sample
 
 
 def skip_header(file_handle, skip_rows=8):
@@ -159,7 +168,7 @@ def filter_hypermutators(hypermutator_count, conn, db_path=''):
 
 
 def save_db(hypermutator_ct, gene_tsv_path,
-            cnv_tsv_path, genedb_path):
+            cnv_tsv_path, cell_line_path, genedb_path):
     """Saves tab delim gene mutation file to a sqlite3 db.
 
     NOTE: Uses pandas to store all contents in memory and then
@@ -173,11 +182,25 @@ def save_db(hypermutator_ct, gene_tsv_path,
         path to tab delim file containing all gene mutations
     cnv_tsv_path : str
         path to tab delim file containing cosmic cnv mutations
+    cell_line_path : str
+        path to cosmic cell line project file
     genedb_pah : str
         path to sqlite3 db
     """
-    df = pd.read_csv(gene_tsv_path, sep='\t')  # read data
+    # read data
+    df = pd.read_csv(gene_tsv_path, sep='\t')
     cnv_df = pd.read_csv(cnv_tsv_path, sep=r'\t|:|\.\.')
+
+    # filter out cell line samples
+    if cell_line_path:
+        cell_line_df = pd.read_csv(cell_line_path, sep='\t')
+        cell_line_sample_names = set(cell_line_df['Sample name'].tolist())
+    else:
+        cell_line_sample_names = set([])
+    df = df[df['SampleName'].apply(lambda x: x not in cell_line_sample_names)]
+
+    # fix sample names so they match with external data
+    df['SampleName'] = df['SampleName'].apply(parse_sample_name)
 
     # fix types that pandas gets wrong
     # see http://pandas.pydata.org/pandas-docs/dev/gotchas.html
@@ -219,7 +242,7 @@ def save_db(hypermutator_ct, gene_tsv_path,
     conn.close()  # close
 
 
-def main(hypermutator_count, gene_dir, db_path):
+def main(hypermutator_count, cell_line_path, gene_dir, db_path):
     """Concatenates all the mutation data from tab delmited files in
     the cosmic directory. Next, saves the results to a sqlite db.
 
@@ -252,4 +275,5 @@ def main(hypermutator_count, gene_dir, db_path):
     out_db = db_path if db_path else out_db
 
     # save info into a txt file and sqlite3 database
-    save_db(hypermutator_count, out_path, cnv_path, out_db)
+    save_db(hypermutator_count, out_path, cnv_path,
+            cell_line_path, out_db)
