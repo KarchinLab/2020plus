@@ -1,11 +1,26 @@
 import pandas as pd
+import numpy as np
 import re
 import argparse
 
 
+def fix_hgvs(hgvs_string):
+    if hgvs_string is np.nan:
+        # handle na values
+        return np.nan
+    if 'in_frame_ins' in hgvs_string.lower():
+        hgvs_string = re.sub('in_frame_ins', 'ins', hgvs_string,
+                             flags=re.IGNORECASE)
+    elif 'in_frame_del' in hgvs_string.lower():
+        hgvs_string = re.sub('in_frame_del', 'del', hgvs_string,
+                             flags=re.IGNORECASE)
+    return hgvs_string
+
+
 def parse_tumor_sample(tsample):
     if tsample.startswith('TCGA'):
-        return tsample[:-1]
+        tsample = re.sub('-[A-Za-z0-9]+$', '', tsample)
+        return tsample
     else:
         return tsample
 
@@ -52,6 +67,7 @@ def main(opts):
                      }
     davoli_df['Mutation_Type'] = davoli_df['Mutation_Type'].apply(lambda x: type2varClass[x])
     davoli_df['Tumor_Sample'] = davoli_df['Tumor_Sample'].apply(parse_tumor_sample)
+    davoli_df['Protein_Change'] = davoli_df['Protein_Change'].apply(fix_hgvs)
 
     # fix column name of ref/new base
     davoli_df.rename(columns={'Gene': 'Gene_Symbol',
