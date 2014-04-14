@@ -53,8 +53,8 @@ class RandomForest(GenericClassifier):
         # setup classifier
         self.clf = RandomForestClassifier(n_estimators=ntrees)
 
-    def _update_metrics(self, y_true, y_pred):
-        super(RandomForest, self)._update_metrics(y_true, y_pred)
+    def _update_metrics(self, y_true, y_pred, onco_prob, tsg_prob):
+        super(RandomForest, self)._update_metrics(y_true, y_pred, onco_prob, tsg_prob)
 
         # evaluate feature importance for random forest
         self.feature_importance.append(self.clf.feature_importances_)

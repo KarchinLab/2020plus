@@ -29,7 +29,9 @@ def r_random_forest(df, opts):
                             'ROC AUC': [rrclf.onco_mean_roc_auc,
                                         rrclf.tsg_mean_roc_auc],
                             'PR AUC': [rrclf.onco_mean_pr_auc,
-                                       rrclf.tsg_mean_pr_auc]},
+                                       rrclf.tsg_mean_pr_auc],
+                            'count': [rrclf.onco_gene_count,
+                                      rrclf.tsg_gene_count]},
                            index=['oncogene', 'tsg'])
     return results
 
@@ -47,7 +49,9 @@ def py_random_forest(df, opts):
                             'ROC AUC': [rclf.onco_mean_roc_auc,
                                         rclf.tsg_mean_roc_auc],
                             'PR AUC': [rclf.onco_mean_pr_auc,
-                                       rclf.tsg_mean_pr_auc]},
+                                       rclf.tsg_mean_pr_auc],
+                            'count': [rclf.onco_gene_count,
+                                      rclf.tsg_gene_count]},
                            index=['oncogene', 'tsg'])
     return results
 
@@ -62,7 +66,9 @@ def naive_bayes(df, opts):
                             'ROC AUC': [nbclf.onco_mean_roc_auc,
                                         nbclf.tsg_mean_roc_auc],
                             'PR AUC': [nbclf.onco_mean_pr_auc,
-                                       nbclf.tsg_mean_pr_auc]},
+                                       nbclf.tsg_mean_pr_auc],
+                            'count': [nbclf.onco_gene_count,
+                                      nbclf.tsg_gene_count]},
                            index=['oncogene', 'tsg'])
     return results
 
@@ -87,7 +93,9 @@ def vogelstein_classification(df, opts):
     results = pd.DataFrame({'precision': [onco_prec[1],
                                           tsg_prec[1]],
                             'recall': [onco_recall[1],
-                                       tsg_recall[1]]},
+                                       tsg_recall[1]],
+                            'count': [np.sum(y_pred_onco),
+                                      np.sum(y_pred_tsg)]},
                            index=['oncogene', 'tsg'])
 
     return results
@@ -149,7 +157,7 @@ def calculate_sem(wp, columns):
 
 
 def calculate_stats(result_dict,
-                    metrics=['precision', 'recall', 'ROC AUC', 'PR AUC']):
+                    metrics=['precision', 'recall', 'ROC AUC', 'PR AUC', 'count']):
     """Computes mean and sem of classification performance metrics.
 
     **Parameters**
@@ -225,7 +233,7 @@ def main(cli_opts):
         py_result[sample_rate] = tmp_results
         tmp_results = calculate_stats(nb_sim_results)
         nb_result[sample_rate] = tmp_results
-        tmp_results = calculate_stats(v_sim_results, ['precision', 'recall'])
+        tmp_results = calculate_stats(v_sim_results, ['precision', 'recall', 'count'])
         v_result[sample_rate] = tmp_results
 
     # aggregate results for plotting
@@ -301,3 +309,22 @@ def main(cli_opts):
                               title='TSG Recall vs. DB size',
                               xlabel='Sample rate',
                               ylabel='Recall')
+
+    # delete naive bayes since it predicts a lot of genes
+    del results['naive bayes']
+
+    # plot number of predicted genes
+    tmp_save_path = _utils.sim_plot_dir + sim_opts['onco_count_plot']
+    plot_data.count_errorbar(results,
+                             gene_type='oncogene',
+                             save_path=tmp_save_path,
+                             title='Number of predicted oncogenes vs. DB size',
+                             xlabel='Sample rate',
+                             ylabel='Number of predicted oncogenes')
+    tmp_save_path = _utils.sim_plot_dir + sim_opts['tsg_count_plot']
+    plot_data.count_errorbar(results,
+                             gene_type='tsg',
+                             save_path=tmp_save_path,
+                             title='Number of predicted TSG vs. DB size',
+                             xlabel='Sample rate',
+                             ylabel='Number of predicted TSG')

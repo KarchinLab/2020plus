@@ -44,6 +44,7 @@ class GenericClassifier(object):
         self.onco_f1_score = np.zeros(self.total_iter)
         self.onco_precision = np.zeros(self.total_iter)
         self.onco_recall = np.zeros(self.total_iter)
+        self.onco_gene_count = np.zeros(self.total_iter)
         self.onco_tpr_array = np.zeros((self.total_iter, num_points))
         self.onco_fpr_array = np.linspace(0, 1, num_points)
         self.onco_precision_array = np.zeros((self.total_iter, num_points))
@@ -54,6 +55,7 @@ class GenericClassifier(object):
         self.tsg_f1_score = np.zeros(self.total_iter)
         self.tsg_precision = np.zeros(self.total_iter)
         self.tsg_recall = np.zeros(self.total_iter)
+        self.tsg_gene_count = np.zeros(self.total_iter)
         self.tsg_tpr_array = np.zeros((self.total_iter, num_points))
         self.tsg_fpr_array = np.linspace(0, 1, num_points)
         self.tsg_precision_array = np.zeros((self.total_iter, num_points))
@@ -63,6 +65,7 @@ class GenericClassifier(object):
         self.f1_score = np.zeros(self.total_iter)
         self.precision = np.zeros(self.total_iter)
         self.recall = np.zeros(self.total_iter)
+        self.cancer_gene_count = np.zeros(self.total_iter)
 
     def set_total_iter(self, myiterations):
         self.total_iter = myiterations
@@ -73,9 +76,12 @@ class GenericClassifier(object):
         filtered_df = df[row_sums > self.min_count]
         return filtered_df
 
-    def _update_metrics(self, y_true, y_pred):
+    def _update_metrics(self, y_true, y_pred,
+                        onco_prob, tsg_prob):
         prec, recall, fscore, support = metrics.precision_recall_fscore_support(y_true, y_pred,
                                                                                 average='macro')
+        cancer_gene_pred = ((onco_prob + tsg_prob)>.5).astype(int)
+        self.cancer_gene_count[self.num_pred] = np.sum(cancer_gene_pred)
         self.precision[self.num_pred] = prec
         self.recall[self.num_pred] = recall
         self.f1_score[self.num_pred] = fscore
@@ -87,6 +93,7 @@ class GenericClassifier(object):
         #self.confusion_matrix += tmp_confusion_matrix
 
         # compute metrics for classification
+        self.onco_gene_count[self.num_pred] = sum(y_pred)
         prec, recall, fscore, support = metrics.precision_recall_fscore_support(y_true, y_pred)
         self.onco_precision[self.num_pred] = prec[self.onco_num]
         self.onco_recall[self.num_pred] = recall[self.onco_num]
@@ -113,6 +120,7 @@ class GenericClassifier(object):
         #self.confusion_matrix += tmp_confusion_matrix
 
         # compute metrics for classification
+        self.tsg_gene_count[self.num_pred] = sum(y_pred)
         prec, recall, fscore, support = metrics.precision_recall_fscore_support(y_true, y_pred)
         tsg_col = 1  # column for metrics relate to tsg
         self.tsg_precision[self.num_pred] = prec[tsg_col]
@@ -224,7 +232,9 @@ class GenericClassifier(object):
                                      tsg_pred,
                                      tsg_prob)
             self._update_metrics(self.y,
-                                 overall_pred)
+                                 overall_pred,
+                                 onco_prob,
+                                 tsg_prob)
             self.num_pred += 1
 
         self._on_finish()  # update info for kfold cross-validation

@@ -13,8 +13,8 @@ class RandomSampleNames(object):
     def __init__(self, sub_sample,
                  num_iter,
                  db_conn,
-                 table_name='cosmic_mutation',
-                 col_name='SampleName'):
+                 table_name='mutation',
+                 col_name='Tumor_Sample'):
         self.db_conn = db_conn
         self.set_sub_sample(sub_sample)
         self.set_num_iter(num_iter)
@@ -97,7 +97,11 @@ class RandomSampleNames(object):
         if df:
             self.df = df
         else:
-            sql = "SELECT * FROM {0}".format(self.TABLE_NAME)
+            sql = ("SELECT Gene, Protein_Change as AminoAcid, "
+                   "       DNA_Change as Nucleotide, "
+                   "       Variant_Classification, "
+                   "       Tumor_Sample "
+                   "FROM {0}".format(self.TABLE_NAME))
             self.df = psql.frame_query(sql, con=self.db_conn)
         self.sample_names = self.df[self.COLUMN_NAME].unique()
         self.num_sample_names = len(self.sample_names)
