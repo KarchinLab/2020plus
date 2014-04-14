@@ -25,7 +25,9 @@ def generate_feature_matrix(df, recurrency_threshold,
     recurrency_threshold : int
         minimum number of mutations to define recurrency
     recurrency_cap : int
-        maximum number of mutations to define recurrency
+        maximum number of mutations to define recurrency.
+        This is a debug parameter, so generally leave it
+        at default setting of infinity.
 
     **Returns**
 
