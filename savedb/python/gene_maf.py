@@ -44,7 +44,19 @@ def filter_hypermutators(hypermutator_count, conn, db_path=''):
 
 
 def save_db(maf_path, db_path, hypermutator_count):
-    df = pd.read_csv(maf_path, sep='\t')  # read data
+    # merge all data frames together with the first
+    # data frames given priority over later data frames
+    df_cols = ['Gene_Symbol', 'Tumor_Sample', 'Tumor_Type', 'Chromosome',
+               'Start_Position', 'End_Position', 'Variant_Classification',
+               'Reference_Allele', 'Tumor_Allele', 'Protein_Change']
+    df = pd.DataFrame(columns=df_cols)
+    for single_maf in maf_path.split(','):
+        tmp_df = pd.read_csv(single_maf, sep='\t')
+        samp_names = set(df['Tumor_Sample'].tolist())
+        tmp_df = tmp_df[tmp_df['Tumor_Sample'].apply(lambda x: x not in samp_names)]
+        df = pd.concat([df, tmp_df])
+        #df = df.groupby(df.index).first()  # use only first appearance of sample name
+
     _utils.drop_table('maf_mutation', db_path, kind='sqlite')
     conn = sqlite3.connect(db_path)  # open connection
 
