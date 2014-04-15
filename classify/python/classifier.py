@@ -18,16 +18,16 @@ def calc_onco_info(df, onco_pct, tsg_pct, min_ct):
     # calculate the number of genes classified as oncogene
     vclf = VogelsteinClassifier(onco_pct, tsg_pct, min_count=min_ct)
     df['total'] = df.T.sum()
-    input_list = ((row['recurrent missense'] + row['recurrent indel'],
+    input_list = [(row['recurrent missense'] + row['recurrent indel'],
                    row['frame shift'] + row['nonsense'] + row['lost stop'] + row['no protein'] + row['splicing mutation'],
                    row['total'])
-                  for i, row in df.iterrows())
+                  for i, row in df.iterrows()]
     df['20/20 predicted class'] = vclf.predict_list(input_list)
     class_cts = df['20/20 predicted class'].value_counts()
 
     # calculate the pct of known oncogenes found
     df['true class'] = [_utils.classify_gene(gene)
-                           for gene in df.index.tolist()]
+                        for gene in df.index.tolist()]
     tmpdf = df.copy()  # prevent wierd behavior
     known_onco = tmpdf[tmpdf['true class']=='oncogene']
     num_onco_found = len(known_onco[known_onco['20/20 predicted class']=='oncogene'])
@@ -94,8 +94,8 @@ def generate_2020_result(onco_pct, tsg_pct, min_ct):
 
     # predict using the "20/20" rule
     vclf = VogelsteinClassifier(onco_pct, tsg_pct, min_count=min_ct)
-    input_list = ((row['recurrent count'], row['deleterious count'], row['total'])
-                  for i, row in df.iterrows())
+    input_list = [(row['recurrent count'], row['deleterious count'], row['total'])
+                  for i, row in df.iterrows()]
     df['20/20 predicted class'] = vclf.predict_list(input_list)
     df['true class'] = [_utils.classify_gene(gene)
                         for gene in df.index.tolist()]
@@ -160,7 +160,7 @@ def main(cli_opts):
     # save result
     result_df.to_csv(_utils.clf_result_dir + cfg_opts['vogelstein_predictions'], sep='\t')
     # plot results
-    #label_to_int = {'oncogene': 1, 'other': 0, 'tsg': 2}  # labels to integer code
+    label_to_int = {'oncogene': 1, 'other': 0, 'tsg': 2}  # labels to integer code
     result_df['true class'] = result_df['true class'].apply(lambda x: _utils.class_to_label[x])
     plot_data.prob_kde(result_df, 'oncogene score',
                        _utils.clf_plot_dir + cfg_opts['onco_score_kde'],
