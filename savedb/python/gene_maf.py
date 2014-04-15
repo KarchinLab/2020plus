@@ -72,7 +72,7 @@ def save_db(maf_path, db_path, hypermutator_count):
 
 
 def main(maf_path, db_path, hypermutator_count):
-    db_opts = _utils.get_db_config('champ')
+    db_opts = _utils.get_db_config('2020plus')
     out_db = db_opts['db']
     out_db = db_path if db_path else out_db
     save_db(maf_path, out_db, hypermutator_count)

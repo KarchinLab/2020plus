@@ -264,7 +264,7 @@ def main(hypermutator_count, cell_line_path, gene_dir, db_path):
     out_opts = _utils.get_output_config('gene_tsv')
     out_path = out_opts['gene_tsv']
     cnv_path = out_opts['cnv_tsv']
-    db_opts = _utils.get_db_config('champ')
+    db_opts = _utils.get_db_config('2020plus')
     out_db = db_opts['db']
 
     # concatenate all gene files

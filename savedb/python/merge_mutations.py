@@ -3,7 +3,7 @@ import sqlite3
 
 
 def main(db_path):
-    db_opts = _utils.get_db_config('champ')
+    db_opts = _utils.get_db_config('2020plus')
     out_db = db_opts['db']
     out_db = db_path if db_path else out_db
 

@@ -134,7 +134,7 @@ def save_db(df, genedb_path):
 def main(db_path):
     # get config files
     in_opts = _utils.get_input_config('input')
-    db_opts = _utils.get_db_config('champ')
+    db_opts = _utils.get_db_config('2020plus')
 
     # get data for gene_features table
     logger.info('Processing features for gene_features table ...')
