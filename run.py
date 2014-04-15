@@ -219,6 +219,12 @@ if __name__ == '__main__':
                                    action='store_true',
                                    default=False,
                                    help='Perform bootstrap (sample with replacement) on mutations')
+    parser_simulation.add_argument('-p', '--processes',
+                                   type=int,
+                                   action='store',
+                                   default=1,
+                                   help='Number of processes to use '
+                                   ' for simulation (more==faster)')
     parser_simulation.add_argument('-l', '--lower-sample-rate',
                                    type=float,
                                    action='store',

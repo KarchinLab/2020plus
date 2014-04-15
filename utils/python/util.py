@@ -32,6 +32,7 @@ clf_plot_dir = save_dir + _opts['clf_plot_dir']
 clf_result_dir = save_dir + _opts['clf_result_dir']
 feature_plot_dir = save_dir + _opts['feature_plot_dir']
 sim_plot_dir = save_dir + _opts['sim_plot_dir']
+sim_result_dir = save_dir + _opts['sim_result_dir']
 
 def read_aa_properties(file_path):
     """Read aa property counts from the data_analysis/results folder.
@@ -109,7 +110,7 @@ def read_smg():
     # open connection
     try:
         # if DB is not created this will throw an error
-        gene_db_path = get_db_config('champ')['db']
+        gene_db_path = get_db_config('2020plus')['db']
         conn = sqlite3.connect(gene_db_path)
 
         sql = ("SELECT DISTINCT Gene"
@@ -145,7 +146,7 @@ def read_cgc():
     # open connection
     try:
         # if DB is not created this will throw an error
-        gene_db_path = get_db_config('champ')['db']
+        gene_db_path = get_db_config('2020plus')['db']
         conn = sqlite3.connect(gene_db_path)
 
         sql = ("SELECT DISTINCT Gene"
@@ -350,7 +351,7 @@ def drop_table(tbl_name,
     """
     if not genes_db_path:
         # if db not specified, use config file
-        genes_db_path = get_db_config('champ')['db']
+        genes_db_path = get_db_config('2020plus')['db']
     if kind == 'sqlite':
         with sqlite3.connect(genes_db_path) as cur:
             sql = "DROP TABLE IF EXISTS %s" % tbl_name

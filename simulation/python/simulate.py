@@ -11,6 +11,7 @@ import plot_data
 import pandas as pd
 import numpy as np
 from scipy import stats
+from multiprocessing import Pool
 import sqlite3
 
 
@@ -182,6 +183,99 @@ def calculate_stats(result_dict,
     return result_df
 
 
+def save_simulation_result(r_panel, r_path,
+                           py_panel, py_path,
+                           nb_panel, nb_path,
+                           v_panel, v_path):
+    # make 'oncogenes'/'tsg' as the 'items' axis
+    r_panel = r_panel.swapaxes('items', 'major')
+    py_panel = py_panel.swapaxes('items', 'major')
+    nb_panel = nb_panel.swapaxes('items', 'major')
+    v_panel = v_panel.swapaxes('items', 'major')
+
+    # collapse pd.panel into a data frame
+    r_df = pd.merge(r_panel['oncogene'], r_panel['tsg'],
+                    left_index=True, right_index=True,
+                    suffixes=(' oncogene', ' tsg'))
+    py_df = pd.merge(py_panel['oncogene'], py_panel['tsg'],
+                     left_index=True, right_index=True,
+                     suffixes=(' oncogene', ' tsg'))
+    nb_df = pd.merge(nb_panel['oncogene'], nb_panel['tsg'],
+                     left_index=True, right_index=True,
+                     suffixes=(' oncogene', ' tsg'))
+    v_df = pd.merge(v_panel['oncogene'], v_panel['tsg'],
+                    left_index=True, right_index=True,
+                    suffixes=(' oncogene', ' tsg'))
+
+    # save data frame to specified paths
+    r_df.to_csv(r_path, sep='\t')
+    py_df.to_csv(py_path, sep='\t')
+    nb_df.to_csv(nb_path, sep='\t')
+    v_df.to_csv(v_path, sep='\t')
+
+
+def predict(info):
+    """Function called by multiprocessing to run predictions.
+
+    **Parameters**
+    info : tuple, length 3
+        Elements:
+          1. df, data frame of actual mutation data
+          2. gene_df, data frame of gene features
+          3. opts, dictionary of cli options from argparse
+    """
+    df, gene_df, opts = info  # unpack tuple
+
+    if opts['bootstrap']:
+        # create feature matrix for bootstrap sample
+        df = features.process_features(df, 0)
+
+    # merge gene features
+    df = merge_feature_df(df, gene_df)  # all feature info
+    df = df.set_index('gene')  # get rid of gene column
+
+    # run classifiers on bootstrap sampled counts
+    r_sim_results = r_random_forest(df, opts)
+    py_sim_results = py_random_forest(df, opts)
+    nb_sim_results = naive_bayes(df, opts)
+    v_sim_results = vogelstein_classification(df, opts)
+
+    return r_sim_results, py_sim_results, nb_sim_results, v_sim_results
+
+
+def yield_sim_df(dfg, num_processes):
+    """Yields (a generator) data frame objects according to
+    the number of processes.
+
+    **Parameters**
+
+    dfg : one of my random sampling classes
+        either a bootstrap object or RandomSampleNames object
+    num_processes : int
+        number of processes indicates how many data frames
+        to yield.
+
+    **returns**
+
+    dfg_list : list
+        a list of data frames of length num_processes
+    """
+    # yield lists of data frames until the last modulo
+    # operator returns 0
+    dfg_list = []
+    for i, df in enumerate(dfg.dataframe_generator()):
+        dfg_list.append(df)
+        i_plus_1 = i + 1  # operator precedence requires this statement
+        if not i_plus_1 % num_processes:
+            yield dfg_list
+            dfg_list = []
+
+    # if number of data frames not perfectly divisible
+    # by number of processes
+    if dfg_list:
+        yield dfg_list
+
+
 def main(cli_opts):
     out_opts = _utils.get_output_config('feature_matrix')
     sim_opts = _utils.get_output_config('simulation')
@@ -211,20 +305,34 @@ def main(cli_opts):
 
         # iterate through each sampled data set
         r_sim_results, py_sim_results, nb_sim_results, v_sim_results = {}, {}, {}, {}
-        for i, all_df in enumerate(dfg.dataframe_generator()):
-            if cli_opts['bootstrap']:
-                # create feature matrix for bootstrap sample
-                all_df = features.process_features(all_df, 0)
+        i = 0  # counter for index of data frames
+        #for i, all_df in enumerate(dfg.dataframe_generator()):
+        for df_list in yield_sim_df(dfg, cli_opts['processes']):
+            # perform predictions using multiple python
+            # processes using the multiprocessing module
+            pool = Pool(processes=len(df_list))
+            info_list = [(d, gene_df, cli_opts) for d in df_list]
+            process_results = pool.map(predict, info_list)
 
-            # merge gene features
-            all_df = merge_feature_df(all_df, gene_df)  # all feature info
-            all_df = all_df.set_index('gene')  # get rid of gene column
+            # save all the results
+            for j in range(len(df_list)):
+                r_sim_results[i],  py_sim_results[i], nb_sim_results[i], v_sim_results[i] = process_results[j]
+                i += 1
 
-            # run classifiers on bootstrap sampled counts
-            r_sim_results[i] = r_random_forest(all_df, cli_opts)
-            py_sim_results[i] = py_random_forest(all_df, cli_opts)
-            nb_sim_results[i] = naive_bayes(all_df, cli_opts)
-            v_sim_results[i] = vogelstein_classification(all_df, cli_opts)
+
+            #if cli_opts['bootstrap']:
+                 #create feature matrix for bootstrap sample
+                #all_df = features.process_features(all_df, 0)
+
+             #merge gene features
+            #all_df = merge_feature_df(all_df, gene_df)  # all feature info
+            #all_df = all_df.set_index('gene')  # get rid of gene column
+
+             #run classifiers on bootstrap sampled counts
+            #r_sim_results[i] = r_random_forest(all_df, cli_opts)
+            #py_sim_results[i] = py_random_forest(all_df, cli_opts)
+            #nb_sim_results[i] = naive_bayes(all_df, cli_opts)
+            #v_sim_results[i] = vogelstein_classification(all_df, cli_opts)
 
         # record result for a specific sample rate
         tmp_results = calculate_stats(r_sim_results)
@@ -236,10 +344,27 @@ def main(cli_opts):
         tmp_results = calculate_stats(v_sim_results, ['precision', 'recall', 'count'])
         v_result[sample_rate] = tmp_results
 
+    # make pandas panel objects out of summarized
+    # results from simulations
+    r_panel_result = pd.Panel(r_result)
+    py_panel_result = pd.Panel(py_result)
+    nb_panel_result = pd.Panel(nb_result)
+    v_panel_result = pd.Panel(v_result)
+
+    # save results of simulations in a text file
+    r_path = _utils.sim_result_dir + sim_opts['r_result']
+    py_path = _utils.sim_result_dir + sim_opts['py_result']
+    nb_path = _utils.sim_result_dir + sim_opts['nb_result']
+    v_path = _utils.sim_result_dir + sim_opts['v_result']
+    save_simulation_result(r_panel_result, r_path,
+                           py_panel_result, py_path,
+                           nb_panel_result, nb_path,
+                           v_panel_result, v_path)
+
     # aggregate results for plotting
-    results = {'20/20+ classifier': pd.Panel(r_result),
-               'random forest': pd.Panel(py_result),
-               'naive bayes': pd.Panel(nb_result)}
+    results = {'20/20+ classifier': r_panel_result,
+               'random forest': py_panel_result,
+               'naive bayes': nb_panel_result}
 
     # plot oncogene results of simulations
     tmp_save_path = _utils.sim_plot_dir + sim_opts['onco_pr_plot']
@@ -276,7 +401,7 @@ def main(cli_opts):
     # since the vogelstein classifier doesn't predict probabilities
     # I can't generate a PR or ROC curve. However, I can evaluate
     # metrics like precision and recall
-    results['20/20 rule'] = pd.Panel(v_result)
+    results['20/20 rule'] = v_panel_result
 
     # plot oncogene precision/recall
     tmp_save_path = _utils.sim_plot_dir + sim_opts['onco_precision_plot']
