@@ -12,6 +12,8 @@ import pandas as pd
 import numpy as np
 from scipy import stats
 from multiprocessing import Pool
+import itertools as it
+import time
 import sqlite3
 
 
@@ -106,7 +108,7 @@ def retrieve_gene_features(opts):
     """Wrapper arround the retrieve_gene_features function in the
     features module."""
     # get additional features
-    db_cfg = _utils.get_db_config('champ')
+    db_cfg = _utils.get_db_config('2020plus')
     conn = sqlite3.connect(db_cfg['db'])
     additional_features = features.retrieve_gene_features(conn, opts)
     conn.close()
@@ -133,7 +135,7 @@ def merge_feature_df(count_features,
     return all_features
 
 
-def calculate_sem(wp, columns):
+def calculate_sem(wp):
     """Calculates the standard error of the mean for a pd.Panel object.
 
     **Note:** The pd.Panel.apply method seems to have a bug preventing
@@ -152,7 +154,7 @@ def calculate_sem(wp, columns):
     """
     tmp_sem_matrix = np.apply_along_axis(stats.sem, 0, wp.values)  # hack because pandas apply method has a bug
     tmp_sem = pd.DataFrame(tmp_sem_matrix,
-                           columns=columns,
+                           columns=wp.minor_axis,
                            index=['oncogene', 'tsg'])
     return tmp_sem
 
@@ -176,7 +178,7 @@ def calculate_stats(result_dict,
     """
     wp = pd.Panel(result_dict)
     tmp_means = wp.mean(axis=0)
-    tmp_sem = calculate_sem(wp, metrics)
+    tmp_sem = calculate_sem(wp)
     result_df = pd.merge(tmp_means, tmp_sem,
                          left_index=True, right_index=True,
                          suffixes=(' mean', ' sem'))
@@ -188,22 +190,22 @@ def save_simulation_result(r_panel, r_path,
                            nb_panel, nb_path,
                            v_panel, v_path):
     # make 'oncogenes'/'tsg' as the 'items' axis
-    r_panel = r_panel.swapaxes('items', 'major')
-    py_panel = py_panel.swapaxes('items', 'major')
-    nb_panel = nb_panel.swapaxes('items', 'major')
-    v_panel = v_panel.swapaxes('items', 'major')
+    r_pan = r_panel.swapaxes('items', 'major')
+    py_pan = py_panel.swapaxes('items', 'major')
+    nb_pan = nb_panel.swapaxes('items', 'major')
+    v_pan = v_panel.swapaxes('items', 'major')
 
     # collapse pd.panel into a data frame
-    r_df = pd.merge(r_panel['oncogene'], r_panel['tsg'],
+    r_df = pd.merge(r_pan['oncogene'], r_pan['tsg'],
                     left_index=True, right_index=True,
                     suffixes=(' oncogene', ' tsg'))
-    py_df = pd.merge(py_panel['oncogene'], py_panel['tsg'],
+    py_df = pd.merge(py_pan['oncogene'], py_pan['tsg'],
                      left_index=True, right_index=True,
                      suffixes=(' oncogene', ' tsg'))
-    nb_df = pd.merge(nb_panel['oncogene'], nb_panel['tsg'],
+    nb_df = pd.merge(nb_pan['oncogene'], nb_pan['tsg'],
                      left_index=True, right_index=True,
                      suffixes=(' oncogene', ' tsg'))
-    v_df = pd.merge(v_panel['oncogene'], v_panel['tsg'],
+    v_df = pd.merge(v_pan['oncogene'], v_pan['tsg'],
                     left_index=True, right_index=True,
                     suffixes=(' oncogene', ' tsg'))
 
@@ -214,7 +216,7 @@ def save_simulation_result(r_panel, r_path,
     v_df.to_csv(v_path, sep='\t')
 
 
-def predict(info):
+def predict(df, gene_df, opts):
     """Function called by multiprocessing to run predictions.
 
     **Parameters**
@@ -224,11 +226,12 @@ def predict(info):
           2. gene_df, data frame of gene features
           3. opts, dictionary of cli options from argparse
     """
-    df, gene_df, opts = info  # unpack tuple
+    # df, gene_df, opts = info  # unpack tuple
+    # df, opts = info  # unpack tuple
 
-    if opts['bootstrap']:
+    #if opts['bootstrap']:
         # create feature matrix for bootstrap sample
-        df = features.process_features(df, 0)
+        #df = features.process_features(df, 0)
 
     # merge gene features
     df = merge_feature_df(df, gene_df)  # all feature info
@@ -276,11 +279,36 @@ def yield_sim_df(dfg, num_processes):
         yield dfg_list
 
 
+def multiprocess_predict(dfg, gene_df, opts):
+    num_processes = opts['processes']
+    process_results = None
+
+    for i in range(0, dfg.num_iter, num_processes):
+        pool = Pool(processes=num_processes)
+        del process_results  # possibly help free up more memory
+        time.sleep(5)  # wait 5 seconds, might help make sure memory is free
+        tmp_num_pred = dfg.num_iter - i if  i + num_processes > dfg.num_iter else num_processes
+        # df_generator = dfg.dataframe_generator()
+        info_repeat = it.repeat((dfg, gene_df, opts), tmp_num_pred)
+        #pool = Pool(processes=tmp_num_pred)
+        process_results = pool.imap(singleprocess_predict, info_repeat)
+        pool.close()
+        pool.join()
+        yield process_results
+
+
+def singleprocess_predict(info):
+    dfg, gene_df, opts = info  # unpack tuple
+    df = next(dfg.dataframe_generator())
+    single_result = predict(df, gene_df, opts)
+    return single_result
+
+
 def main(cli_opts):
     out_opts = _utils.get_output_config('feature_matrix')
     sim_opts = _utils.get_output_config('simulation')
-    champ_db_path = _utils.get_db_config('champ')['db']
-    conn = sqlite3.connect(champ_db_path)
+    my_db_path = _utils.get_db_config('2020plus')['db']
+    conn = sqlite3.connect(my_db_path)
 
     gene_df = retrieve_gene_features(cli_opts)  # features like gene length, etc
 
@@ -307,18 +335,21 @@ def main(cli_opts):
         r_sim_results, py_sim_results, nb_sim_results, v_sim_results = {}, {}, {}, {}
         i = 0  # counter for index of data frames
         #for i, all_df in enumerate(dfg.dataframe_generator()):
-        for df_list in yield_sim_df(dfg, cli_opts['processes']):
+        #for df_list in yield_sim_df(dfg, cli_opts['processes']):
+        for df_list in multiprocess_predict(dfg, gene_df, cli_opts):
             # perform predictions using multiple python
             # processes using the multiprocessing module
-            pool = Pool(processes=len(df_list))
-            info_list = [(d, gene_df, cli_opts) for d in df_list]
-            process_results = pool.map(predict, info_list)
+            #pool = Pool(processes=len(df_list))
+            #info_list = [(d, gene_df, cli_opts) for d in df_list]
+            #process_results = pool.map(predict, info_list)
 
             # save all the results
-            for j in range(len(df_list)):
-                r_sim_results[i],  py_sim_results[i], nb_sim_results[i], v_sim_results[i] = process_results[j]
+            #for j in range(len(df_list)):
+            for j, mydf in enumerate(df_list):
+                #r_sim_results[i],  py_sim_results[i], nb_sim_results[i], v_sim_results[i] = process_results[j]
+                #r_sim_results[i],  py_sim_results[i], nb_sim_results[i], v_sim_results[i] = df_list[j]
+                r_sim_results[i],  py_sim_results[i], nb_sim_results[i], v_sim_results[i] = mydf
                 i += 1
-
 
             #if cli_opts['bootstrap']:
                  #create feature matrix for bootstrap sample
