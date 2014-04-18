@@ -1,12 +1,13 @@
 import numpy as np
+import features.python.features as features
 
 class Bootstrap(object):
 
-    def __init__(self, df, subsample=1.0, num_samples=10):
+    def __init__(self, df, subsample=1.0, num_iter=10):
         # initialize variables
         self.set_df(df)
         self.set_subsample(subsample)
-        self.set_num_samples(num_samples)
+        self.set_num_iter(num_iter)
 
         # set up data for multinomial sampling
         self.nonzero_indices = np.nonzero(self.df.values)
@@ -22,9 +23,10 @@ class Bootstrap(object):
         n = int(self.subsample * self.total_count)  # number of counts to sample
         multinomial_sample = np.random.multinomial(n,  # total counts for multinomial
                                                    self.prob,  # probability
-                                                   self.num_samples)  # number of samples
-        for i in range(self.num_samples):
+                                                   self.num_iter)  # number of samples
+        for i in range(self.num_iter):
             tmp_df.values[self.nonzero_indices] = multinomial_sample[i]
+            tmp_df = features.process_features(tmp_df)
             yield tmp_df
 
     def set_subsample(self, subsample):
@@ -42,14 +44,14 @@ class Bootstrap(object):
         else:
             raise ValueError('Subsample should be positive.')
 
-    def set_num_samples(self, num_samples):
+    def set_num_iter(self, num_iter):
         """Set number of times to sample from multinomial distribution.
 
         Args:
           | num_samples (int): get multinomial sample, num_samples number of times
         """
-        if num_samples > 0:
-            self.num_samples = num_samples
+        if num_iter > 0:
+            self.num_iter = num_iter
         else:
             raise ValueError('Number of iterations should be positive.')
 
@@ -58,4 +60,3 @@ class Bootstrap(object):
         if 'gene' in df.columns:
             df = df.set_index('gene')
         self.df = df
-
