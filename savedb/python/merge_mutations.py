@@ -8,7 +8,7 @@ def main(db_path):
     out_db = db_path if db_path else out_db
 
     # drop table if exists
-    _utils.drop_table('mutation', out_db, kind='sqlite')
+    # _utils.drop_table('mutation', out_db, kind='sqlite')
 
     cols_of_interest = ['Gene', 'Tumor_Sample', 'Tumor_Type',
                         'Chromosome', 'Start_Position',
@@ -17,14 +17,16 @@ def main(db_path):
                         'Protein_Change', 'DNA_Change']
     data_type = ['TEXT', 'TEXT', 'TEXT', 'TEXT', 'INT',
                  'INT', 'TEXT', 'TEXT', 'TEXT', 'TEXT', 'TEXT']
+    _utils.create_empty_table('mutation', out_db,
+                              cols_of_interest, data_type)
 
     conn = sqlite3.connect(out_db)  # open connection
     cur = conn.cursor()
-    col_info_list = [' '.join(x) for x in zip(cols_of_interest, data_type)]
-    col_info_str = ', '.join(col_info_list)
-    sql = "CREATE TABLE mutation({0});".format(col_info_str)
-    cur.execute(sql)
-    conn.commit()
+    #col_info_list = [' '.join(x) for x in zip(cols_of_interest, data_type)]
+    #col_info_str = ', '.join(col_info_list)
+    #sql = "CREATE TABLE mutation({0});".format(col_info_str)
+    #cur.execute(sql)
+    #conn.commit()
 
     maf_mutation_cols = ['Gene_Symbol'] + cols_of_interest[1:-1]
     sql = ("INSERT INTO mutation ({0}) "

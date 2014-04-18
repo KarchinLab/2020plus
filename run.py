@@ -105,15 +105,13 @@ def _savedb():
     savedb.python.gene_tsv.main(args.hypermutator,
                                 args.cell_line,
                                 args.input,
-                                args.output)  # populate the nucleotide table
+                                args.output,
+                                args.no_cosmic)  # populate the nucleotide table
     savedb.python.gene_features.main(args.output)  # populate the gene_features table
-
-    if args.maf:
-        # include MAF file if provided
-        savedb.python.gene_maf.main(args.maf,
-                                    args.output,
-                                    args.hypermutator)
-        savedb.python.merge_mutations.main(args.output)
+    savedb.python.gene_maf.main(args.maf,
+                                args.output,
+                                args.hypermutator)
+    savedb.python.merge_mutations.main(args.output)
 
 
 def _features():
@@ -344,6 +342,10 @@ if __name__ == '__main__':
                                type=str, default='',
                                help='MAF file to augment mutations '
                                'found in COSMIC')
+    parser_savedb.add_argument('-nc', '--no-cosmic',
+                               action='store_true',
+                               default=False,
+                               help='Don\'t use mutations from COSMIC')
     parser_savedb.add_argument('-c', '--cell-line',
                                type=str, action='store',
                                default='',

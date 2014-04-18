@@ -92,9 +92,10 @@ def recursive_gene_length(fasta_dir):
     gene_length_dict = {}
     mydirs = ['0-9'] + list(string.ascii_uppercase)
     for mydir in mydirs:
+        print mydir
         dir_path = fasta_dir + mydir + '/'
         for file_name in os.listdir(dir_path):
-            if '_protein' in file_name:
+            if '_protein' in file_name and '_ENST' not in file_name:
                 gene_name = file_name.strip('_protein.txt')
                 gene_length = calc_gene_length(dir_path + file_name)
                 gene_length_dict[gene_name] = gene_length
@@ -150,12 +151,12 @@ def main(db_path):
     db_path = db_path if db_path else db_opts['db']
 
     # get info on cnv's overlapping genes
-    tmp_gain = cnv_gain(db_path)
-    df = pd.merge(df, tmp_gain, on='gene', how='left')
-    df['cnv_gain'] = df['cnv_gain'].fillna(0)
-    tmp_loss = cnv_loss(db_path)
-    df = pd.merge(df, tmp_loss, on='gene', how='left')
-    df['cnv_loss'] = df['cnv_loss'].fillna(0)
+    #tmp_gain = cnv_gain(db_path)
+    #df = pd.merge(df, tmp_gain, on='gene', how='left')
+    #df['cnv_gain'] = df['cnv_gain'].fillna(0)
+    #tmp_loss = cnv_loss(db_path)
+    #df = pd.merge(df, tmp_loss, on='gene', how='left')
+    #df['cnv_loss'] = df['cnv_loss'].fillna(0)
 
     #df['gene length'] = gene_length_series
     #df['gene'] = df.index  # add gene names as a column (not just an index)

@@ -71,8 +71,28 @@ def save_db(maf_path, db_path, hypermutator_count):
     filter_hypermutators(hypermutator_count, conn, db_path)
 
 
+def create_empty_maf_mutation_table(db_path):
+    # specify columns in table
+    cols_of_interest = ['Gene_Symbol', 'Tumor_Sample', 'Tumor_Type',
+                        'Chromosome', 'Start_Position', 'End_Position',
+                        'Variant_Classification', 'Reference_Allele',
+                        'Tumor_Allele', 'Protein_Change']
+    data_type = ['TEXT', 'TEXT', 'TEXT', 'INTEGER',
+                 'INTEGER', 'INTEGER', 'TEXT', 'TEXT',
+                 'TEXT', 'TEXT']
+    _utils.creat_empty_table('maf_mutation', db_path,
+                             cols_of_interest, data_type)
+
 def main(maf_path, db_path, hypermutator_count):
+    # get db info
     db_opts = _utils.get_db_config('2020plus')
     out_db = db_opts['db']
     out_db = db_path if db_path else out_db
-    save_db(maf_path, out_db, hypermutator_count)
+
+    # update databse maf_mutation table
+    if maf_path:
+        # add to database if they specify a MAF file
+        save_db(maf_path, out_db, hypermutator_count)
+    else:
+        # else just create an empty maf_mutation table
+        create_empty_maf_mutation_table(out_db)

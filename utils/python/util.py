@@ -362,6 +362,20 @@ def drop_table(tbl_name,
             cur.execute(sql)
 
 
+def create_empty_table(tbl_name, db_path, colnames, coltypes):
+    # drop table if exists
+    drop_table(tbl_name, db_path, kind='sqlite')
+
+    # make empty maf_mutation table
+    conn = sqlite3.connect(db_path)  # open connection
+    cur = conn.cursor()
+    col_info_list = [' '.join(x) for x in zip(colnames, coltypes)]
+    col_info_str = ', '.join(col_info_list)
+    sql = "CREATE TABLE {0}({1});".format(tbl_name, col_info_str)
+    cur.execute(sql)
+    conn.commit()
+
+
 # set up vogelstein oncogenes/tsgs
 oncogene_list = read_oncogenes()
 tsg_list = read_tsgs()

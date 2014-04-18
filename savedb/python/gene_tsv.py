@@ -24,6 +24,7 @@ import sqlite3
 import string
 import os
 import re
+import IPython
 
 
 def parse_sample_name(sample):
@@ -197,6 +198,8 @@ def save_db(hypermutator_ct, gene_tsv_path,
         cell_line_sample_names = set(cell_line_df['Sample name'].tolist())
     else:
         cell_line_sample_names = set([])
+
+    # skip this if COSMIC not used
     df = df[df['SampleName'].apply(lambda x: x not in cell_line_sample_names)]
 
     # fix sample names so they match with external data
@@ -242,7 +245,28 @@ def save_db(hypermutator_ct, gene_tsv_path,
     conn.close()  # close
 
 
-def main(hypermutator_count, cell_line_path, gene_dir, db_path):
+def create_empty_cosmic_mutation_table(db_path):
+    # construct column/column types
+    mycols = ['Gene', 'SampleName', 'COSMICSampleID', 'AminoAcid',
+              'Nucleotide', 'PrimaryTissue', 'Tissuesubtype1',
+              'Tissuesubtype2', 'Histology', 'Histologysubtype1',
+              'Histologysubtype2', 'PubmedID', 'studies',
+              'MutationID', 'SomaticStatus', 'SampleSource',
+              'Zygosity', 'hg18chrom', 'hg18start', 'hg18end',
+              'hg19chrom', 'hg19start', 'hg19end']
+    coltypes = ['TEXT']*len(mycols)
+    coltypes[-1] = 'INTEGER'
+    coltypes[-2] = 'INTEGER'
+    coltypes[-4] = 'INTEGER'
+    coltypes[-5] = 'INTEGER'
+
+    # create empty cosmic_mutation table
+    _utils.create_empty_table('cosmic_mutation', db_path,
+                              mycols, coltypes)
+
+
+def main(hypermutator_count, cell_line_path,
+         gene_dir, db_path, no_cosmic_flag):
     """Concatenates all the mutation data from tab delmited files in
     the cosmic directory. Next, saves the results to a sqlite db.
 
@@ -257,6 +281,8 @@ def main(hypermutator_count, cell_line_path, gene_dir, db_path):
     db_path : str
         path to save sqlite database. If string is empty,
         use path from config.
+    no_cosmic_flag : bool
+        indicates not to use cosmic mutations
     """
     # get input/output configurations
     in_opts = _utils.get_input_config('input')
@@ -267,13 +293,18 @@ def main(hypermutator_count, cell_line_path, gene_dir, db_path):
     db_opts = _utils.get_db_config('2020plus')
     out_db = db_opts['db']
 
-    # concatenate all gene files
-    cosmic_dir = gene_dir if gene_dir else cosmic_dir
-    concatenate_genes(out_path, cosmic_dir)
-
     # check if user specifies non standard db path
     out_db = db_path if db_path else out_db
 
     # save info into a txt file and sqlite3 database
-    save_db(hypermutator_count, out_path, cnv_path,
-            cell_line_path, out_db)
+    if not no_cosmic_flag:
+        # concatenate all gene files
+        cosmic_dir = gene_dir if gene_dir else cosmic_dir
+        concatenate_genes(out_path, cosmic_dir)
+
+        # save database
+        save_db(hypermutator_count, out_path, cnv_path,
+                cell_line_path, out_db)
+    else:
+        # create an empty table if cosmic not wanted
+        create_empty_cosmic_mutation_table(out_db)
