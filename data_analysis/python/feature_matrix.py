@@ -107,8 +107,10 @@ def main(recurrent, recurrent_max, conn):
     cfg_opts = _utils.get_output_config('feature_matrix')  # get config
 
     # query db for all mutations
-    # df = psql.frame_query("SELECT * FROM cosmic_mutation", con=conn)  # get all
-    df = psql.frame_query("SELECT Gene, DNA_Change as Nucleotide, Protein_Change as AminoAcid, Variant_Classification FROM mutation", con=conn)  # get all
+    sql = ("SELECT Gene, DNA_Change as Nucleotide, "
+           "       Protein_Change as AminoAcid, Variant_Classification "
+           "FROM mutation")
+    df = psql.frame_query(sql, con=conn)  # get all
 
     # generate features
     feature_matrix = generate_feature_matrix(df, recurrent,

@@ -279,6 +279,16 @@ def pca_plot(file_path,
     MAX_SIZE = 300  # some genes take up to much space
     scatter_size = [size if size < MAX_SIZE else MAX_SIZE for size in row_sums]
 
+    # drop columns that are potentially all zeros
+    # since this will make SVD not converge.
+    # all zeros could come from not using COSMIC
+    # data
+    drop_cols = []
+    for c in df.columns:
+        if df[c].sum() == 0:
+            drop_cols.append(c)
+    df = df.drop(drop_cols, axis=1)
+
     # perform PCA
     results = PCA(df)
     first_eigen_value, second_eigen_value = results.fracs[:2]
@@ -304,6 +314,23 @@ def all_mut_type_barplot(df,
                   ylabel='Counts',
                   stacked=True)
     logger.info('Finished plotting protein mutation types by gene type.')
+
+
+def non_silent_ratio_kde(df, save_path,
+                         xlim=None,
+                         title='',
+                         xlabel='',
+                         ylabel=''):
+    labels = df['label'].unique()
+    for label in labels:
+        df[df['label']==label]['non-silent/silent'].plot(kind='kde', label=label)
+
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.legend(loc='best')
+    plt.savefig(save_path)
+    plt.close()
 
 
 def recurrent_missense_pos_line(df,
