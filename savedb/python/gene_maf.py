@@ -80,8 +80,9 @@ def create_empty_maf_mutation_table(db_path):
     data_type = ['TEXT', 'TEXT', 'TEXT', 'INTEGER',
                  'INTEGER', 'INTEGER', 'TEXT', 'TEXT',
                  'TEXT', 'TEXT']
-    _utils.creat_empty_table('maf_mutation', db_path,
-                             cols_of_interest, data_type)
+    _utils.create_empty_table('maf_mutation', db_path,
+                              cols_of_interest, data_type)
+
 
 def main(maf_path, db_path, hypermutator_count):
     # get db info
