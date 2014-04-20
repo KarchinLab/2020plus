@@ -21,12 +21,12 @@ def count_mutated_genes(conn):
     df : pd.DataFrame
         two column data frame of sample names and gene cts
     """
-    sql = ('SELECT x.SampleName, SUM(x.gene_indicator) as GeneCounts'
+    sql = ('SELECT x.Tumor_Sample, SUM(x.gene_indicator) as GeneCounts'
           ' FROM ('
-          '     SELECT SampleName, Gene, 1 as gene_indicator'
-          '     FROM cosmic_mutation'
-          '     GROUP BY SampleName, Gene'
-          ' ) x GROUP BY SampleName'
+          '     SELECT Tumor_Sample, Gene, 1 as gene_indicator'
+          '     FROM mutation'
+          '     GROUP BY Tumor_Sample, Gene'
+          ' ) x GROUP BY Tumor_Sample'
           ' ORDER BY GeneCounts Desc;')
     df = psql.frame_query(sql, con=conn)
     df.GeneCounts = df.GeneCounts.astype(int)  # pandas is not auto detecting
@@ -46,11 +46,11 @@ def count_mutations(conn):
     df : pd.DataFrame
         two column data frame of sample names and mutation cts
     """
-    sql = ('SELECT x.SampleName, SUM(x.mut_indicator) as MutationCounts'
+    sql = ('SELECT x.Tumor_Sample, SUM(x.mut_indicator) as MutationCounts'
           ' FROM ('
-          '     SELECT SampleName, 1 as mut_indicator'
-          '     FROM cosmic_mutation'
-          ' ) x GROUP BY SampleName'
+          '     SELECT Tumor_Sample, 1 as mut_indicator'
+          '     FROM mutation'
+          ' ) x GROUP BY Tumor_Sample'
           ' ORDER BY MutationCounts Desc;')
     df = psql.frame_query(sql, con=conn)
     df.MutationCounts = df.MutationCounts.astype(int)  # pandas is not auto detecting
