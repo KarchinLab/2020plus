@@ -3,6 +3,7 @@ from utils.python.nucleotide import Nucleotide
 import plot_data
 import pandas.io.sql as psql
 import csv
+import itertools as it
 import logging
 
 logger = logging.getLogger(__name__)  # module logger
@@ -22,13 +23,19 @@ def count_substitutions(hgvs_iterable):
     """
     # count DNA substitutions
     nuc_counter = {}  # {(initial, mutated): count,...}
+    valid_letters = ['A', 'C', 'G', 'T']
+
+    # initiliaze all substitutions to zero
+    for possible_sub in it.permutations(valid_letters, 2):
+        nuc_counter.setdefault(possible_sub, 0)
+
+    # count actual occurences of substitutions
     for nuc_change in hgvs_iterable:
         nuc = Nucleotide(nuc_change)
         if nuc.is_valid and not nuc.is_missing_info and nuc.is_substitution:
             # only take valid substitution events
             if len(nuc.initial) == 1 and len(nuc.mutated) == 1:
                 # restrict attention to single nucleotide substitutions
-                valid_letters = ['A', 'C', 'G', 'T']
                 if nuc.initial in valid_letters and nuc.mutated in valid_letters:
                     # unfortunately, there are a couple counts from non DNA
                     # which need to be filtered
