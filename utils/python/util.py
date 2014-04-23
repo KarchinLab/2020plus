@@ -376,6 +376,19 @@ def create_empty_table(tbl_name, db_path, colnames, coltypes):
     conn.commit()
 
 
+def get_gene_length():
+    # get db
+    db_path = get_db_config('2020plus')['db']
+
+    # query for gene length
+    conn = sqlite3.connect(db_path)
+    sql = "SELECT gene, gene_length FROM gene_features"
+    df = psql.frame_query(sql, con=conn)
+    df = df.set_index('gene')
+    conn.close()
+
+    return df
+
 # set up vogelstein oncogenes/tsgs
 oncogene_list = read_oncogenes()
 tsg_list = read_tsgs()

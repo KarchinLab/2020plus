@@ -91,17 +91,41 @@ def missense_position_entropy(df):
                              columns=['missense position entropy',
                                       'pct of uniform missense entropy'],
                              index=gene_list)
+    gene_len_df = _utils.get_gene_length()['gene_length']
+    gene_len_mean = gene_len_df.mean()
+    known_genes = set(gene_len_df.index.tolist())
+    mybin_width = 1
     for gene, indexes in gene_items:
         tmp_df = df.ix[indexes]
         # myct = recurrent_mutation.count_recurrent_by_number(tmp_df['AminoAcid'])
-        myct, total_missense = recurrent_mutation._count_recurrent_missense(tmp_df['AminoAcid'])
+        myct, total_missense = recurrent_mutation._count_recurrent_missense(tmp_df['AminoAcid'],
+                                                                            bin_width=mybin_width)
         if total_missense > 0:
+
+            # process positional info
             pos_ct = np.array(myct.values())  # convert to numpy array
             total_missense = np.sum(pos_ct)  # total number of missense
             p = pos_ct / float(total_missense)  # normalize to a probability
             missense_entropy = mymath.shannon_entropy(p)  # calc shannon entropy
-            if total_missense > 1:
-                max_ent = mymath.max_shannon_entropy(total_missense)
+
+            # get gene length in case number of mutations is greater than length
+            tmp_gene_len = gene_len_df.ix[gene] if gene in known_genes else gene_len_mean
+            # in sum cases gene length may be smaller than what a mutation
+            # occurs at. In this case, extend gene_length to allow for mutation.
+            len_from_bins = (max(myct.keys()) + 1) * mybin_width
+            tmp_gene_len = len_from_bins if len_from_bins > tmp_gene_len else tmp_gene_len
+
+            # calculate pct of maximum entropy
+            if (total_missense > 1 and len(pos_ct) > 1) and tmp_gene_len > mybin_width:
+                tmp_num_bins = int(tmp_gene_len/mybin_width)
+                max_bins = tmp_num_bins if not tmp_gene_len % mybin_width else tmp_num_bins + 1
+
+                # find the effective max number of counts at unique positions/bins
+                max_count = total_missense if total_missense < max_bins else max_bins
+
+                # calc max entropy
+                # max_ent = mymath.max_shannon_entropy(total_missense)
+                max_ent = mymath.max_shannon_entropy(max_count)
                 percent_missense_entropy = missense_entropy / max_ent
             else:
                 percent_missense_entropy = 0

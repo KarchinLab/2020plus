@@ -13,7 +13,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def _count_recurrent_missense(hgvs_iterable):
+def _count_recurrent_missense(hgvs_iterable,
+                              bin_width=1):
     """Counts the total missense mutations and stratifies missense
     counts according to position.
 
@@ -21,6 +22,10 @@ def _count_recurrent_missense(hgvs_iterable):
 
     hgvs_iterable : iterable
         container object with HGVS protein strings
+    bin_width : int
+        size (length) to still consider mutation in same bin.
+        Default is 1, meaning mutations have to occur at the
+        exact same position.
 
     **Returns**
 
@@ -40,12 +45,23 @@ def _count_recurrent_missense(hgvs_iterable):
             gene_pos_ctr.setdefault(aa.pos, 0)
             gene_pos_ctr[aa.pos] += 1  # add 1 to dict of pos
             total_missense_ctr += 1  # add 1 to total missense
-    return gene_pos_ctr, total_missense_ctr
+
+    # now aggregate mutations using bin width
+    unique_bins = set([int(key/bin_width)
+                       for key in gene_pos_ctr.keys()])
+    gene_pos_bin_ctr = {mybin: 0 for mybin in unique_bins}
+    for p in gene_pos_ctr.keys():
+        tmp_bin = int(p/bin_width)
+        gene_pos_bin_ctr[tmp_bin] += gene_pos_ctr[p]
+
+    # return gene_pos_ctr, total_missense_ctr
+    return gene_pos_bin_ctr, total_missense_ctr
 
 
 def count_missense_types(hgvs_iterable,
                          recurrent_min=2,
-                         recurrent_max=float('inf')):
+                         recurrent_max=float('inf'),
+                         bin_width=1):
     """Count the number of recurrent missense and regular missense
     mutations given a valid recurrency range.
 
@@ -65,7 +81,7 @@ def count_missense_types(hgvs_iterable,
     missense_cts : int
         number of regular missense mutations in a gene
     """
-    pos_count, total_missense = _count_recurrent_missense(hgvs_iterable)
+    pos_count, total_missense = _count_recurrent_missense(hgvs_iterable, bin_width)
     recurrent_cts = sum([cts for cts in pos_count.values()  # sum mutations passing theshold
                          if cts >= recurrent_min and cts <= recurrent_max])
     missense_cts = total_missense - recurrent_cts  # subtract reccurent from total
