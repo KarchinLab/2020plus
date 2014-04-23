@@ -363,9 +363,9 @@ def entropy_kde(df,
                 title='',
                 xlabel='',
                 ylabel='Density'):
-    df[df['true class']==2][column].dropna().plot(kind='kde', label='TSG')
-    df[df['true class']==1][column].dropna().plot(kind='kde', label='Oncogenes')
-    df[df['true class']==0][column].dropna().plot(kind='kde', label='Other genes')
+    df[df['true class']==_utils.tsg_label][column].dropna().plot(kind='kde', label='TSG')
+    df[df['true class']==_utils.onco_label][column].dropna().plot(kind='kde', label='Oncogenes')
+    df[df['true class']==_utils.other_label][column].dropna().plot(kind='kde', label='Other genes')
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
@@ -393,3 +393,23 @@ def sample_barplot(df, save_path, title='', xlabel='', ylabel=''):
                   title=title,
                   ylabel='Counts')
     logger.info('Finished plotting number of mutation given sample size.')
+
+
+def sample_kde(df, save_path,
+               xlabel='',
+               ylabel='',
+               title=''):
+    # categorize genes into onco/tsg
+    df['true class'] = df.index.to_series().apply(_utils.classify_gene)
+    df['true class'] = df['true class'].apply(lambda x: _utils.class_to_label[x])
+
+    # plot kde
+    df[df['true class']==_utils.tsg_label]['sample_count'].dropna().plot(kind='kde', label='TSG')
+    df[df['true class']==_utils.onco_label]['sample_count'].dropna().plot(kind='kde', label='Oncogenes')
+    df[df['true class']==_utils.other_label]['sample_count'].dropna().plot(kind='kde', label='Other genes')
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.legend(loc='best')
+    plt.savefig(save_path)
+    plt.close()
