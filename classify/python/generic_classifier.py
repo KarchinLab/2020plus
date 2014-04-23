@@ -61,11 +61,20 @@ class GenericClassifier(object):
         self.tsg_precision_array = np.zeros((self.total_iter, num_points))
         self.tsg_recall_array = np.linspace(0, 1, num_points)
 
+        # driver metrics
+        self.driver_precision = np.zeros(self.total_iter)
+        self.driver_recall = np.zeros(self.total_iter)
+        self.driver_tpr_array = np.zeros((self.total_iter, num_points))
+        self.driver_fpr_array = np.linspace(0, 1, num_points)
+        self.driver_precision_array = np.zeros((self.total_iter, num_points))
+        self.driver_recall_array = np.linspace(0, 1, num_points)
+        self.driver_threshold_array = np.zeros((self.total_iter, num_points))
+        self.cancer_gene_count = np.zeros(self.total_iter)
+
         # overall metrics
         self.f1_score = np.zeros(self.total_iter)
         self.precision = np.zeros(self.total_iter)
         self.recall = np.zeros(self.total_iter)
-        self.cancer_gene_count = np.zeros(self.total_iter)
 
     def set_total_iter(self, myiterations):
         self.total_iter = myiterations
@@ -85,6 +94,24 @@ class GenericClassifier(object):
         self.precision[self.num_pred] = prec
         self.recall[self.num_pred] = recall
         self.f1_score[self.num_pred] = fscore
+
+        # compute Precision-Recall curve metrics
+        driver_prob = onco_prob + tsg_prob
+        driver_true = (y_true > 0).astype(int)
+        p, r, thresh = metrics.precision_recall_curve(driver_true, driver_prob)
+        p, r, thresh = p[::-1], r[::-1], thresh[::-1]  # reverse order of results
+        thresh = np.insert(thresh, 0, 1.0)
+        self.driver_precision_array[self.num_pred, :] = interp(self.driver_recall_array, r, p)
+        self.driver_threshold_array[self.num_pred, :] = interp(self.driver_recall_array, r, thresh)
+
+        # calculate prediction summary statistics
+        prec, recall, fscore, support = metrics.precision_recall_fscore_support(driver_true, cancer_gene_pred)
+        self.driver_precision[self.num_pred] = prec[1]
+        self.driver_recall[self.num_pred] = recall[1]
+
+        # save driver metrics
+        fpr, tpr, thresholds = metrics.roc_curve(driver_true, driver_prob)
+        self.driver_tpr_array[self.num_pred, :] = interp(self.driver_fpr_array, fpr, tpr)
 
     def _update_onco_metrics(self, y_true, y_pred, prob):
 
@@ -151,6 +178,8 @@ class GenericClassifier(object):
         #self.tsg_tpr_array[:, 0] = 0.0  # it always begins as 0
         self.tsg_mean_roc_auc = float(metrics.auc(self.tsg_fpr_array,
                                                   np.mean(self.tsg_tpr_array, axis=0)))
+        self.driver_mean_roc_auc = float(metrics.auc(self.driver_fpr_array,
+                                                     np.mean(self.driver_tpr_array, axis=0)))
 
         # Precision-Recall curve metrics
         #self.onco_mean_precision /= self.num_pred
@@ -161,11 +190,16 @@ class GenericClassifier(object):
         self.tsg_mean_pr_auc = float(metrics.auc(self.tsg_recall_array,
                                                  np.mean(self.tsg_precision_array, axis=0)))
 
+        self.driver_mean_pr_auc = float(metrics.auc(self.driver_recall_array,
+                                                    np.mean(self.driver_precision_array, axis=0)))
+
         # log info on classifier predictions
         self.logger.info('TSG: Precision=%s, Recall=%s, Fscore=%s' % (
                          np.mean(self.tsg_precision), np.mean(self.tsg_recall), np.mean(self.tsg_f1_score)))
         self.logger.info('Oncogene: Precision=%s, Recall=%s, Fscore=%s' % (
                          np.mean(self.onco_precision), np.mean(self.onco_recall), np.mean(self.onco_f1_score)))
+        self.logger.info('Driver: Precision=%s, Recall=%s' % (
+                         np.mean(self.driver_precision), np.mean(self.driver_recall)))
 
     def kfold_validation(self, k=10):
         # generate indices for kfold cross validation
@@ -305,6 +339,14 @@ class GenericClassifier(object):
     def get_tsg_pr_metrics(self):
         """Simple get method for tumor supressor Precision-Recall metrics"""
         return self.tsg_precision_array, self.tsg_recall_array, self.tsg_mean_pr_auc
+
+    def get_driver_pr_metrics(self):
+        """Simple get method for driver gene Precision-Recall metrics"""
+        return self.driver_precision_array, self.driver_recall_array, self.driver_mean_pr_auc
+
+    def get_driver_roc_metrics(self):
+        """Simple get method for driver gene ROC metrics."""
+        return self.driver_tpr_array, self.driver_fpr_array, self.driver_mean_roc_auc
 
     def set_classes(self, oncogene, tsg):
         """Sets the integers used to represent classes in classification."""

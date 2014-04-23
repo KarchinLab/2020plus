@@ -113,7 +113,10 @@ def prob_kde(df, col_name, save_path,
              xlabel='Probability'):
     df['olfactory flag'] = [1 if gene in _utils.olfactory_set
                             else 0 for gene in df.index]
-    df[df['olfactory flag']==1][col_name].plot(kind='kde', label='Olfactory Receptors')
+    try:
+        df[df['olfactory flag']==1][col_name].plot(kind='kde', label='Olfactory Receptors')
+    except:
+        pass
     df[df['true class']==2][col_name].plot(kind='kde', label='TSG')
     df[df['true class']==1][col_name].plot(kind='kde', label='Oncogenes')
     df[df['true class']==0][col_name].plot(kind='kde', label='Other genes')
