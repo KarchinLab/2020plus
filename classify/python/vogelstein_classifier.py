@@ -53,8 +53,22 @@ class VogelsteinClassifier(object):
         self.other_label = "other"
 
     def predict_list(self, input_list,
-                     kind='count', scale_type='linear'):
-        """Predict a list of inputs as either oncogene/tsg/other."""
+                     kind='count',
+                     scale_type=None):
+        """Predict a list of inputs as either oncogene/tsg/other.
+
+        **Parameters**
+
+        input_list : list of list
+            list containing a list of recurrent count,
+            deleterious count or %, and total count or %, in that
+            order.
+        kind : str ('count' | 'percent')
+            whether recur/del are percents or counts
+        scale_type : str (None | 'linear')
+            whether to scale count thresholds based on size of database
+            based on cancer genome landscapes paper
+        """
         # scale count thresholds
         all_cts = sum([x[-1] for x in input_list])
         if scale_type:
