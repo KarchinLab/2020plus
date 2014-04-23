@@ -26,16 +26,21 @@ def r_random_forest(df, opts):
                           min_ct=opts['min_count'])
     rrclf.kfold_validation()  # run random forest
     results = pd.DataFrame({'precision': [rrclf.onco_precision,
-                                          rrclf.tsg_precision],
+                                          rrclf.tsg_precision,
+                                          rrclf.driver_precision],
                             'recall': [rrclf.onco_recall,
-                                       rrclf.tsg_recall],
+                                       rrclf.tsg_recall,
+                                       rrclf.driver_recall],
                             'ROC AUC': [rrclf.onco_mean_roc_auc,
-                                        rrclf.tsg_mean_roc_auc],
+                                        rrclf.tsg_mean_roc_auc,
+                                        rrclf.driver_mean_roc_auc],
                             'PR AUC': [rrclf.onco_mean_pr_auc,
-                                       rrclf.tsg_mean_pr_auc],
+                                       rrclf.tsg_mean_pr_auc,
+                                       rrclf.driver_mean_pr_auc],
                             'count': [rrclf.onco_gene_count,
-                                      rrclf.tsg_gene_count]},
-                           index=['oncogene', 'tsg'])
+                                      rrclf.tsg_gene_count,
+                                      rrclf.cancer_gene_count]},
+                           index=['oncogene', 'tsg', 'driver'])
     return results
 
 
@@ -46,16 +51,21 @@ def py_random_forest(df, opts):
                         min_ct=opts['min_count'])
     rclf.kfold_validation()  # run random forest
     results = pd.DataFrame({'precision': [rclf.onco_precision,
-                                          rclf.tsg_precision],
+                                          rclf.tsg_precision,
+                                          rclf.driver_precision],
                             'recall': [rclf.onco_recall,
-                                       rclf.tsg_recall],
+                                       rclf.tsg_recall,
+                                       rclf.driver_recall],
                             'ROC AUC': [rclf.onco_mean_roc_auc,
-                                        rclf.tsg_mean_roc_auc],
+                                        rclf.tsg_mean_roc_auc,
+                                        rclf.driver_mean_roc_auc],
                             'PR AUC': [rclf.onco_mean_pr_auc,
-                                       rclf.tsg_mean_pr_auc],
+                                       rclf.tsg_mean_pr_auc,
+                                       rclf.driver_mean_pr_auc],
                             'count': [rclf.onco_gene_count,
-                                      rclf.tsg_gene_count]},
-                           index=['oncogene', 'tsg'])
+                                      rclf.tsg_gene_count,
+                                      rclf.cancer_gene_count]},
+                           index=['oncogene', 'tsg', 'driver'])
     return results
 
 
@@ -63,16 +73,21 @@ def naive_bayes(df, opts):
     nbclf = MultinomialNaiveBayes(df, min_ct=opts['min_count'], total_iter=1)
     nbclf.kfold_validation()  # run random forest
     results = pd.DataFrame({'precision': [nbclf.onco_precision,
-                                          nbclf.tsg_precision],
+                                          nbclf.tsg_precision,
+                                          nbclf.driver_precision],
                             'recall': [nbclf.onco_recall,
-                                       nbclf.tsg_recall],
+                                       nbclf.tsg_recall,
+                                       nbclf.driver_recall],
                             'ROC AUC': [nbclf.onco_mean_roc_auc,
-                                        nbclf.tsg_mean_roc_auc],
+                                        nbclf.tsg_mean_roc_auc,
+                                        nbclf.driver_mean_roc_auc],
                             'PR AUC': [nbclf.onco_mean_pr_auc,
-                                       nbclf.tsg_mean_pr_auc],
+                                       nbclf.tsg_mean_pr_auc,
+                                       nbclf.driver_mean_pr_auc],
                             'count': [nbclf.onco_gene_count,
-                                      nbclf.tsg_gene_count]},
-                           index=['oncogene', 'tsg'])
+                                      nbclf.tsg_gene_count,
+                                      nbclf.cancer_gene_count]},
+                           index=['oncogene', 'tsg', 'driver'])
     return results
 
 
@@ -80,6 +95,7 @@ def vogelstein_classification(df, opts):
     x, y_true = features.randomize(df)  # don't need randomization but gets x, y
     y_true_onco = (y_true==1).astype(int)
     y_true_tsg = (y_true==2).astype(int)
+    y_true_driver = y_true_onco + y_true_tsg
 
     # input for 20/20 rule classifier
     ct_list = x[['recurrent count', 'deleterious count', 'total']].values
@@ -89,17 +105,22 @@ def vogelstein_classification(df, opts):
     y_pred = pd.Series(vclf.predict_list(ct_list))
     y_pred_onco = (y_pred=='oncogene').astype(int)
     y_pred_tsg = (y_pred=='tsg').astype(int)
+    y_pred_driver = y_pred_onco + y_pred_tsg
     onco_prec, onco_recall, onco_fscore, onco_support = metrics.precision_recall_fscore_support(y_true_onco, y_pred_onco)
     tsg_prec, tsg_recall, tsg_fscore, tsg_support = metrics.precision_recall_fscore_support(y_true_tsg, y_pred_tsg)
+    driver_prec, driver_recall, driver_fscore, driver_support = metrics.precision_recall_fscore_support(y_true_driver, y_pred_driver)
 
     # aggregate results
     results = pd.DataFrame({'precision': [onco_prec[1],
-                                          tsg_prec[1]],
+                                          tsg_prec[1],
+                                          driver_prec[1]],
                             'recall': [onco_recall[1],
-                                       tsg_recall[1]],
+                                       tsg_recall[1],
+                                       driver_recall[1]],
                             'count': [np.sum(y_pred_onco),
-                                      np.sum(y_pred_tsg)]},
-                           index=['oncogene', 'tsg'])
+                                      np.sum(y_pred_tsg),
+                                      np.sum(y_pred_driver)]},
+                           index=['oncogene', 'tsg', 'driver'])
 
     return results
 
@@ -155,7 +176,7 @@ def calculate_sem(wp):
     tmp_sem_matrix = np.apply_along_axis(stats.sem, 0, wp.values)  # hack because pandas apply method has a bug
     tmp_sem = pd.DataFrame(tmp_sem_matrix,
                            columns=wp.minor_axis,
-                           index=['oncogene', 'tsg'])
+                           index=['oncogene', 'tsg', 'driver'])
     return tmp_sem
 
 
@@ -199,15 +220,27 @@ def save_simulation_result(r_panel, r_path,
     r_df = pd.merge(r_pan['oncogene'], r_pan['tsg'],
                     left_index=True, right_index=True,
                     suffixes=(' oncogene', ' tsg'))
+    r_df = pd.merge(r_df, r_pan['driver'],
+                    left_index=True, right_index=True,
+                    suffixes=('', ' driver'))
     py_df = pd.merge(py_pan['oncogene'], py_pan['tsg'],
                      left_index=True, right_index=True,
                      suffixes=(' oncogene', ' tsg'))
+    py_df = pd.merge(py_df, py_pan['driver'],
+                    left_index=True, right_index=True,
+                    suffixes=('', ' driver'))
     nb_df = pd.merge(nb_pan['oncogene'], nb_pan['tsg'],
                      left_index=True, right_index=True,
                      suffixes=(' oncogene', ' tsg'))
+    nb_df = pd.merge(nb_df, nb_pan['driver'],
+                    left_index=True, right_index=True,
+                    suffixes=('', ' driver'))
     v_df = pd.merge(v_pan['oncogene'], v_pan['tsg'],
                     left_index=True, right_index=True,
                     suffixes=(' oncogene', ' tsg'))
+    v_df = pd.merge(v_df, v_pan['driver'],
+                    left_index=True, right_index=True,
+                    suffixes=('', ' driver'))
 
     # save data frame to specified paths
     r_df.to_csv(r_path, sep='\t')
@@ -429,6 +462,22 @@ def main(cli_opts):
                                xlabel='Sample rate',
                                ylabel='ROC AUC')
 
+    # plot driver auc metrics
+    tmp_save_path = _utils.sim_plot_dir + sim_opts['driver_pr_plot']
+    plot_data.pr_auc_errorbar(results,
+                              gene_type='driver',
+                              save_path=tmp_save_path,
+                              title='Driver PR AUC vs. DB size',
+                              xlabel='Sample rate',
+                              ylabel='PR AUC')
+    tmp_save_path = _utils.sim_plot_dir + sim_opts['driver_roc_plot']
+    plot_data.roc_auc_errorbar(results,
+                               gene_type='driver',
+                               save_path=tmp_save_path,
+                               title='Driver ROC AUC vs. DB size',
+                               xlabel='Sample rate',
+                               ylabel='ROC AUC')
+
     # since the vogelstein classifier doesn't predict probabilities
     # I can't generate a PR or ROC curve. However, I can evaluate
     # metrics like precision and recall
@@ -466,6 +515,22 @@ def main(cli_opts):
                               xlabel='Sample rate',
                               ylabel='Recall')
 
+    # plot driver precision/recall
+    tmp_save_path = _utils.sim_plot_dir + sim_opts['driver_precision_plot']
+    plot_data.precision_errorbar(results,
+                                 gene_type='driver',
+                                 save_path=tmp_save_path,
+                                 title='Driver Precision vs. DB size',
+                                 xlabel='Sample rate',
+                                 ylabel='Precision')
+    tmp_save_path = _utils.sim_plot_dir + sim_opts['driver_recall_plot']
+    plot_data.recall_errorbar(results,
+                              gene_type='driver',
+                              save_path=tmp_save_path,
+                              title='Driver Recall vs. DB size',
+                              xlabel='Sample rate',
+                              ylabel='Recall')
+
     # delete naive bayes since it predicts a lot of genes
     del results['naive bayes']
 
@@ -484,3 +549,10 @@ def main(cli_opts):
                              title='Number of predicted TSG vs. DB size',
                              xlabel='Sample rate',
                              ylabel='Number of predicted TSG')
+    tmp_save_path = _utils.sim_plot_dir + sim_opts['driver_count_plot']
+    plot_data.count_errorbar(results,
+                             gene_type='driver',
+                             save_path=tmp_save_path,
+                             title='Number of predicted driver vs. DB size',
+                             xlabel='Sample rate',
+                             ylabel='Number of predicted driver')
