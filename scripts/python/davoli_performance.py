@@ -74,7 +74,7 @@ def main(opts):
 
     # get lasso oncogene pr curve
     lasso_precision_array, recall_array, lasso_pr_auc = calc_pr_metrics(df['known og'],
-                                                                             df['OG_Probability_LASSO'])
+                                                                        df['OG_Probability_LASSO'])
     # get tuson oncogene pr curve
     tuson_precision_array, recall_array, tuson_pr_auc = calc_pr_metrics(df['known og'], -df['TUSON_q_value_OG'])
 
@@ -101,7 +101,6 @@ def main(opts):
                   recall_array,
                   save_path=opts['tsg_output'],
                   title=r'Davoli \textit{et al.} TSG Precision-Recall Curve')
-
 
 
 if __name__ == "__main__":
