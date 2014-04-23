@@ -31,7 +31,9 @@ class RandomSampleNames(object):
         for i in range(self.num_iter):
             logger.info('Feature generation: Sub-sample rate={0}, Iteration={1} . . .'.format(self.sub_sample, i))
             # get sample names to be used
-            np.random.shuffle(self.sample_names)  # randomly shuffle sample names
+            prng = np.random.RandomState()
+            prng.shuffle(self.sample_names)
+
             #j = 0  # index for sample names
             #tmp_total = 0
             #while(tmp_total < n):
