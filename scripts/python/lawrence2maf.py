@@ -29,7 +29,15 @@ def generate_hgvs_syntax(df):
     for row in df.iterrows():
         row = row[1]  # grab the pandas series object
         seq_ont = row.ix['Sequence Ontology']
-        pos = row.ix['Amino acid position']
+        nulls_in_row = row.isnull()
+
+        # fix bug related to pandas forcing conversion of
+        # dtype to float if there exists a NaN
+        if not nulls_in_row['Amino acid position']:
+            pos = int(row.ix['Amino acid position'])
+        else:
+            pos = row.ix['Amino acid position']
+
         if seq_ont in ['SY', 'SL', 'SG', 'MS', 'CS']:
             ref = row.ix['Reference amino acid(s)']
             alt = row.ix['Alternate amino acid(s)']
