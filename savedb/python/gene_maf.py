@@ -55,7 +55,6 @@ def save_db(maf_path, db_path, hypermutator_count):
         samp_names = set(df['Tumor_Sample'].tolist())
         tmp_df = tmp_df[tmp_df['Tumor_Sample'].apply(lambda x: x not in samp_names)]
         df = pd.concat([df, tmp_df])
-        #df = df.groupby(df.index).first()  # use only first appearance of sample name
 
     _utils.drop_table('maf_mutation', db_path, kind='sqlite')
     conn = sqlite3.connect(db_path)  # open connection
