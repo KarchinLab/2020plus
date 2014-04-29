@@ -5,7 +5,8 @@ import argparse
 def parse_arguments():
     descript = ('Convert MAF files '
                 ' into format compatible with cravat')
-    parser = argparse.ArgumentParser(description=descript)
+    usage_str = 'python maf2cravat.py (-s|-t) input.maf cravat.txt'
+    parser = argparse.ArgumentParser(description=descript, usage=usage_str)
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-s', '--saturation-paper',
                        action='store_true',
@@ -45,8 +46,26 @@ def main(opts, argv):
 
                 # get position
                 mypos = line[col2ix['pos']]
-            else:
-                pass
+            elif opts['tuson_paper']:
+                # add the extra base for cravat if an indel
+                is_ins = '-' in line[col2ix['Reference_Allele']]
+                is_del = '-' in line[col2ix['Tumor_Allele']]
+                is_indel = is_ins or is_del
+                if is_indel:
+                    ref_base = 'A' + line[col2ix['Reference_Allele']].replace('-', '')
+                    new_base = 'A' + line[col2ix['Tumor_Allele']].replace('-', '')
+                else:
+                    ref_base = line[col2ix['Reference_Allele']]
+                    new_base = line[col2ix['Tumor_Allele']]
+
+                # fix chr names
+                mychr = line[col2ix['Chromosome']]
+                mychr = 'X' if mychr == '23' else mychr
+                mychr = 'Y' if mychr == '24' else mychr
+                mychr = 'chr' + mychr
+
+                # get position
+                mypos = line[col2ix['Start_Position']]
 
             # append results
             tmp_list = [k, mychr, mypos, '+',
