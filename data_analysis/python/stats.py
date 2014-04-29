@@ -6,6 +6,7 @@ import plot_data
 import mutation_types
 import single_gene
 import recurrent_mutation
+import tumor_type
 import position_entropy
 import feature_matrix
 import tables.cosmic_aa as cosmic_aa
@@ -87,6 +88,8 @@ def main(recurrent, recurrent_max, db, classify_only):
         recurrent_mutation.main(conn)
 
         sample.main(conn)  # info related to mutations for each sample
+
+        tumor_type.main(conn)
 
         # handle DNA substitutions
         dna_substitutions.main(conn)
