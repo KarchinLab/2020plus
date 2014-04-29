@@ -160,7 +160,6 @@ def main(cli_opts):
     # save result
     result_df.to_csv(_utils.clf_result_dir + cfg_opts['vogelstein_predictions'], sep='\t')
     # plot results
-    label_to_int = {'oncogene': 1, 'other': 0, 'tsg': 2}  # labels to integer code
     result_df['true class'] = result_df['true class'].apply(lambda x: _utils.class_to_label[x])
     plot_data.prob_kde(result_df, 'oncogene score',
                        _utils.clf_plot_dir + cfg_opts['onco_score_kde'],
@@ -220,6 +219,7 @@ def main(cli_opts):
     rrclf_tsg_tpr, rrclf_tsg_fpr, rrclf_tsg_mean_roc_auc = rrclf.get_tsg_roc_metrics()
     rrclf_tsg_precision, rrclf_tsg_recall, rrclf_tsg_mean_pr_auc = rrclf.get_tsg_pr_metrics()
     rrclf_driver_precision, rrclf_driver_recall, rrclf_driver_mean_pr_auc = rrclf.get_driver_pr_metrics()
+    rrclf_driver_tpr, rrclf_driver_fpr, rrclf_driver_mean_roc_auc = rrclf.get_driver_roc_metrics()
 
     # run predictions using R's random forest
     pred_results_path = _utils.clf_result_dir + cfg_opts['rrand_forest_pred']
@@ -267,6 +267,7 @@ def main(cli_opts):
     rclf_tsg_tpr, rclf_tsg_fpr, rclf_tsg_mean_roc_auc = rclf.get_tsg_roc_metrics()
     rclf_tsg_precision, rclf_tsg_recall, rclf_tsg_mean_pr_auc = rclf.get_tsg_pr_metrics()
     rclf_driver_precision, rclf_driver_recall, rclf_driver_mean_pr_auc = rclf.get_driver_pr_metrics()
+    rclf_driver_tpr, rclf_driver_fpr, rclf_driver_mean_roc_auc = rclf.get_driver_roc_metrics()
 
     # plot feature importance
     mean_df = rclf.mean_importance
@@ -320,6 +321,7 @@ def main(cli_opts):
     nbclf_tsg_tpr, nbclf_tsg_fpr, nbclf_tsg_mean_roc_auc = nbclf.get_tsg_roc_metrics()
     nbclf_tsg_precision, nbclf_tsg_recall, nbclf_tsg_mean_pr_auc = nbclf.get_tsg_pr_metrics()
     nbclf_driver_precision, nbclf_driver_recall, nbclf_driver_mean_pr_auc = nbclf.get_driver_pr_metrics()
+    nbclf_driver_tpr, nbclf_driver_fpr, nbclf_driver_mean_roc_auc = nbclf.get_driver_roc_metrics()
     logger.info('Finished Naive Bayes.')
 
     # dummy classifier, predict most frequent
@@ -333,11 +335,12 @@ def main(cli_opts):
     dclf_onco_precision, dclf_onco_recall, dclf_onco_mean_pr_auc = dclf.get_onco_pr_metrics()
     dclf_tsg_tpr, dclf_tsg_fpr, dclf_tsg_mean_roc_auc = dclf.get_tsg_roc_metrics()
     dclf_tsg_precision, dclf_tsg_recall, dclf_tsg_mean_pr_auc = dclf.get_tsg_pr_metrics()
+    dclf_driver_tpr, dclf_driver_fpr, dclf_driver_mean_roc_auc = dclf.get_driver_roc_metrics()
     logger.info('Finished dummy classifier.')
 
     # plot oncogene roc figure
     random_forest_str = 'random forest (AUC = %0.3f)' % rclf_onco_mean_roc_auc
-    rrandom_forest_str = 'sub-sampled random forest (AUC = %0.3f)' % rrclf_onco_mean_roc_auc
+    rrandom_forest_str = '20/20+ Classifier (AUC = %0.3f)' % rrclf_onco_mean_roc_auc
     naive_bayes_str = 'naive bayes (AUC = %0.3f)' % nbclf_onco_mean_roc_auc
     dummy_str = 'dummy (AUC = %0.3f)' % dclf_onco_mean_roc_auc
     rclf_onco_mean_tpr = np.mean(rclf_onco_tpr, axis=0)
@@ -358,7 +361,7 @@ def main(cli_opts):
 
     # plot tsg roc figure
     random_forest_str = 'random forest (AUC = %0.3f)' % rclf_tsg_mean_roc_auc
-    r_random_forest_str = 'sub-sampled random forest (AUC = %0.3f)' % rrclf_tsg_mean_roc_auc
+    r_random_forest_str = '20/20+ Classifier (AUC = %0.3f)' % rrclf_tsg_mean_roc_auc
     naive_bayes_str = 'naive bayes (AUC = %0.3f)' % nbclf_tsg_mean_roc_auc
     dummy_str = 'dummy (AUC = %0.3f)' % dclf_tsg_mean_roc_auc
     rclf_tsg_mean_tpr = np.mean(rclf_tsg_tpr, axis=0)
@@ -376,9 +379,29 @@ def main(cli_opts):
     save_path = _utils.clf_plot_dir + cfg_opts['roc_plot_tsg']
     plot_data.receiver_operator_curve(df, save_path, line_style)
 
+    # plot driver roc figure
+    random_forest_str = 'random forest (AUC = %0.3f)' % rclf_driver_mean_roc_auc
+    r_random_forest_str = '20/20+ Classifier (AUC = %0.3f)' % rrclf_driver_mean_roc_auc
+    naive_bayes_str = 'naive bayes (AUC = %0.3f)' % nbclf_driver_mean_roc_auc
+    dummy_str = 'dummy (AUC = %0.3f)' % dclf_driver_mean_roc_auc
+    rclf_driver_mean_tpr = np.mean(rclf_driver_tpr, axis=0)
+    rrclf_driver_mean_tpr = np.mean(rrclf_driver_tpr, axis=0)
+    nbclf_driver_mean_tpr = np.mean(nbclf_driver_tpr, axis=0)
+    dclf_driver_mean_tpr = np.mean(dclf_driver_tpr, axis=0)
+    df = pd.DataFrame({random_forest_str: rclf_driver_mean_tpr,
+                       r_random_forest_str: rrclf_driver_mean_tpr,
+                       naive_bayes_str: nbclf_driver_mean_tpr,
+                       dummy_str: dclf_driver_mean_tpr},
+                      index=rclf_driver_fpr)
+    line_style = {dummy_str: '--',
+                  random_forest_str: '-',
+                  naive_bayes_str:'-'}
+    save_path = _utils.clf_plot_dir + cfg_opts['roc_plot_driver']
+    plot_data.receiver_operator_curve(df, save_path, line_style)
+
     # plot oncogene pr figure
     random_forest_str = 'random forest (AUC = %0.3f)' % rclf_onco_mean_pr_auc
-    rrandom_forest_str = 'sub-sampled random forest (AUC = %0.3f)' % rrclf_onco_mean_pr_auc
+    rrandom_forest_str = '20/20+ Classifier (AUC = %0.3f)' % rrclf_onco_mean_pr_auc
     naive_bayes_str = 'naive bayes (AUC = %0.3f)' % nbclf_onco_mean_pr_auc
     dummy_str = 'dummy (AUC = %0.3f)' % dclf_onco_mean_pr_auc
     rclf_onco_mean_precision = np.mean(rclf_onco_precision, axis=0)
@@ -408,7 +431,7 @@ def main(cli_opts):
 
     # plot tsg pr figure
     random_forest_str = 'random forest (AUC = %0.3f)' % rclf_tsg_mean_pr_auc
-    r_random_forest_str = 'sub-sampled random forest (AUC = %0.3f)' % rrclf_tsg_mean_pr_auc
+    r_random_forest_str = '20/20+ Classifier (AUC = %0.3f)' % rrclf_tsg_mean_pr_auc
     naive_bayes_str = 'naive bayes (AUC = %0.3f)' % nbclf_tsg_mean_pr_auc
     dummy_str = 'dummy (AUC = %0.3f)' % dclf_tsg_mean_pr_auc
     rclf_tsg_mean_precision = np.mean(rclf_tsg_precision, axis=0)
@@ -429,9 +452,9 @@ def main(cli_opts):
                                      title='TSG Precision-Recall Curve')
 
 
-    # plot tsg pr figure
+    # plot driver gene pr figure
     random_forest_str = 'random forest (AUC = %0.3f)' % rclf_driver_mean_pr_auc
-    r_random_forest_str = 'sub-sampled random forest (AUC = %0.3f)' % rrclf_driver_mean_pr_auc
+    r_random_forest_str = '20/20+ Classifier (AUC = %0.3f)' % rrclf_driver_mean_pr_auc
     naive_bayes_str = 'naive bayes (AUC = %0.3f)' % nbclf_driver_mean_pr_auc
     rclf_driver_mean_precision = np.mean(rclf_driver_precision, axis=0)
     rrclf_driver_mean_precision = np.mean(rrclf_driver_precision, axis=0)
