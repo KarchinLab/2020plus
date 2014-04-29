@@ -24,6 +24,7 @@ class AminoAcid(object):
 
     def __init__(self, hgvs='', occurrence=1):
         self.logger = logging.getLogger(__name__)
+        self.is_non_silent = False  # initialize mutation to be silent
         if not (type(hgvs) is str or type(hgvs) is type(u'')):
             # catches cases where wierd non-string input is used
             self.is_valid = False
@@ -120,6 +121,7 @@ class AminoAcid(object):
         # set missense status
         if re.search('^[A-Z?*]\d+[A-Z?]$', hgvs_string):
             self.is_missense = True
+            self.is_non_silent = True
         else:
             self.is_missense = False
 
@@ -127,10 +129,12 @@ class AminoAcid(object):
         """Check for frame shift and set the self.is_frame_shift flag."""
         if 'fs' in self.hgvs_original:
             self.is_frame_shift = True
+            self.is_non_silent = True
         elif re.search('[A-Z]\d+[A-Z]+\*', self.hgvs_original):
             # it looks like some mutations dont follow the convention
             # of using 'fs' to indicate frame shift
             self.is_frame_shift = True
+            self.is_non_silent = True
         else:
             self.is_frame_shift = False
 
@@ -140,6 +144,7 @@ class AminoAcid(object):
         lost_stop_pattern = '^\*\d+[A-Z?]+\*?$'
         if re.search(lost_stop_pattern, hgvs_string):
             self.is_lost_stop = True
+            self.is_non_silent = True
         else:
             self.is_lost_stop = False
 
@@ -147,6 +152,7 @@ class AminoAcid(object):
         """Set whether there is a premature stop codon."""
         if re.search('.+\*(\d+)?$', hgvs_string):
             self.is_premature_stop_codon = True
+            self.is_non_silent = True
 
             # check if it is also a nonsense mutation
             if hgvs_string.endswith('*'):
@@ -165,11 +171,13 @@ class AminoAcid(object):
             self.is_insertion = True
             self.is_deletion = False
             self.is_indel = True
+            self.is_non_silent = True
         elif "del" in self.hgvs_original:
             # mutation is deletion
             self.is_deletion = True
             self.is_insertion = False
             self.is_indel = True
+            self.is_non_silent = True
         else:
             # not an indel
             self.is_deletion = False
@@ -211,6 +219,7 @@ class AminoAcid(object):
         no_protein_list = ['0', '0?']  # no protein symbols
         if hgvs_string in no_protein_list:
             self.is_no_protein = True
+            self.is_non_silent = True
         else:
             self.is_no_protein = False
 
