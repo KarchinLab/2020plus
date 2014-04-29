@@ -404,9 +404,78 @@ def sample_kde(df, save_path,
     df['true class'] = df['true class'].apply(lambda x: _utils.class_to_label[x])
 
     # plot kde
-    df[df['true class']==_utils.tsg_label]['sample_count'].dropna().plot(kind='kde', label='TSG')
-    df[df['true class']==_utils.onco_label]['sample_count'].dropna().plot(kind='kde', label='Oncogenes')
-    df[df['true class']==_utils.other_label]['sample_count'].dropna().plot(kind='kde', label='Other genes')
+    df[df['true class']==_utils.tsg_label]['sample_pct'].dropna().plot(kind='kde', label='TSG')
+    df[df['true class']==_utils.onco_label]['sample_pct'].dropna().plot(kind='kde', label='Oncogenes')
+    df[df['true class']==_utils.other_label]['sample_pct'].dropna().plot(kind='kde', label='Other genes')
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.legend(loc='best')
+    plt.savefig(save_path)
+    plt.close()
+
+
+def entropy_sample_correlation(x, y,
+                               save_path,
+                               xlabel='',
+                               ylabel='',
+                               title=''):
+    logger.info('Plotting correlation between sample prevalence and '
+                ' oncogene position entropy (%s) ...' % save_path)
+
+    # define plot text if not provided
+    if not xlabel:
+        xlabel = 'Maximum percent of samples a gene is mutated in a given Tumor Type'
+    if not ylabel:
+        ylabel = 'Percent of Uniform Mutation Entropy'
+    if not title:
+        title = 'Oncogene comparison between prevalence and positional distribution'
+
+    # make scatter plot
+    myplt.correlation_plot(x, y,
+                           save_path,
+                           title=title,
+                           xlabel=xlabel,
+                           ylabel=ylabel)
+    logger.info('Finished plotting correlation between sample prevalence and '
+                ' oncogene position entropy.')
+
+
+def non_silent_tumor_type_barplot(df, save_path,
+                                  xlabel='',
+                                  ylabel='',
+                                  title=''):
+    # specify labels
+    if not xlabel:
+        xlabel='Tumor Types'
+    if not ylabel:
+        ylabel='Number of non-silent mutations'
+    if not title:
+        title='Number of non-silent mutations for each tumor type'
+    # make bar plot
+    myplt.barplot(df,
+                  save_path,
+                  xlabel=xlabel,
+                  ylabel=ylabel,
+                  title=title)
+
+
+def js_distance_kde(df, save_path,
+                    xlabel='',
+                    ylabel='',
+                    title=''):
+    # initialize labels
+    if not xlabel:
+        xlabel = 'Jensen-Shannon Distance'
+    if not ylabel:
+        ylabel = 'Density'
+    if not title:
+        title = 'JS distance of Tumor Type distribution compared to database'
+
+    # plot kde
+    df[df['true class']=='tsg']['JS distance'].dropna().plot(kind='kde', label='TSG')
+    df[df['true class']=='oncogene']['JS distance'].dropna().plot(kind='kde', label='Oncogenes')
+    df[df['true class']=='other']['JS distance'].dropna().plot(kind='kde', label='Other genes')
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)

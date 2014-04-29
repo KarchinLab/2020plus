@@ -344,5 +344,3 @@ def correlation_plot(x, y,
     plt.savefig(save_path)
     plt.clf()  # clear figure
     plt.close()
-
-
