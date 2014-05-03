@@ -357,7 +357,7 @@ def main(cli_opts):
             # bootstrap object for sub-sampling
             dfg = Bootstrap(df.copy(),
                             subsample=sample_rate,
-                            num_samples=cli_opts['samples'])
+                            num_iter=cli_opts['samples'])
         else:
             # sample with out replacement of sample names
             dfg = RandomSampleNames(sub_sample=sample_rate,
@@ -533,6 +533,7 @@ def main(cli_opts):
 
     # delete naive bayes since it predicts a lot of genes
     del results['naive bayes']
+    del results['random forest']
 
     # plot number of predicted genes
     tmp_save_path = _utils.sim_plot_dir + sim_opts['onco_count_plot']

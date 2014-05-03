@@ -21,12 +21,12 @@ class Bootstrap(object):
         """
         tmp_df = self.df.copy()  # copy df so it is not mutable
         n = int(self.subsample * self.total_count)  # number of counts to sample
-        multinomial_sample = np.random.multinomial(n,  # total counts for multinomial
-                                                   self.prob,  # probability
-                                                   self.num_iter)  # number of samples
         for i in range(self.num_iter):
-            tmp_df.values[self.nonzero_indices] = multinomial_sample[i]
-            tmp_df = features.process_features(tmp_df)
+            prng = np.random.RandomState()
+            multinomial_sample = prng.multinomial(n,  # total counts for multinomial
+                                                  self.prob)  # probability
+            tmp_df.values[self.nonzero_indices] = multinomial_sample
+            tmp_df = features.process_features(tmp_df, 0)
             yield tmp_df
 
     def set_subsample(self, subsample):
