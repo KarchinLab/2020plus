@@ -14,9 +14,14 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def calc_onco_info(df, onco_pct, tsg_pct, min_ct):
+def calc_class_info(df, onco_pct, tsg_pct, min_ct, tsg_min=None, kind='oncogene'):
     # calculate the number of genes classified as oncogene
-    vclf = VogelsteinClassifier(onco_pct, tsg_pct, min_count=min_ct)
+    if not tsg_min:
+        vclf = VogelsteinClassifier(onco_pct, tsg_pct, min_count=min_ct)
+    else:
+        vclf = VogelsteinClassifier(onco_pct, tsg_pct,
+                                    min_count=min_ct,
+                                    tsg_min=tsg_min)
     df['total'] = df.T.sum()
     input_list = [(row['recurrent missense'] + row['recurrent indel'],
                    row['frame shift'] + row['nonsense'] + row['lost stop'] + row['no protein'] + row['splicing mutation'],
@@ -29,12 +34,12 @@ def calc_onco_info(df, onco_pct, tsg_pct, min_ct):
     df['true class'] = [_utils.classify_gene(gene)
                         for gene in df.index.tolist()]
     tmpdf = df.copy()  # prevent wierd behavior
-    known_onco = tmpdf[tmpdf['true class']=='oncogene']
-    num_onco_found = len(known_onco[known_onco['20/20 predicted class']=='oncogene'])
-    total_onco = len(known_onco)  # total number of oncogenes with counts
-    pct_onco_found = num_onco_found / total_onco
+    known_class = tmpdf[tmpdf['true class']==kind]
+    num_class_found = len(known_class[known_class['20/20 predicted class']==kind])
+    total_class = len(known_class)  # total number of oncogenes with counts
+    pct_class_found = num_class_found / total_class
 
-    return class_cts['oncogene'], pct_onco_found
+    return class_cts[kind], pct_class_found
 
 
 def num_onco_by_recurrent_mutations(onco_pct, tsg_pct, min_ct):
@@ -46,10 +51,11 @@ def num_onco_by_recurrent_mutations(onco_pct, tsg_pct, min_ct):
     onco_ct_list, onco_pct_list = [], []  # list of cts/pct for oncogenes
     for file_path in gene_design_matrix_paths:
         tmp_df = pd.read_csv(file_path, sep='\t', index_col=0)
-        tmp_ct, tmp_pct = calc_onco_info(tmp_df,
+        tmp_ct, tmp_pct = calc_class_info(tmp_df,
                                          onco_pct=onco_pct,  # pct thresh for onco
                                          tsg_pct=tsg_pct,  # pct thresh for tsg
-                                         min_ct=min_ct)  # min count for a gene
+                                         min_ct=min_ct,  # min count for a gene
+                                         kind='oncogene')
         onco_ct_list.append(tmp_ct)
         onco_pct_list.append(tmp_pct)
 
@@ -64,19 +70,48 @@ def num_onco_by_recurrent_mutations(onco_pct, tsg_pct, min_ct):
     return mycts, mypct
 
 
-def num_onco_by_pct_threshold(min_ct):
+def num_tsg_by_threshold(onco_pct, tsg_pct, min_ct, del_param_list):
+    file_path = _utils.result_dir + 'gene_feature_matrix.txt'
+    tmp_df = pd.read_csv(file_path, sep='\t', index_col=0)
+    tsg_ct_list, tsg_pct_list = [], []
+    for tmp_tsg_min in del_param_list:
+        tmp_tsg_ct, tmp_tsg_pct = calc_class_info(tmp_df.copy(),
+                                                  onco_pct=onco_pct,  # pct thresh for onco
+                                                  tsg_pct=tsg_pct,  # pct thresh for tsg
+                                                  min_ct=min_ct,  # min count for a gene
+                                                  tsg_min=tmp_tsg_min,  # min del ct for tsg
+                                                  kind='tsg')
+        tsg_ct_list.append(tmp_tsg_ct)
+        tsg_pct_list.append(tmp_tsg_pct)
+
+    # return dataframe with counts for each use of a recurrent mutation counts
+    mycts = pd.Series(tsg_ct_list, index=del_param_list)
+    mypct = pd.Series(tsg_pct_list, index=del_param_list)
+    return mycts, mypct
+
+
+def num_pred_by_pct_threshold(min_ct):
     """Enumerates percent thresholds for 2020 rule."""
     # initialization of dataframe
     cts, pct = num_onco_by_recurrent_mutations(.2, .2, min_ct)
-    df_ct = pd.DataFrame(index=cts.index)
-    df_pct = pd.DataFrame(index=pct.index)
+    onco_ct = pd.DataFrame(index=cts.index)
+    onco_pct = pd.DataFrame(index=pct.index)
 
     # test different percentage thresholds
-    for threshold in np.arange(.15, .5, .05):
+    thresh_range = np.arange(.15, .5, .05)
+    tsg_ct_params = range(5, 17, 2)
+    tsg_ct = pd.DataFrame(index=tsg_ct_params)
+    tsg_pct = pd.DataFrame(index=tsg_ct_params)
+    for threshold in thresh_range:
         tmp_ct, tmp_pct = num_onco_by_recurrent_mutations(threshold, threshold, min_ct)
-        df_ct[str(threshold)] = tmp_ct
-        df_pct[str(threshold)] = tmp_pct
-    return df_ct, df_pct
+        onco_ct[str(threshold)] = tmp_ct
+        onco_pct[str(threshold)] = tmp_pct
+        tmp_ct, tmp_pct = num_tsg_by_threshold(threshold, threshold,
+                                               min_ct, tsg_ct_params)
+        tsg_ct[threshold] = tmp_ct
+        tsg_pct[threshold] = tmp_pct
+
+    return onco_ct, onco_pct, tsg_ct, tsg_pct
 
 
 def generate_2020_result(onco_pct, tsg_pct, min_ct):
@@ -145,13 +180,13 @@ def main(cli_opts):
     minimum_ct = cli_opts['min_count']
 
     # get oncogene info
-    count_df, pct_df = num_onco_by_pct_threshold(minimum_ct)
-    count_df = count_df.sort_index()  # sort df by recurrent mutation cts
-    pct_df = pct_df.sort_index()  # sort df by recurrent mutation cts
+    onco_count_df, onco_pct_df, tsg_ct, tsg_pct = num_pred_by_pct_threshold(minimum_ct)
+    onco_count_df = onco_count_df.sort_index()  # sort df by recurrent mutation cts
+    onco_pct_df = onco_pct_df.sort_index()  # sort df by recurrent mutation cts
 
     # save results
-    count_df.to_csv(_utils.clf_result_dir + cfg_opts['oncogene_parameters_ct'], sep='\t')
-    pct_df.to_csv(_utils.clf_result_dir + cfg_opts['oncogene_parameters_pct'], sep='\t')
+    onco_count_df.to_csv(_utils.clf_result_dir + cfg_opts['oncogene_parameters_ct'], sep='\t')
+    onco_pct_df.to_csv(_utils.clf_result_dir + cfg_opts['oncogene_parameters_pct'], sep='\t')
 
     # get the "normal" results from the 20/20 rule, based on
     # gene_feature_matrix.txt (aka last settings for data_analysis command)
@@ -178,7 +213,7 @@ def main(cli_opts):
     tmp_title = r"Landscape 2013 Classifier Predicted Oncogenes"
     tmp_ylabel = 'Number of Oncogenes'
     tmp_xlabel = 'Number of Mutations Required for Recurrency'
-    plot_data.onco_mutations_parameter(count_df,
+    plot_data.onco_mutations_parameter(onco_count_df,
                                        tmp_save_path,
                                        title=tmp_title,
                                        ylabel=tmp_ylabel,
@@ -188,11 +223,31 @@ def main(cli_opts):
     tmp_ylabel = 'Oncogene Recall'
     tmp_xlabel = 'Number of Mutations Required for Recurrency'
     tmp_save_path = _utils.clf_plot_dir + cfg_opts['pct_oncogenes_plot']
-    plot_data.onco_mutations_parameter(pct_df,
+    plot_data.onco_mutations_parameter(onco_pct_df,
                                        tmp_save_path,
                                        title=tmp_title,
                                        ylabel=tmp_ylabel,
                                        xlabel=tmp_xlabel)
+    # plot tsg of number of tsg's predicted
+    tmp_title = 'Landscape 2013 Classifier Predicted TSGs'
+    tmp_ylabel = 'Number of Predicted TSGs'
+    tmp_xlabel = 'Minimum Deleterious Mutations'
+    tmp_save_path = _utils.clf_plot_dir + cfg_opts['number_tsg_plot']
+    plot_data.tsg_mutations_parameter(tsg_ct,
+                                     tmp_save_path,
+                                     title=tmp_title,
+                                     ylabel=tmp_ylabel,
+                                     xlabel=tmp_xlabel)
+    # plot recall of tsg while varying tsg score threshold
+    tmp_title = 'Percentage of Landscape 2013 Oncogenes Recovered'
+    tmp_ylabel = 'TSG Recall'
+    tmp_xlabel = 'Minimum Deleterious Mutations'
+    tmp_save_path = _utils.clf_plot_dir + cfg_opts['pct_tsg_plot']
+    plot_data.tsg_mutations_parameter(tsg_pct,
+                                     tmp_save_path,
+                                     title=tmp_title,
+                                     ylabel=tmp_ylabel,
+                                     xlabel=tmp_xlabel)
 
     df = pd.read_csv(in_opts['gene_feature'],
                      sep='\t', index_col=0)

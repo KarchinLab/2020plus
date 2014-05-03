@@ -20,6 +20,19 @@ def onco_mutations_parameter(df,
     logger.info('Finished plotting.')
 
 
+def tsg_mutations_parameter(df,
+                            save_path,
+                            title='',
+                            xlabel='',
+                            ylabel=''):
+    logger.info('Plotting tsg mutations while varying tsg score')
+    myplt.line(df, save_path,
+               title=title,
+               ylabel=ylabel,
+               xlabel=xlabel)
+    logger.info('Finished plotting.')
+
+
 def feature_importance_barplot(mean_df,
                                std_df,
                                save_path):
