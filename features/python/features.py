@@ -177,9 +177,10 @@ def random_sort(df):
     df : pd.DataFrame
         Randomly shuffled data frame
     """
-    random_indices = np.random.choice(df.index.values,  # sample from 'genes'
-                                      len(df),  # number of samples
-                                      replace=False)  # sample without replacement
+    prng = np.random.RandomState()  # get new random state
+    random_indices = prng.choice(df.index.values,  # sample from 'genes'
+                                 len(df),  # number of samples
+                                 replace=False)  # sample without replacement
     random_df = df.reindex(random_indices)  # change order of df
     return random_df
 
