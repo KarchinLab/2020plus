@@ -466,7 +466,6 @@ def main(cli_opts):
     df = pd.DataFrame({random_forest_str: rclf_onco_mean_precision,
                        rrandom_forest_str: rrclf_onco_mean_precision,
                        naive_bayes_str: nbclf_onco_mean_precision},
-                       # dummy_str: dclf_onco_mean_precision},
                       index=rclf_onco_recall)
     #rclf_onco_sem_precision = stats.sem(rclf_onco_precision, axis=0)
     #nbclf_onco_sem_precision = stats.sem(nbclf_onco_precision, axis=0)
@@ -496,7 +495,6 @@ def main(cli_opts):
     df = pd.DataFrame({random_forest_str: rclf_tsg_mean_precision,
                        r_random_forest_str: rrclf_tsg_mean_precision,
                        naive_bayes_str: nbclf_tsg_mean_precision},
-                       #dummy_str: dclf_tsg_mean_precision},
                       index=rclf_tsg_recall)
     line_style = {dummy_str: '--',
                   random_forest_str: '-',
