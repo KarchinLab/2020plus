@@ -113,7 +113,7 @@ font.family          : sans-serif
 # settings for axes and ticks. Special text sizes can be defined
 # relative to font.size, using the following values: xx-small, x-small,
 # small, medium, large, x-large, xx-large, larger, or smaller
-font.size           : 14.0
+font.size           : 16.0
 # font.serif          : Bitstream Vera Serif, New Century Schoolbook, Century Schoolbook L, Utopia, ITC Bookman, Bookman, Nimbus Roman No9 L, Times New Roman, Times, Palatino, Charter, serif
 font.sans-serif     : Helvetica, Bitstream Vera Sans, Lucida Grande, Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif
 #font.cursive        : Apple Chancery, Textile, Zapf Chancery, Sand, cursive
@@ -201,8 +201,8 @@ axes.facecolor      : eeeeee   # axes background color
 axes.edgecolor      : bcbcbc   # axes edge color
 axes.linewidth      : 1        # edge linewidth
 axes.grid           : True     # display grid or not
-axes.titlesize      : x-large # fontsize of the axes title
-axes.labelsize      : large  # fontsize of the x any y labels
+axes.titlesize      : xx-large  # fontsize of the axes title
+axes.labelsize      : x-large  # fontsize of the x any y labels
 axes.labelcolor     : 555555
 axes.axisbelow      : True     # whether axis gridlines and ticks are below
                                # the axes elements (lines, text, etc)
@@ -244,7 +244,7 @@ xtick.minor.size     : 0      # minor tick size in points
 xtick.major.pad      : 6      # distance to major tick label in points
 xtick.minor.pad      : 6      # distance to the minor tick label in points
 xtick.color          : 555555      # color of the tick labels
-xtick.labelsize      : medium # fontsize of the tick labels
+xtick.labelsize      : large # fontsize of the tick labels
 xtick.direction      : in     # direction: in or out
 
 ytick.major.size     : 0      # major tick size in points
@@ -252,7 +252,7 @@ ytick.minor.size     : 0      # minor tick size in points
 ytick.major.pad      : 6      # distance to major tick label in points
 ytick.minor.pad      : 6      # distance to the minor tick label in points
 ytick.color          : 555555      # color of the tick labels
-ytick.labelsize      : medium  # fontsize of the tick labels
+ytick.labelsize      : large  # fontsize of the tick labels
 ytick.direction      : in     # direction: in or out
 
 
