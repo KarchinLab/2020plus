@@ -418,7 +418,7 @@ if __name__ == '__main__':
         if args.log:
             log_file = args.log
         else:
-            log_file = os.devnull
+            log_file = ''  # auto-name the log file
     else:
         log_file = os.devnull
     log_level = args.log_level
