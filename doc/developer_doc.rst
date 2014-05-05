@@ -4,15 +4,16 @@ Developer Documentation
 Overview
 --------
 
-There are already over 4000 lines of code, as of writting.
+There are already over 6000 lines of code, as of writting.
 However, I have distilled most of the usage to just a handful
 of sub-commands of the run.py script in the project root directory.
-There are four run.py sub-commands:
+There are five run.py sub-commands:
 
 1. savedb
-2. features
-3. data_analysis
+2. data_analysis
+3. features
 4. classify
+5. simulation
 
 Python code for each sub-command is located in a self-titled directory.
 Lets take the *data_analysis* sub-command as an example:
@@ -24,12 +25,9 @@ Lets take the *data_analysis* sub-command as an example:
     * stats.py
     * . . .
 
-  * results/
-  * plots/
-
 Python code is located in the python sub-directory. If figures are generated
-then they are stored in the plots/ directory. While text files are stored in 
-the results/ directory.
+then they are stored in the plots/ directory under the results/XXXXX folder (if using the XXXXX command). While text files are stored in 
+the results/XXXXX/results directory (if using the XXXXX sub-command).
 
 In general, most (if not all) of the file paths for text files are 
 found in config files in the *config* directory.
@@ -48,14 +46,14 @@ is the randomForest library in R (I use the rpy2 wrapper).
 
 Pandas is a package that provides an R-like data frame for python.
 Learning a little about pandas from their website will help tremendously
-in understanding my code. First of all, all I/O operations are handled
+in understanding my code. First of all, all most all I/O operations are handled
 through pandas including querying/writing to databases. The following is 
 an example of querying sqlite3 and getting a data frame object.
 
 .. code-block:: python
 
    oncogenes = _utils.oncogene_list  # list of oncogenes
-   sql = "SELECT * FROM nucleotide WHERE Gene in " + str(oncogenes)
+   sql = "SELECT * FROM cosmic_mutation WHERE Gene in " + str(oncogenes)
    df = psql.frame_query(sql, con=conn)  # execute query
    # now do some work . . .
 

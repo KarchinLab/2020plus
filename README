@@ -27,3 +27,5 @@ Directories
 * config -- contains configuration files for running code
 * styles -- matplotlib styles for plotting
 * tests -- unit tests to be tested by the python "nose" package
+* results -- contains output from commands
+* simulation -- simulate COSMIC database size changes

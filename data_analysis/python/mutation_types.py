@@ -193,3 +193,16 @@ def main(conn):
                       sep='\t')
     plot_data.all_mut_type_barplot(tmp_mut_df,
                                    plot_dir + cfg_opts['all_mut_type_barplot'])
+
+    # plot non-silent/silent mutation ratio
+    tmp_df = pd.DataFrame(index=tmp_mut_df.index)
+    total = tmp_mut_df.sum(axis=1)
+    silent = tmp_mut_df['synonymous']
+    non_silent = total - silent
+    silent += 1
+    non_silent += 1
+    tmp_df['non-silent/silent'] = non_silent / silent.astype(float)
+    tmp_df['label'] = tmp_df.index.to_series().apply(_utils.classify_gene)
+    plot_data.non_silent_ratio_kde(tmp_df, 'non_silent_ratio.png',
+                                   title='non-silent/silent mutation distribution',
+                                   xlabel='non-silent/silent')
