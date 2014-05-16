@@ -59,7 +59,7 @@ def main(conn):
                                     rows='Gene',
                                     aggfunc=np.sum)
     gene_mut_table = gene_mut_table.fillna(0)  # NAs represent 0 counts
-    gene_mut_table = gene_mut_table + 1/5.  # add a pseudo count
+    gene_mut_table = gene_mut_table + .01  # add a pseudo count
     gene_mut_table = gene_mut_table.div(gene_mut_table.sum(axis=1).astype(float),
                                         axis=0)  # row normalize to 1 (i.e. a probability)
     pct_ttype_df['non silent'] = 1/float(len(pct_ttype_df))

@@ -470,7 +470,7 @@ def js_distance_kde(df, save_path,
     if not ylabel:
         ylabel = 'Density'
     if not title:
-        title = 'JS distance of Tumor Type distribution compared to database'
+        title = 'JS distance from Database Tumor Type distribution'
 
     # plot kde
     df[df['true class']=='tsg']['JS distance'].dropna().plot(kind='kde', label='TSG')
