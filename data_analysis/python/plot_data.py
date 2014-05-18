@@ -445,6 +445,10 @@ def non_silent_tumor_type_barplot(df, save_path,
                                   xlabel='',
                                   ylabel='',
                                   title=''):
+    # get rid of underscores
+    df.rename(columns=lambda x: x.replace('_', ' '), inplace=True)
+    df.rename(index=lambda x: x.replace('_', ' '), inplace=True)
+
     # specify labels
     if not xlabel:
         xlabel='Tumor Types'
