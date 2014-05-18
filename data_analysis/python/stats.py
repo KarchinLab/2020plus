@@ -67,6 +67,7 @@ def main(recurrent, recurrent_max, db, classify_only):
 
     position_entropy.main(conn)
     feature_matrix.main(recurrent, recurrent_max, conn)  # generate mutation count feature matrix
+    tumor_type.main(conn)
 
     # user can specify a flag to prevent complete updates of the
     # data_analysis results. if classify_only is specified only
@@ -88,8 +89,6 @@ def main(recurrent, recurrent_max, db, classify_only):
         recurrent_mutation.main(conn)
 
         sample.main(conn)  # info related to mutations for each sample
-
-        tumor_type.main(conn)
 
         # handle DNA substitutions
         dna_substitutions.main(conn)
