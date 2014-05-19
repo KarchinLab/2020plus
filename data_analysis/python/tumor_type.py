@@ -7,6 +7,7 @@ import plot_data
 import utils.python.math as mymath
 import numpy as np
 import logging
+import IPython
 
 logger = logging.getLogger(__name__)
 
@@ -125,8 +126,10 @@ def js_dist_ttype(df, ttype_df):
     pct_ttype_df = ttype_df / float(ttype_df.sum())
     non_silent_df = filter_silent(df)
     gene_mut_table = gene_ns_tumor_types(non_silent_df)
-    pct_ttype_df['non silent'] = 1/float(len(pct_ttype_df))
-    db_ttypes = pct_ttype_df['non silent'].reindex(gene_mut_table.columns)  # make sure indices align
+    # pct_ttype_df['non silent'] = 1/float(len(pct_ttype_df))
+    # db_ttypes = pct_ttype_df['non silent'].reindex(gene_mut_table.columns)  # make sure indices align
+    db_ttypes = pct_ttype_df.reindex(gene_mut_table.columns)
+    db_ttypes = db_ttypes['non silent'].fillna(0.0)  # get series object
     js_df = pd.DataFrame({'JS distance': gene_mut_table.apply(mymath.js_distance,
                                                               args=(db_ttypes,),
                                                               axis=1)})
