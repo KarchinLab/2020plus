@@ -2,6 +2,7 @@
 of the classifier predictions."""
 
 import utils.python.util as _utils
+import utils.python.math as mymath
 import features.python.features as features
 import numpy as np
 from numpy import interp
@@ -202,14 +203,18 @@ class GenericClassifier(object):
                          np.mean(self.driver_precision), np.mean(self.driver_recall)))
 
     def kfold_validation(self, k=10):
-        # generate indices for kfold cross validation
-        #k_fold = cross_validation.KFold(n=len(self.x),  # len of df
-                                        #n_folds=k,  # k fold
-                                        #indices=True)  # return indices
         self.num_pred = 0  # number of predictions
+        cfg = _utils.get_output_config('tumor_type')
+        ns_ttype_df = pd.read_csv(_utils.result_dir + cfg['gene_ns_ttype'],
+                                  index_col=0, sep='\t')
 
         for i in range(self.total_iter):
             self.x, self.y = features.randomize(self.x)  # randomize for another round
+            ns_ttype_df = ns_ttype_df.reindex(index=self.x.index)  # match indices
+
+            # add shannon entropy of tumor types
+            self.x['Tumor Type Entropy'] = ns_ttype_df.apply(mymath.shannon_entropy,
+                                                             axis=1)
 
             # initialize predicted results variables
             num_genes = len(self.y)
@@ -226,6 +231,14 @@ class GenericClassifier(object):
 
             # evaluate k-fold cross validation
             for train_ix, test_ix in k_fold:
+                # add js distance
+                ttype_df = ns_ttype_df.iloc[train_ix].sum()
+                pct_ttype_df = ttype_df / float(ttype_df.sum())
+                myjs_dist = ns_ttype_df.apply(mymath.js_distance,
+                                              args=(pct_ttype_df,),
+                                              axis=1)
+                self.x['JS distance'] = myjs_dist
+
                 if self.is_weighted_sample:
                     # weight classes by using sample weights
                     num_train = len(train_ix)
