@@ -7,7 +7,6 @@ import plot_data
 import utils.python.math as mymath
 import numpy as np
 import logging
-import IPython
 
 logger = logging.getLogger(__name__)
 
