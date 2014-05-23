@@ -213,10 +213,19 @@ if __name__ == '__main__':
     parser_simulation = subparser.add_parser('simulation',
                                              help='Run simulation scripts'
                                              ' in the simulation folder')
-    parser_simulation.add_argument('-b', '--bootstrap',
-                                   action='store_true',
-                                   default=False,
-                                   help='Perform bootstrap (sample with replacement) on mutations')
+    group = parser_simulation.add_mutually_exclusive_group(required=True)
+    group.add_argument('-b', '--bootstrap',
+                       action='store_true',
+                       default=False,
+                       help='Perform bootstrap (sample with replacement) on mutations')
+    group.add_argument('-rs', '--random-samples',
+                       action='store_true',
+                       default=False,
+                       help='Perform sample with out replacement on samples/tumors')
+    group.add_argument('-rt', '--random-tumor-type',
+                       action='store_true',
+                       default=False,
+                       help='Perform sample with out replacement based on tumor types')
     parser_simulation.add_argument('-p', '--processes',
                                    type=int,
                                    action='store',
