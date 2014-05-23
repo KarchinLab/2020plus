@@ -38,10 +38,18 @@ class MyClassifier(object):
                                    replace=TRUE,
                                    ntree=ntree,
                                    classwt=1/sampSize,
-                                   sampsize=sampSize)
+                                   sampsize=sampSize,
+                                   importance=TRUE)
                 return(rf)
              }''')
         self.rf_fit = ro.r['rf_fit']
+
+        # R function for getting feature importance
+        ro.r('''rf_imp <- function(rf){
+                myimp <- importance(rf)
+                return(myimp[,5])
+             }''')
+        self.rf_imp = ro.r['rf_imp']
 
         # R function for predicting class probability
         ro.r('''rf_pred_prob <- function(rf, xtest){
@@ -87,6 +95,8 @@ class MyClassifier(object):
         xtrain['true_class'] = ytrain
         r_xtrain = com.convert_to_r_dataframe(xtrain)
         self.rf = self.rf_fit(r_xtrain, self.ntrees, self.sample_size)
+        r_imp = self.rf_imp(self.rf)  # importance dataframe in R
+        self.feature_importances_ = com.convert_robj(r_imp)
 
     def set_classes(self, oncogene, tsg):
         """Sets the integers used to represent classes in classification."""
@@ -156,33 +166,6 @@ class RRandomForest(GenericClassifier):
             df = df.drop('total', axis=1)
         df = df.fillna(df.mean())
 
-        #myfeatures = {'nonsense': df['nonsense'],
-                      #'no protein': df['no protein'],
-                      #'lost stop': df['lost stop'],
-                      #'frame shift': df['frame shift'],
-                       #'deleterious percent': df['nonsense'] + df['no protein'] + df['lost stop'] + df['frame shift'],
-                      #'recurrent missense': df['recurrent missense'],
-                      #'recurrent indel': df['recurrent indel'],
-                       #'recurrent percent': df['recurrent missense'] + df['recurrent indel'],
-                      #'missense': df.missense,
-                      #'indel': df.indel,
-                      #'recurrent count': df['recurrent count'],
-                      #'deleterious count': df['deleterious count'],
-                      #'synonymous': df.synonymous,
-                      #'missense position entropy': df['missense position entropy'],
-                      #'mutation position entropy': df['mutation position entropy']}
-        #tmpdf = pd.DataFrame(myfeatures)
-
-        # optional columns from mutsigcv paper
-        #if 'gene_length' in df.columns:
-            #tmpdf['gene_length'] = df['gene_length']
-        #if 'noncoding_mutation_rate' in df.columns:
-            #tmpdf['noncoding_mutation_rate'] = df['noncoding_mutation_rate']
-        #if 'expression' in df.columns:
-            #tmpdf['expression'] = df['expression']
-        #if 'replication_time' in df.columns:
-            #tmpdf['replication_time'] = df['replication_time']
-
         self.x, self.y = features.randomize(df)
 
         # use the MyClassifier wrapper class around R
@@ -190,3 +173,16 @@ class RRandomForest(GenericClassifier):
                                 driver_sample=driver_sample,
                                 other_sample_ratio=other_sample_ratio)
         self.clf.set_classes(onco_flag, tsg_flag)
+
+    def _update_metrics(self, y_true, y_pred, onco_prob, tsg_prob):
+        super(RRandomForest, self)._update_metrics(y_true, y_pred, onco_prob, tsg_prob)
+
+        # evaluate feature importance for random forest
+        self.feature_importance.append(self.clf.feature_importances_)
+
+    def _on_finish(self):
+        super(RRandomForest, self)._on_finish()
+        self.feature_importance = pd.DataFrame(self.feature_importance,
+                                               columns=self.x.columns)
+        self.mean_importance = self.feature_importance.mean()
+        self.std_importance = self.feature_importance.std()

@@ -276,6 +276,12 @@ def main(cli_opts):
     rrclf_driver_precision, rrclf_driver_recall, rrclf_driver_mean_pr_auc = rrclf.get_driver_pr_metrics()
     rrclf_driver_tpr, rrclf_driver_fpr, rrclf_driver_mean_roc_auc = rrclf.get_driver_roc_metrics()
 
+    # plot feature importance
+    mean_df = rrclf.mean_importance
+    std_df = rrclf.std_importance
+    feat_path = _utils.clf_plot_dir + cfg_opts['r_feature_importance_plot']
+    plot_data.feature_importance_barplot(mean_df, std_df, feat_path)
+
     # run predictions using R's random forest
     pred_results_path = _utils.clf_result_dir + cfg_opts['rrand_forest_pred']
     result_df = rand_forest_pred(rrclf, df, result_path=pred_results_path)
