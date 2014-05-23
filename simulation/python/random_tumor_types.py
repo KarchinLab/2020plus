@@ -34,7 +34,7 @@ class RandomTumorTypes(object):
             prng = np.random.RandomState()
             prng.shuffle(self.tumor_types)
 
-            types_of_interest = set(self.sample_names[:int(self.num_sample_names*self.sub_sample)])
+            types_of_interest = set(self.tumor_types[:int(self.num_tumor_types*self.sub_sample)])
 
             # get data from those sample names
             samp_flag = self.df[self.COLUMN_NAME].apply(lambda x: x in types_of_interest)
