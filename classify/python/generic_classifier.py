@@ -205,16 +205,12 @@ class GenericClassifier(object):
     def kfold_validation(self, k=10):
         self.num_pred = 0  # number of predictions
         cfg = _utils.get_output_config('tumor_type')
-        ns_ttype_df = pd.read_csv(_utils.result_dir + cfg['gene_ns_ttype'],
-                                  index_col=0, sep='\t')
+        #ns_ttype_df = pd.read_csv(_utils.result_dir + cfg['gene_ns_ttype'],
+                                  #index_col=0, sep='\t')
 
         for i in range(self.total_iter):
             self.x, self.y = features.randomize(self.x)  # randomize for another round
-            ns_ttype_df = ns_ttype_df.reindex(index=self.x.index)  # match indices
-
-            # add shannon entropy of tumor types
-            self.x['Tumor Type Entropy'] = ns_ttype_df.apply(mymath.shannon_entropy,
-                                                             axis=1)
+            #ns_ttype_df = ns_ttype_df.reindex(index=self.x.index)  # match indices
 
             # initialize predicted results variables
             num_genes = len(self.y)
@@ -232,12 +228,15 @@ class GenericClassifier(object):
             # evaluate k-fold cross validation
             for train_ix, test_ix in k_fold:
                 # add js distance
-                ttype_df = ns_ttype_df.iloc[train_ix].sum()
-                pct_ttype_df = ttype_df / float(ttype_df.sum())
-                myjs_dist = ns_ttype_df.apply(mymath.js_distance,
-                                              args=(pct_ttype_df,),
-                                              axis=1)
-                self.x['JS distance'] = myjs_dist
+                #tmp = ns_ttype_df.iloc[train_ix]
+                #tmp = tmp.div(tmp.sum(axis=1), axis=0)
+                # ttype_df = ns_ttype_df.iloc[train_ix].sum()
+                #ttype_df = tmp.sum()
+                #pct_ttype_df = ttype_df / float(ttype_df.sum())
+                #myjs_dist = ns_ttype_df.apply(mymath.js_distance,
+                                              #args=(pct_ttype_df,),
+                                              #axis=1)
+                #self.x['Tumor Type JS distance'] = myjs_dist
 
                 if self.is_weighted_sample:
                     # weight classes by using sample weights
@@ -287,12 +286,16 @@ class GenericClassifier(object):
         self._on_finish()  # update info for kfold cross-validation
 
     def kfold_prediction(self, k=10):
+        cfg = _utils.get_output_config('tumor_type')
+        #ns_ttype_df = pd.read_csv(_utils.result_dir + cfg['gene_ns_ttype'],
+                                  #index_col=0, sep='\t')
         # generate indices for kfold cross validation
         k_fold = cross_validation.KFold(n=len(self.x),  # len of df
                                         n_folds=k,  # k fold
                                         indices=True)  # return indices
         self.num_pred = 0  # number of predictions
         self.x, self.y = features.randomize(self.x)  # randomize data
+        #ns_ttype_df = ns_ttype_df.reindex(index=self.x.index)  # match indices
 
         prediction = pd.Series(index=self.y.index)  # predicted class
         onco_prob = pd.Series(index=self.y.index).fillna(0)
@@ -300,8 +303,20 @@ class GenericClassifier(object):
 
         for i in range(self.total_iter):
             self.x, self.y = features.randomize(self.x)  # randomize for another round
+            #ns_ttype_df = ns_ttype_df.reindex(index=self.x.index)  # match indices
             # obtain predictions from single round of kfold validation
             for train_ix, test_ix in k_fold:
+                # add js distance
+                #tmp = ns_ttype_df.iloc[train_ix]
+                #tmp = tmp.div(tmp.sum(axis=1), axis=0)
+                # ttype_df = ns_ttype_df.iloc[train_ix].sum()
+                #ttype_df = tmp.sum()
+                #pct_ttype_df = ttype_df / float(ttype_df.sum())
+                #myjs_dist = ns_ttype_df.apply(mymath.js_distance,
+                                              #args=(pct_ttype_df,),
+                                              #axis=1)
+                #self.x['Tumor Type JS distance'] = myjs_dist
+
                 # retreive indices from pandas dataframe using row number
                 tmp_train_ix = self.x.iloc[train_ix].index
                 tmp_test_ix = self.x.iloc[test_ix].index
