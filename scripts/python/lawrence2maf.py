@@ -2,6 +2,35 @@ import pandas as pd
 import numpy as np
 import argparse
 
+def fix_tumor_sample(tsample):
+    if 'tumor' in tsample.lower():
+        return tsample.strip('-Tumor')
+    else:
+        return tsample
+
+
+def fix_tumor_type(ttype):
+    ttype_dict = {'OV': 'Ovarian',
+                  'ESO': 'Esophageal Adenocarcinoma',
+                  'CRC': 'Colorectal',
+                  'NB': 'Neuroblastoma',
+                  'GBM': 'Glioblastoma Multiforme',
+                  'PRAD': 'Prostate Adenocarcinoma',
+                  'UCEC': 'Endometrial Carcinoma',
+                  'BLCA': 'Bladder Urothelial Carcinoma',
+                  'BRCA': 'Breast Adenocarcinoma',
+                  'MEL': 'Melanoma',
+                  'LUSC': 'Lung Squamous Cell Carcinoma',
+                  'MED': 'Medulloblastoma',
+                  'HNSC': 'Head and Neck Squamous Cell Carcinoma',
+                  'LUAD': 'Lung Adenocarcinoma',
+                  'KIRC': 'Kidney Clear Cell Carcinoma'}
+    if ttype_dict.has_key(ttype):
+        return ttype_dict[ttype]
+    else:
+        return ttype
+
+
 def fix_variant_type(var_clf):
     if 'missense' in var_clf.lower():
         return 'Missense_Mutation'
@@ -111,6 +140,10 @@ def main(opts):
 
     # add chr to chromosome names
     broad_df['Chromosome'] = broad_df['Chromosome'].astype(str).apply(lambda x: 'chr' + x)
+
+    # fix tumor names
+    broad_df['Tumor_Type'] = broad_df['Tumor_Type'].apply(fix_tumor_type)
+    broad_df['Tumor_Sample'] = broad_df['Tumor_Sample'].apply(fix_tumor_sample)
 
     # output results to file
     cols_of_interest = ['Gene_Symbol', 'Tumor_Sample', 'Tumor_Type',
