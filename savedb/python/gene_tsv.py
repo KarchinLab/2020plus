@@ -24,7 +24,6 @@ import sqlite3
 import string
 import os
 import re
-import IPython
 
 
 def parse_sample_name(sample):
@@ -41,8 +40,8 @@ def skip_header(file_handle, skip_rows=8):
     To skip rows the next() method is called repeatedly.
     This skips the non-table part of the tab delimited gene files.
 
-    **Parameters**
-
+    Parameters
+    ----------
     file_handle : file
         file object of tab delim file
     skip_rows : int, Default=8
@@ -63,8 +62,8 @@ def concatenate_genes(out_path, cosmic_dir):
     * Skips rows that are blank at either AA or nucleotide mutations
     * Skips rows where mutations are both "?" for AA and DNA
 
-    **Parameters**
-
+    Parameters
+    ----------
     out_path : str
         path to save concatenated file
     cosmic_dir : str
@@ -133,8 +132,8 @@ def filter_hypermutators(hypermutator_count, conn, db_path=''):
     """Query database to find hypermutator samples so they can
     be excluded from further analysis.
 
-    **Parameters**
-
+    Parameters
+    ----------
     hypermutator_count : int
         samples with mutation counts below this number are allowed
     conn : db connection
@@ -175,8 +174,8 @@ def save_db(hypermutator_ct, gene_tsv_path,
     NOTE: Uses pandas to store all contents in memory and then
     saves to sqlite db. This may cause large memory usage.
 
-    **Parameters**
-
+    Parameters
+    ----------
     hypermutator_ct : int
         filter for overly mutated samples
     gene_tsv_path : str
@@ -270,8 +269,8 @@ def main(hypermutator_count, cell_line_path,
     """Concatenates all the mutation data from tab delmited files in
     the cosmic directory. Next, saves the results to a sqlite db.
 
-    **Parameters**
-
+    Parameters
+    ----------
     hypermutator_count : int
         remove samples with too many mutations
     gene_dir : str
