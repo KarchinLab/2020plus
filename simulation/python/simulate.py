@@ -7,6 +7,7 @@ from classify.python.vogelstein_classifier import VogelsteinClassifier
 import sklearn.metrics as metrics
 from bootstrap import Bootstrap
 from random_sample_names import RandomSampleNames
+from random_tumor_types import RandomTumorTypes
 import plot_data
 import pandas as pd
 import numpy as np
@@ -102,7 +103,8 @@ def vogelstein_classification(df, opts):
 
     # predict
     vclf = VogelsteinClassifier(min_count=opts['min_count'])
-    y_pred = pd.Series(vclf.predict_list(ct_list))
+    y_pred = pd.Series(vclf.predict_list(ct_list,
+                                         scale_type=opts['scale_type']))
     y_pred_onco = (y_pred=='oncogene').astype(int)
     y_pred_tsg = (y_pred=='tsg').astype(int)
     y_pred_driver = y_pred_onco + y_pred_tsg
@@ -209,12 +211,14 @@ def calculate_stats(result_dict,
 def save_simulation_result(r_panel, r_path,
                            py_panel, py_path,
                            nb_panel, nb_path,
-                           v_panel, v_path):
+                           v_panel, v_path,
+                           v_lin_panel, v_lin_path):
     # make 'oncogenes'/'tsg' as the 'items' axis
     r_pan = r_panel.swapaxes('items', 'major')
     py_pan = py_panel.swapaxes('items', 'major')
     nb_pan = nb_panel.swapaxes('items', 'major')
     v_pan = v_panel.swapaxes('items', 'major')
+    v_lin_pan = v_lin_panel.swapaxes('items', 'major')
 
     # collapse pd.panel into a data frame
     r_df = pd.merge(r_pan['oncogene'], r_pan['tsg'],
@@ -241,12 +245,19 @@ def save_simulation_result(r_panel, r_path,
     v_df = pd.merge(v_df, v_pan['driver'],
                     left_index=True, right_index=True,
                     suffixes=('', ' driver'))
+    v_lin_df = pd.merge(v_lin_pan['oncogene'], v_lin_pan['tsg'],
+                    left_index=True, right_index=True,
+                    suffixes=(' oncogene', ' tsg'))
+    v_lin_df = pd.merge(v_lin_df, v_lin_pan['driver'],
+                    left_index=True, right_index=True,
+                    suffixes=('', ' driver'))
 
     # save data frame to specified paths
     r_df.to_csv(r_path, sep='\t')
     py_df.to_csv(py_path, sep='\t')
     nb_df.to_csv(nb_path, sep='\t')
     v_df.to_csv(v_path, sep='\t')
+    v_lin_df.to_csv(v_lin_path, sep='\t')
 
 
 def predict(df, gene_df, opts):
@@ -274,9 +285,14 @@ def predict(df, gene_df, opts):
     r_sim_results = r_random_forest(df, opts)
     py_sim_results = py_random_forest(df, opts)
     nb_sim_results = naive_bayes(df, opts)
-    v_sim_results = vogelstein_classification(df, opts)
 
-    return r_sim_results, py_sim_results, nb_sim_results, v_sim_results
+    # do both non-scaling and linear scaling
+    opts['scale_type'] = None
+    v_sim_results = vogelstein_classification(df, opts)
+    opts['scale_type'] = 'linear'
+    v_linear_sim_results = vogelstein_classification(df, opts)
+
+    return r_sim_results, py_sim_results, nb_sim_results, v_sim_results, v_linear_sim_results
 
 
 def yield_sim_df(dfg, num_processes):
@@ -349,7 +365,7 @@ def main(cli_opts):
                      sep='\t', index_col=0)
 
     # iterate through each sampling rate
-    r_result, py_result, nb_result, v_result = {}, {}, {}, {}
+    r_result, py_result, nb_result, v_result, v_linear_result = {}, {}, {}, {}, {}
     for sample_rate in np.linspace(cli_opts['lower_sample_rate'],
                                    cli_opts['upper_sample_rate'],
                                    cli_opts['num_sample_rate']):
@@ -358,45 +374,26 @@ def main(cli_opts):
             dfg = Bootstrap(df.copy(),
                             subsample=sample_rate,
                             num_iter=cli_opts['samples'])
-        else:
+        elif cli_opts['random_samples']:
             # sample with out replacement of sample names
             dfg = RandomSampleNames(sub_sample=sample_rate,
                                     num_iter=cli_opts['samples'],
                                     db_conn=conn)
+        else:
+            # sample with out replacement of tumor types
+            dfg = RandomTumorTypes(sub_sample=sample_rate,
+                                   num_iter=cli_opts['samples'],
+                                   db_conn=conn)
+
 
         # iterate through each sampled data set
-        r_sim_results, py_sim_results, nb_sim_results, v_sim_results = {}, {}, {}, {}
+        r_sim_results, py_sim_results, nb_sim_results, v_sim_results, v_linear_sim_results = {}, {}, {}, {}, {}
         i = 0  # counter for index of data frames
-        #for i, all_df in enumerate(dfg.dataframe_generator()):
-        #for df_list in yield_sim_df(dfg, cli_opts['processes']):
         for df_list in multiprocess_predict(dfg, gene_df, cli_opts):
-            # perform predictions using multiple python
-            # processes using the multiprocessing module
-            #pool = Pool(processes=len(df_list))
-            #info_list = [(d, gene_df, cli_opts) for d in df_list]
-            #process_results = pool.map(predict, info_list)
-
             # save all the results
-            #for j in range(len(df_list)):
             for j, mydf in enumerate(df_list):
-                #r_sim_results[i],  py_sim_results[i], nb_sim_results[i], v_sim_results[i] = process_results[j]
-                #r_sim_results[i],  py_sim_results[i], nb_sim_results[i], v_sim_results[i] = df_list[j]
-                r_sim_results[i],  py_sim_results[i], nb_sim_results[i], v_sim_results[i] = mydf
+                r_sim_results[i],  py_sim_results[i], nb_sim_results[i], v_sim_results[i], v_linear_sim_results[i] = mydf
                 i += 1
-
-            #if cli_opts['bootstrap']:
-                 #create feature matrix for bootstrap sample
-                #all_df = features.process_features(all_df, 0)
-
-             #merge gene features
-            #all_df = merge_feature_df(all_df, gene_df)  # all feature info
-            #all_df = all_df.set_index('gene')  # get rid of gene column
-
-             #run classifiers on bootstrap sampled counts
-            #r_sim_results[i] = r_random_forest(all_df, cli_opts)
-            #py_sim_results[i] = py_random_forest(all_df, cli_opts)
-            #nb_sim_results[i] = naive_bayes(all_df, cli_opts)
-            #v_sim_results[i] = vogelstein_classification(all_df, cli_opts)
 
         # record result for a specific sample rate
         tmp_results = calculate_stats(r_sim_results)
@@ -407,6 +404,8 @@ def main(cli_opts):
         nb_result[sample_rate] = tmp_results
         tmp_results = calculate_stats(v_sim_results, ['precision', 'recall', 'count'])
         v_result[sample_rate] = tmp_results
+        tmp_results = calculate_stats(v_linear_sim_results, ['precision', 'recall', 'count'])
+        v_linear_result[sample_rate] = tmp_results
 
     # make pandas panel objects out of summarized
     # results from simulations
@@ -414,21 +413,24 @@ def main(cli_opts):
     py_panel_result = pd.Panel(py_result)
     nb_panel_result = pd.Panel(nb_result)
     v_panel_result = pd.Panel(v_result)
+    v_linear_panel_result = pd.Panel(v_linear_result)
 
     # save results of simulations in a text file
     r_path = _utils.sim_result_dir + sim_opts['r_result']
     py_path = _utils.sim_result_dir + sim_opts['py_result']
     nb_path = _utils.sim_result_dir + sim_opts['nb_result']
     v_path = _utils.sim_result_dir + sim_opts['v_result']
+    v_linear_path = _utils.sim_result_dir + sim_opts['v_linear_result']
     save_simulation_result(r_panel_result, r_path,
                            py_panel_result, py_path,
                            nb_panel_result, nb_path,
-                           v_panel_result, v_path)
+                           v_panel_result, v_path,
+                           v_linear_panel_result, v_linear_path)
 
     # aggregate results for plotting
-    results = {'20/20+ classifier': r_panel_result,
-               'random forest': py_panel_result,
-               'naive bayes': nb_panel_result}
+    results = {'20/20+ classifier': r_panel_result}
+               #'random forest': py_panel_result,
+               #'naive bayes': nb_panel_result}
 
     # plot oncogene results of simulations
     tmp_save_path = _utils.sim_plot_dir + sim_opts['onco_pr_plot']
@@ -481,7 +483,8 @@ def main(cli_opts):
     # since the vogelstein classifier doesn't predict probabilities
     # I can't generate a PR or ROC curve. However, I can evaluate
     # metrics like precision and recall
-    results['20/20 rule'] = v_panel_result
+    # results['20/20 rule'] = v_panel_result
+    # results['20/20 rule (linear scaling)'] = v_linear_panel_result
 
     # plot oncogene precision/recall
     tmp_save_path = _utils.sim_plot_dir + sim_opts['onco_precision_plot']
@@ -532,8 +535,8 @@ def main(cli_opts):
                               ylabel='Recall')
 
     # delete naive bayes since it predicts a lot of genes
-    del results['naive bayes']
-    del results['random forest']
+    # del results['naive bayes']
+    # del results['random forest']
 
     # plot number of predicted genes
     tmp_save_path = _utils.sim_plot_dir + sim_opts['onco_count_plot']
