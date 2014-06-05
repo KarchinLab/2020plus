@@ -1,4 +1,5 @@
 from __future__ import division
+import numpy as np
 
 class VogelsteinClassifier(object):
     """Oncogene and TSG classifier based on the 20/20 rule.
@@ -52,9 +53,24 @@ class VogelsteinClassifier(object):
         self.tsg_label = "tsg"
         self.other_label = "other"
 
+    def _subsample_count(recur_ct, del_ct, total_ct, desired_ct):
+        if total_ct <= desired_ct:
+            # no need for subsampling
+            return recur_ct, del_ct, total_ct
+        else:
+            # sub-sample to desired number of counts
+            prng = np.random.RandomState()
+            ct_array = np.array([recur_ct, del_ct,
+                                 total_ct - (recur_ct + del_ct)])
+            prob = ct_array.astype(float) / ct_array.sum()
+            multinomial_sample = prng.multinomial(desired_ct,  # total counts for multinomial
+                                                  prob)  # probability
+            return multinomial_sample
+
     def predict_list(self, input_list,
                      kind='count',
-                     scale_type=None):
+                     scale_type=None,
+                     subsample=None):
         """Predict a list of inputs as either oncogene/tsg/other.
 
         **Parameters**
@@ -68,6 +84,9 @@ class VogelsteinClassifier(object):
         scale_type : str (None | 'linear')
             whether to scale count thresholds based on size of database
             based on cancer genome landscapes paper
+        subsample : (None | int)
+            whether to subsample total mutations to a certain number of
+            mutations.
         """
         # scale count thresholds
         all_cts = sum([x[-1] for x in input_list])
