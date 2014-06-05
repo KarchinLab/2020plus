@@ -204,9 +204,9 @@ if __name__ == '__main__':
     parser_classify.add_argument('-n', '--ntrees',
                                  type=int,
                                  action='store',
-                                 default=500,
+                                 default=200,
                                  help='Number of decision trees for random forests. '
-                                 '(default: 500)')
+                                 '(default: 200)')
     parser_classify.set_defaults(func=_classify)
 
     # simulation sub-command
