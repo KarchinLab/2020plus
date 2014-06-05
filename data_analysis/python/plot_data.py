@@ -229,8 +229,8 @@ def pca_plot(file_path,
         path to file for gene feature matrix
     save_path : str
         path to save plot
-    norm_class : bool, (Default=False)
-        flag for subsampling genes to even unbalanced classes.
+    norm_class : int, (Default=3)
+        ratio of driver to passenger genes for subsampling genes to even unbalanced classes.
     low_count_filter : int, (Default=1)
         Genes should have at least low_count_filter number of mutations
     title : str
@@ -254,7 +254,7 @@ def pca_plot(file_path,
         non_driver_list = list(set(df.index) - set(driver_list))
         other_df = df.ix[non_driver_list]
         len_driver = len(driver_df)
-        sub_sample = other_df.loc[np.random.choice(other_df.index, 3*len_driver, replace=False)]
+        sub_sample = other_df.loc[np.random.choice(other_df.index, norm_class*len_driver, replace=False)]
         df = pd.concat([driver_df, sub_sample])  # new df with more equal classes
 
     # plot oncogenes and tumor suppressor genes as different colors

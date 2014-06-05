@@ -130,9 +130,14 @@ def main(recurrent, recurrent_max, conn):
                        title='Protein Mutation Type Composition PCA')
     # normalized PCA by removing class imbalance
     plot_data.pca_plot(_utils.result_dir + cfg_opts['gene_feature_matrix'],
-                       _utils.plot_dir + cfg_opts['pca_plot_rand'],
-                       norm_class=True,
+                       _utils.plot_dir + cfg_opts['pca_plot_rand_3'],
+                       norm_class=3,
                        low_count_filter=10,
                        title='Protein Mutation Type Composition PCA Subsampled by '
                        'Gene Type (3:1)')
-
+    plot_data.pca_plot(_utils.result_dir + cfg_opts['gene_feature_matrix'],
+                       _utils.plot_dir + cfg_opts['pca_plot_rand_1'],
+                       norm_class=1,
+                       low_count_filter=10,
+                       title='Protein Mutation Type Composition PCA Subsampled by '
+                       'Gene Type (1:1)')
