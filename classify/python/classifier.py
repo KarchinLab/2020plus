@@ -291,6 +291,7 @@ def main(cli_opts):
     novel_onco = result_df[(result_df['predicted class']==_utils.onco_label) & (result_df['true class']!=_utils.onco_label)].index.to_series()
     pred_tsg = result_df[result_df['predicted class']==_utils.tsg_label].index.to_series()
     novel_tsg = result_df[(result_df['predicted class']==_utils.tsg_label) & (result_df['true class']!=_utils.tsg_label)].index.to_series()
+    pred_driver = result_df[result_df['predicted cancer gene']==1].index.to_series()
     pred_onco.to_csv(_utils.clf_result_dir + cfg_opts['rrf_onco'], sep='\t', index=False, header=None)
     novel_onco.to_csv(_utils.clf_result_dir + cfg_opts['rrf_novel_onco'], sep='\t', index=False, header=None)
     pred_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rrf_tsg'], sep='\t', index=False, header=None)
@@ -299,6 +300,9 @@ def main(cli_opts):
                '{2} ({3} novel) tsg'.format(len(pred_onco), len(novel_onco),
                                             len(pred_tsg), len(novel_tsg)))
     logger.info(log_str)
+    rrf_pred_onco = pred_onco
+    rrf_pred_tsg = pred_tsg
+    rrf_pred_driver = pred_driver
 
     # plot r random forest results
     plot_data.prob_scatter(result_df,
@@ -317,6 +321,10 @@ def main(cli_opts):
                        col_name='driver gene probability',
                        save_path='results/classify/plots/r_random_forest_driver_prob.kde.png',
                        title='Distribution of Driver Gene Probabilities (sub-sampled random forest)')
+    plot_data.sample_boxplot(rrf_pred_onco,
+                             rrf_pred_tsg,
+                             rrf_pred_driver,
+                             save_path=_utils.clf_plot_dir + cfg_opts['rrf_sample_pct_boxplot'])
     logger.info('Finished running sub-sampled Random Forest')
 
     # scikit learns' random forest

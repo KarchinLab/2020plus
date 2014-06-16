@@ -1,6 +1,7 @@
 import utils.python.plot as myplt
 import utils.python.util as _utils
 import matplotlib.pyplot as plt
+import pandas as pd
 import logging
 
 logger = logging.getLogger(__name__)
@@ -161,3 +162,33 @@ def prob_scatter(df, plot_path, title):
                   ylabel='TSG Probability',
                   title=title,
                   colors='#348ABD')
+
+
+def sample_boxplot(pred_onco,
+                   pred_tsg,
+                   pred_driver,
+                   save_path,
+                   xlabel='',
+                   ylabel='',
+                   title=''):
+    cfg = _utils.get_output_config('sample')
+    df = pd.read_csv(_utils.result_dir + cfg['max_gene_pct_sample_out'],
+                     sep='\t', index_col=0)
+    df['Predicted Type'] = [("oncogene" if g in pred_onco else "other") for g in df.index]
+    df.ix[pred_tsg, 'Predicted Type'] = 'TSG'
+    # df['tsg'] = [(1 if g in pred_tsg else 0) for g in df.index]
+    # df['driver'] = [(1 if g in pred_driver else 0) for g in df.index]
+    # df['other'] = 1 - df[['oncogene', 'tsg', 'driver']].max(axis=1)
+
+    if not xlabel:
+        xlabel = 'Predicted Type'
+    if not ylabel:
+        ylabel = 'Maximum Pct of Samples for a Tumor Type'
+    if not title:
+        title = 'Percentage of Samples with Non-Silent Mutation'
+
+    myplt.boxplot(df, by='Predicted Type',
+                  save_path=save_path,
+                  xlabel=xlabel,
+                  ylabel=ylabel,
+                  title=title)
