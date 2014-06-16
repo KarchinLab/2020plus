@@ -1,6 +1,6 @@
 """
 The sample module analyzes characteristics of samples in
-the COSMIC database by using the cosmic_mutation.
+the database by using the `mutation` table.
 """
 
 import utils.python.util as _utils
@@ -16,13 +16,13 @@ logger = logging.getLogger(__name__)
 def count_mutated_genes(conn):
     """Count the number of genes that are mutated in each sample.
 
-    **Parameters**
+    Parameters
+    ----------
+    conn : sqlite connection
+        connection to 20/20+ database
 
-    conn : MySQLdb connection
-        connection to COSMIC_nuc
-
-    **Returns**
-
+    Returns
+    -------
     df : pd.DataFrame
         two column data frame of sample names and gene cts
     """
@@ -40,14 +40,16 @@ def count_mutated_genes(conn):
 
 def count_mutations(conn):
     """Count the number of mutations in each sample.
+    Mutation type is not considered so the count includes both
+    silent and non-silent mutations.
 
-    **Parameters**
+    Parameters
+    ----------
+    conn : sqlite connection
+        connection to 20/20+ database
 
-    conn : MySQLdb connection
-        connection to COSMIC_nuc
-
-    **Returns**
-
+    Returns
+    -------
     df : pd.DataFrame
         two column data frame of sample names and mutation cts
     """
@@ -63,6 +65,21 @@ def count_mutations(conn):
 
 
 def count_per_gene(conn):
+    """Count the number of distinct tumor samples that contain
+    a mutation for each gene.
+
+    NOTE: Does not consider mutation type.
+
+    Parameters
+    ----------
+    conn : db connection
+        connection to 20/20+ database
+
+    Returns
+    -------
+    df : pd.DataFrame
+        gene names with corresponding number of samples where it is mutated
+    """
     sql = ('SELECT Gene, COUNT(DISTINCT(mut.Tumor_Sample)) as sample_count '
            'FROM mutation mut '
            'GROUP BY Gene')
@@ -72,6 +89,19 @@ def count_per_gene(conn):
 
 
 def gene_count_per_tumor_type(conn):
+    """Calculate the number of tumor samples with a non-silent mutations
+    for each gene in a specific tumor type.
+
+    Parameters
+    ----------
+    conn : db connection
+        connection to 20/20+ database
+
+    Returns
+    -------
+    df : pd.DataFrame
+        three column data frame with gene, tumor type, and # of samples
+    """
     sql = ('SELECT Gene, Tumor_Type, Tumor_Sample, Protein_Change as AminoAcid, '
            '       DNA_Change as Nucleotide, Variant_Classification '
            'FROM mutation')
@@ -113,6 +143,18 @@ def gene_count_per_tumor_type(conn):
 
 
 def count_samples_per_tumor_type(conn):
+    """Count total number of tumor samples for each tumor type.
+
+    Parameters
+    ----------
+    conn : db connection
+        connection to 20/20+ database
+
+    Returns
+    -------
+    df : pd.DataFrame
+        Tumor types with corresponding number of samples
+    """
     sql = ('SELECT Tumor_Type, COUNT(DISTINCT(mut.Tumor_Sample)) as sample_count '
            'FROM mutation mut '
            'GROUP BY Tumor_Type')
@@ -163,13 +205,17 @@ def main(conn):
     table = pd.pivot_table(gene_samples_per_tumor_type, values='sample_count',
                            rows='Gene', cols='Tumor_Type', aggfunc=np.mean)
     table = table.div(sample_ct_per_tumor_type['sample_count'].astype(float))
-    table = pd.DataFrame({'sample_pct': table.apply(np.max, axis=1)})
+    table = pd.DataFrame({'sample_pct': table.apply(np.max, axis=1)})  # only use ttype with max pct
     table.to_csv(out_dir + cfg_opts['max_gene_pct_sample_out'], sep='\t')
+    # plot the KDE of the distribution
     plot_data.sample_kde(table,
                          _utils.plot_dir + cfg_opts['max_gene_pct_sample_kde'],
                          title='Percent of samples a gene is mutated',
                          xlabel='Maximum percent of samples in a tumor type',
                          ylabel='Density')
+    # make a boxplot of the same thing as kde
+    plot_data.sample_boxplot(table,
+                             _utils.plot_dir + cfg_opts['max_gene_pct_sample_boxplot'])
 
     # plot the correlation between max percent of samples a gene is mutated in
     # given tumor type and the percent of maximum entropy for oncogenes

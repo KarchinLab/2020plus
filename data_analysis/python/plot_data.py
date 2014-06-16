@@ -415,6 +415,30 @@ def sample_kde(df, save_path,
     plt.close()
 
 
+def sample_boxplot(df, save_path,
+               xlabel='',
+               ylabel='',
+               title=''):
+    # categorize genes into onco/tsg
+    df['true class'] = df.index.to_series().apply(_utils.classify_gene)
+
+    # specify text for plot
+    if not xlabel:
+        xlabel = 'Category of Gene in Training'
+    if not ylabel:
+        ylabel = 'Maximum Pct of Samples in a Tumor Type'
+    if not title:
+        title = 'Pct of Samples containing a Non-silent Mutation'
+
+    # plot kde
+    myplt.boxplot(df,
+                  by='true class',
+                  save_path=save_path,
+                  xlabel=xlabel,
+                  ylabel=ylabel,
+                  title=title)
+
+
 def entropy_sample_correlation(x, y,
                                save_path,
                                xlabel='',
