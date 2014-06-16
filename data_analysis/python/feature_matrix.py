@@ -18,8 +18,8 @@ def generate_feature_matrix(df, recurrency_threshold,
                             recurrency_cap=float('inf')):
     """Generate a feature matrix potentially useful for classifying genes.
 
-    **Parameters**
-
+    Parameters
+    ----------
     df : pd.DataFrame
         data frame consisting of cosmic mutations from db
     recurrency_threshold : int
@@ -29,8 +29,8 @@ def generate_feature_matrix(df, recurrency_threshold,
         This is a debug parameter, so generally leave it
         at default setting of infinity.
 
-    **Returns**
-
+    Returns
+    -------
     features : list
         feature matrix
     """
