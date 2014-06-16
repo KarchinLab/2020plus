@@ -12,8 +12,8 @@ import scipy.stats as stats
 def heatmap(df, file_path, title='', xlabel='', ylabel='', cmap=plt.cm.Blues):
     """Plot a heatmap from a pandas dataframe.
 
-    **Parameters:**
-
+    Parameters
+    ----------
     df : pandas.DataFrame
         data for heatmap plotting
     file_path : str
@@ -98,17 +98,17 @@ def barplot(df,
             stacked=False):
     """barplot generates/saves a bar plot from a pandas data frame.
 
-    **Parameters**
-
-        df : pd.DataFrame
-            data frame for bar plot
-        file_path : str
-            path to save bar plot figure
-        kind : str, ['bar' | 'barh']
-            vertical or horizontal bar chart
-        stderror : list
-            stdev of each bar
-        Matplotlib options for plotting
+    Parameters
+    ----------
+    df : pd.DataFrame
+        data frame for bar plot
+    file_path : str
+        path to save bar plot figure
+    kind : str, ['bar' | 'barh']
+        vertical or horizontal bar chart
+    stderror : list
+        stdev of each bar
+    Matplotlib options for plotting
     """
     if yerr is not None:
         # error bars for y-axis
@@ -137,8 +137,8 @@ def histogram(df,
               ylabel=''):
     """Plots a histogram using matplotlib.
 
-    **Parameters**
-
+    Parameters
+    ----------
     df : pd.DataFrame
         one dimensional data frame or series
     file_path : str
@@ -178,8 +178,8 @@ def line(data,
          vlines=[]):
     """Plots a line plot using matplotlib.
 
-    **Parameters**
-
+    Parameters
+    ----------
     data : pd.DataFrame
         two column df with x and y values
     file_path : str
@@ -228,8 +228,8 @@ def scatter(x, y,
     """Create a 2D scatter plot. Many of the optional arguements
     deal with formatting the plot.
 
-    **Parameters**
-
+    Parameters
+    ----------
     x : list|array
         container for x-axis data
     y : list|array
@@ -271,8 +271,8 @@ def line_fill_between(data, sem,
     """Plot a line graph from data but also add a fill between effect
     base on the standard error of the mean (sem).
 
-    **Parameters**
-
+    Parameters
+    ----------
     data : pd.DataFrame
         data for one to multiple lines
     sem : pd.DataFrame
@@ -337,6 +337,23 @@ def correlation_plot(x, y,
     plt.plot(line_x, line_y,
              label='$%.2fx + %.2f$, $R^2=%.2f$' % (slope, intercept, r_value**2))
     plt.legend(loc='best')
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.tight_layout()
+    plt.savefig(save_path)
+    plt.clf()  # clear figure
+    plt.close()
+
+
+def boxplot(df, by,
+            save_path,
+            xlabel,
+            ylabel,
+            title):
+    axes = df.boxplot(by=by)
+    fig = axes.get_figure()
+    fig.suptitle('')  # remove auto title from pandas
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
