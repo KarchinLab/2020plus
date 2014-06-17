@@ -433,6 +433,7 @@ def sample_boxplot(df, save_path,
     # plot kde
     myplt.boxplot(df,
                   by='true class',
+                  column=[],  # use default column for boxplot
                   save_path=save_path,
                   xlabel=xlabel,
                   ylabel=ylabel,

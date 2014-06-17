@@ -347,11 +347,18 @@ def correlation_plot(x, y,
 
 
 def boxplot(df, by,
+            column,
             save_path,
             xlabel,
             ylabel,
             title):
-    axes = df.boxplot(by=by)
+    # make box plot
+    if column:
+        axes = df.boxplot(column=column, by=by)
+    else:
+        axes = df.boxplot(by=by)
+
+    # format plot
     fig = axes.get_figure()
     fig.suptitle('')  # remove auto title from pandas
     plt.title(title)

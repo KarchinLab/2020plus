@@ -167,19 +167,42 @@ def prob_scatter(df, plot_path, title):
 def sample_boxplot(pred_onco,
                    pred_tsg,
                    pred_driver,
-                   save_path,
+                   save_path_type,
+                   save_path_driver,
                    xlabel='',
                    ylabel='',
                    title=''):
+    """Create a box plot for distribution of percentage of tumor samples
+    containing a non-silent mutation in different categories of genes (ie
+    oncogenes, tsgs, and drivers).
+
+    Parameters
+    ----------
+    pred_onco : list
+        list of genes predicted as oncogenes
+    pred_tsg : list
+        list of genes predicted as tsgs
+    pred_driver : list
+        list of genes predicted as drivers
+    save_path_type : str
+        path to save figure for comparing oncogenes, tsgs, and other
+    save_path_driver : str
+        path to save figure for comparing drivers vs other
+    xlabel : str
+        x-axis label
+    ylabel : str
+        y-axis label
+    title : str
+        title of figures
+    """
     cfg = _utils.get_output_config('sample')
     df = pd.read_csv(_utils.result_dir + cfg['max_gene_pct_sample_out'],
                      sep='\t', index_col=0)
     df['Predicted Type'] = [("oncogene" if g in pred_onco else "other") for g in df.index]
     df.ix[pred_tsg, 'Predicted Type'] = 'TSG'
-    # df['tsg'] = [(1 if g in pred_tsg else 0) for g in df.index]
-    # df['driver'] = [(1 if g in pred_driver else 0) for g in df.index]
-    # df['other'] = 1 - df[['oncogene', 'tsg', 'driver']].max(axis=1)
+    df['Predicted Driver'] = [("driver" if g in pred_driver else "other") for g in df.index]
 
+    # set figure labels
     if not xlabel:
         xlabel = 'Predicted Type'
     if not ylabel:
@@ -187,8 +210,20 @@ def sample_boxplot(pred_onco,
     if not title:
         title = 'Percentage of Samples with Non-Silent Mutation'
 
-    myplt.boxplot(df, by='Predicted Type',
-                  save_path=save_path,
+    # plot with oncogenes, tsgs, and other
+    myplt.boxplot(df,
+                  by='Predicted Type',
+                  column=['sample_pct'],
+                  save_path=save_path_type,
+                  xlabel=xlabel,
+                  ylabel=ylabel,
+                  title=title)
+
+    # plot with drivers vs other
+    myplt.boxplot(df,
+                  by='Predicted Driver',
+                  column=['sample_pct'],
+                  save_path=save_path_driver,
                   xlabel=xlabel,
                   ylabel=ylabel,
                   title=title)

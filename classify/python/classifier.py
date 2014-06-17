@@ -300,9 +300,6 @@ def main(cli_opts):
                '{2} ({3} novel) tsg'.format(len(pred_onco), len(novel_onco),
                                             len(pred_tsg), len(novel_tsg)))
     logger.info(log_str)
-    rrf_pred_onco = pred_onco
-    rrf_pred_tsg = pred_tsg
-    rrf_pred_driver = pred_driver
 
     # plot r random forest results
     plot_data.prob_scatter(result_df,
@@ -321,10 +318,11 @@ def main(cli_opts):
                        col_name='driver gene probability',
                        save_path='results/classify/plots/r_random_forest_driver_prob.kde.png',
                        title='Distribution of Driver Gene Probabilities (sub-sampled random forest)')
-    plot_data.sample_boxplot(rrf_pred_onco,
-                             rrf_pred_tsg,
-                             rrf_pred_driver,
-                             save_path=_utils.clf_plot_dir + cfg_opts['rrf_sample_pct_boxplot'])
+    plot_data.sample_boxplot(pred_onco,
+                             pred_tsg,
+                             pred_driver,
+                             save_path_type=_utils.clf_plot_dir + cfg_opts['rrf_sample_pct_type_boxplot'],
+                             save_path_driver=_utils.clf_plot_dir + cfg_opts['rrf_sample_pct_driver_boxplot'])
     logger.info('Finished running sub-sampled Random Forest')
 
     # scikit learns' random forest
