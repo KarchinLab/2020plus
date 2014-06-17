@@ -37,13 +37,13 @@ def count_nucleotides(conn):
 def count_oncogenes(conn):
     """Count both DNA and protein mutation types for oncogenes.
 
-    **Parameters**
+    Parameters
+    ----------
+    conn : db connection
+        connection to 20/20+ database
 
-    conn : MySQL/Sqlite connection
-        connection to database
-
-    **Returns**
-
+    Returns
+    -------
     aa_counts : pd.Series
         mutation type counts for proteins
     nuc_counts : pd.Series
@@ -53,7 +53,8 @@ def count_oncogenes(conn):
 
     # prepare sql statement
     oncogenes = _utils.oncogene_list
-    sql = ("SELECT Gene, Protein_Change as AminoAcid, DNA_Change as Nucleotide, Variant_Classification "
+    sql = ("SELECT Gene, Protein_Change as AminoAcid, "
+           "       DNA_Change as Nucleotide, Variant_Classification "
            "FROM mutation WHERE Gene in " + str(oncogenes))
     logger.debug('Oncogene SQL statement: ' + sql)
 
@@ -72,13 +73,13 @@ def count_oncogenes(conn):
 def count_tsg(conn):
     """Count both DNA and protein mutation types for Tumor Suppressor Genes.
 
-    **Parameters**
+    Parameters
+    ----------
+    conn : db connection
+        connection to 20/20+ database
 
-    conn : MySQL/Sqlite connection
-        connection to database
-
-    **Returns**
-
+    Returns
+    -------
     aa_counts : pd.Series
         mutation type counts for proteins.
     nuc_counts : pd.Series
@@ -107,13 +108,13 @@ def count_tsg(conn):
 def count_gene_types(file_path):
     """Returns protein mutation type counts by gene type (oncogenes, tsg, other).
 
-    **Parameters**
-
+    Parameters
+    ----------
     file_path : str
         path to mutation type cts by gene file
 
-    **Returns**
-
+    Returns
+    -------
     mut_ct_df : pd.DataFrame
         mutation type counts by gene type
     """
@@ -131,10 +132,10 @@ def main(conn):
     The main function uses other functions within the module to count
     mutations and the plot_data module to plot results.
 
-    **Parameters**
-
-    conn : MySQL/Sqlite connection
-        connection to database
+    Parameters
+    ----------
+    conn : db connection
+        connection to 20/20+ database
     """
     out_dir = _utils.result_dir  # output directory for text files
     plot_dir = _utils.plot_dir  # plotting directory

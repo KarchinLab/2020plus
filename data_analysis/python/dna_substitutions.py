@@ -1,3 +1,5 @@
+"""This module counts mutational changes at the DNA level.
+"""
 import utils.python.util as _utils
 from utils.python.nucleotide import Nucleotide
 import plot_data
