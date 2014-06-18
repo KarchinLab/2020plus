@@ -7,6 +7,7 @@ to make a reasonable looking plot.
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as stats
+import IPython
 
 
 def heatmap(df, file_path, title='', xlabel='', ylabel='', cmap=plt.cm.Blues):
@@ -358,13 +359,33 @@ def boxplot(df, by,
     else:
         axes = df.boxplot(by=by)
 
+    if type(axes) is np.ndarray:
+        # multiple boxplot case
+        multi_box_flag = True
+    else:
+        # only one facet for boxplot
+        multi_box_flag = False
+
     # format plot
-    fig = axes.get_figure()
-    fig.suptitle('')  # remove auto title from pandas
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.tight_layout()
-    plt.savefig(save_path)
-    plt.clf()  # clear figure
-    plt.close()
+    if multi_box_flag:
+        # plot with multiple box plot facets
+        for ax in axes:
+            ax.set_xlabel(xlabel)
+        axes[0].set_ylabel(ylabel)
+        fig = axes[0].get_figure()
+        fig.suptitle('')
+        plt.tight_layout()
+        plt.savefig(save_path)
+        plt.clf()
+        plt.close()
+    else:
+        # plot when just 1 box plot facet
+        fig = axes.get_figure()
+        fig.suptitle('')  # remove auto title from pandas
+        plt.title(title)
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        plt.tight_layout()
+        plt.savefig(save_path)
+        plt.clf()  # clear figure
+        plt.close()

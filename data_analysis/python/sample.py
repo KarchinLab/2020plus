@@ -107,11 +107,16 @@ def gene_count_per_tumor_type(conn):
            'FROM mutation')
     df = psql.frame_query(sql, con=conn)
     ttypes = df['Tumor_Type'].unique()
-    cols = ['Gene', 'Tumor_type', 'sample_count']
+    cols = ['Gene', 'Tumor_type', 'ns_sample_count', 'all_sample_count']
     result_df = pd.DataFrame(columns=cols)
     for ttype in ttypes:
         # restrict to specific tumor type
         tmp_df = df[df['Tumor_Type']==ttype]
+
+        # identify synonymous mutations
+        synonymous = map(lambda x: AminoAcid(x).is_synonymous,
+                         tmp_df['AminoAcid'])
+        tmp_df['synonymous'] = synonymous
 
         # identify non-silent mutations
         non_silent = map(lambda x: AminoAcid(x).is_non_silent,
@@ -120,6 +125,10 @@ def gene_count_per_tumor_type(conn):
         is_splice_site = tmp_df['Variant_Classification'] == 'Splice_Site'
         tmp_df['non_silent'] = (tmp_df['aa_non_silent'] | is_splice_site).astype(int)
 
+        # get count for all mutations
+        # tmp_df['all_mutations'] = tmp_df['non_silent'] + tmp_df['synonymous']
+        tmp_df['all_mutations'] = tmp_df[['non_silent', 'synonymous']].max(axis=1)
+
         # calculate number of samples a gene has a non-silent mutation for
         # this specific tumor type
         table = pd.pivot_table(tmp_df,
@@ -127,12 +136,21 @@ def gene_count_per_tumor_type(conn):
                                cols='Tumor_Sample',
                                rows='Gene',
                                aggfunc=np.max)
-        num_samples_per_gene = table.sum(axis=1)  # sum all samples for a gene
+        ns_num_samples_per_gene = table.sum(axis=1)  # sum all samples for a gene
+
+        # calculate number of samples a gene has any (including synonymous) mutations
+        table = pd.pivot_table(tmp_df,
+                               values='all_mutations',
+                               cols='Tumor_Sample',
+                               rows='Gene',
+                               aggfunc=np.max)
+        all_num_samples_per_gene = table.sum(axis=1)  # sum all samples for a gene
 
         # re-define tmp_df to create a dataframe to concatenate to the df
         # used save all of the results
-        tmp_df = pd.DataFrame(columns=cols, index=num_samples_per_gene.index)
-        tmp_df['sample_count'] = num_samples_per_gene
+        tmp_df = pd.DataFrame(columns=cols, index=ns_num_samples_per_gene.index)
+        tmp_df['ns_sample_count'] = ns_num_samples_per_gene
+        tmp_df['all_sample_count'] = all_num_samples_per_gene
         tmp_df['Gene'] = tmp_df.index
         tmp_df['Tumor_Type'] = ttype  # add a col for tumor type
 
@@ -202,10 +220,14 @@ def main(conn):
                          ylabel='Density')
 
     # plot the max percent of samples a gene is mutated in given a tumor type
-    table = pd.pivot_table(gene_samples_per_tumor_type, values='sample_count',
-                           rows='Gene', cols='Tumor_Type', aggfunc=np.mean)
-    table = table.div(sample_ct_per_tumor_type['sample_count'].astype(float))
-    table = pd.DataFrame({'sample_pct': table.apply(np.max, axis=1)})  # only use ttype with max pct
+    ns_table = pd.pivot_table(gene_samples_per_tumor_type, values='ns_sample_count',
+                              rows='Gene', cols='Tumor_Type', aggfunc=np.mean)
+    ns_table = ns_table.div(sample_ct_per_tumor_type['sample_count'].astype(float))
+    all_table = pd.pivot_table(gene_samples_per_tumor_type, values='all_sample_count',
+                               rows='Gene', cols='Tumor_Type', aggfunc=np.mean)
+    all_table = all_table.div(sample_ct_per_tumor_type['sample_count'].astype(float))
+    table = pd.DataFrame({'non-silent sample pct': ns_table.apply(np.max, axis=1),
+                          'all mutation sample pct': all_table.apply(np.max, axis=1)})  # only use ttype with max pct
     table.to_csv(out_dir + cfg_opts['max_gene_pct_sample_out'], sep='\t')
     # plot the KDE of the distribution
     plot_data.sample_kde(table,
@@ -224,6 +246,6 @@ def main(conn):
     ent_df = ent_df[ent_df['true class']==_utils.onco_label]  # select only oncogenes
     merged_df = pd.merge(ent_df, table, how='left',
                          left_index=True, right_index=True)
-    plot_data.entropy_sample_correlation(merged_df['sample_pct'],
+    plot_data.entropy_sample_correlation(merged_df['non-silent sample pct'],
                                          merged_df['pct of uniform mutation entropy'],
                                          _utils.plot_dir + cfg_opts['entropy_sample_correlation'])

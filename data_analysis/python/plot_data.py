@@ -399,6 +399,10 @@ def sample_kde(df, save_path,
                xlabel='',
                ylabel='',
                title=''):
+    logger.info('Plotting KDE of percent of samples with a non-silent mutation . . .')
+
+    df = df.rename(columns={'non-silent sample pct': 'sample_pct'}).copy()  # plotting expects col named 'sample_pct'
+
     # categorize genes into onco/tsg
     df['true class'] = df.index.to_series().apply(_utils.classify_gene)
     df['true class'] = df['true class'].apply(lambda x: _utils.class_to_label[x])
@@ -413,12 +417,15 @@ def sample_kde(df, save_path,
     plt.legend(loc='best')
     plt.savefig(save_path)
     plt.close()
+    logger.info('Finished plotting KDE of samples.')
 
 
 def sample_boxplot(df, save_path,
-               xlabel='',
-               ylabel='',
-               title=''):
+                   xlabel='',
+                   ylabel='',
+                   title=''):
+    logger.info('Plotting box plot of percent of samples with specific '
+                'mutations ({0}) . . .'.format(save_path))
     # categorize genes into onco/tsg
     df['true class'] = df.index.to_series().apply(_utils.classify_gene)
 
@@ -430,7 +437,7 @@ def sample_boxplot(df, save_path,
     if not title:
         title = 'Pct of Samples containing a Non-silent Mutation'
 
-    # plot kde
+    # plot boxplot
     myplt.boxplot(df,
                   by='true class',
                   column=[],  # use default column for boxplot
@@ -438,6 +445,7 @@ def sample_boxplot(df, save_path,
                   xlabel=xlabel,
                   ylabel=ylabel,
                   title=title)
+    logger.info('Finished box plot.')
 
 
 def entropy_sample_correlation(x, y,
