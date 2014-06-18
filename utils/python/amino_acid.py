@@ -24,7 +24,12 @@ class AminoAcid(object):
 
     def __init__(self, hgvs='', occurrence=1):
         self.logger = logging.getLogger(__name__)
-        self.is_non_silent = False  # initialize mutation to be silent
+
+        # initialize flags to prevent errors
+        self.is_non_silent = False
+        self.is_synonymous = False
+
+        # parse HGVS string
         if not (type(hgvs) is str or type(hgvs) is type(u'')):
             # catches cases where wierd non-string input is used
             self.is_valid = False
@@ -252,6 +257,7 @@ class AminoAcid(object):
             self.stop_pos = None  # not a nonsense mutation
             if self.initial == self.mutated:
                 self.is_synonymous = True
+                self.is_non_silent = False
             elif self.mutated == '*':
                 self.is_nonsense_mutation = True
         elif self.is_indel:
@@ -307,6 +313,7 @@ class AminoAcid(object):
             if self.initial == self.mutated:
                 # classify nonsense-to-nonsense mutations as synonymous
                 self.is_synonymous = True
+                self.is_non_silent = False
         else:
             self.is_valid = False  # did not match any of the possible cases
             self.logger.debug('(Parsing-Problem) Invalid HGVS Amino Acid '

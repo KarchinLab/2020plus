@@ -170,6 +170,7 @@ def test_synonymous_mutation():
     assert aa.initial == 'A'
     assert aa.mutated == 'A'
     assert aa.pos == 246
+    assert not aa.is_non_silent  # non-silent flag should be false
 
 
 def test_no_protein():
