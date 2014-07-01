@@ -43,7 +43,7 @@ def fix_variant_type(var_clf):
     elif 'synonymous' in var_clf.lower():
         return 'Silent'
     elif 'nonsense' in var_clf.lower():
-        return 'Nonsense'
+        return 'Nonsense_Mutation'
     elif 'silent' in var_clf.lower():
         return 'Silent'
     elif 'nonstop' in var_clf.lower():
@@ -100,10 +100,10 @@ def parse_arguments():
     parser.add_argument('-o', '--output',
                         type=str, action='store',
                         help='Modified MAF format acceptable for input')
-    parser.add_argument('-b', '--black-list',
-                        action='store_true',
-                        help='Filter out mutations that occur in the CRAVAT '
-                        'black list (i.e. problematic regions)')
+    #parser.add_argument('-b', '--black-list',
+                        #action='store_true',
+                        #help='Filter out mutations that occur in the CRAVAT '
+                        #'black list (i.e. problematic regions)')
     args = parser.parse_args()
     return vars(args)
 
@@ -118,8 +118,8 @@ def main(opts):
     broad_df['Protein_Change'] = hgvs_list
 
     # filter out variants with mappability warning
-    if opts['black_list']:
-        broad_df = broad_df[cravat_df['Mappability Warning'].isnull()]
+    # if opts['black_list']:
+    broad_df = broad_df[cravat_df['Mappability Warning'].isnull()]
 
     # rename headers
     broad_df.rename(columns={'ttype': 'Tumor_Type',
