@@ -100,10 +100,6 @@ def parse_arguments():
     parser.add_argument('-o', '--output',
                         type=str, action='store',
                         help='Modified MAF format acceptable for input')
-    #parser.add_argument('-b', '--black-list',
-                        #action='store_true',
-                        #help='Filter out mutations that occur in the CRAVAT '
-                        #'black list (i.e. problematic regions)')
     args = parser.parse_args()
     return vars(args)
 
@@ -112,14 +108,18 @@ def main(opts):
     # read in data
     cravat_df = pd.read_csv(opts['cravat'], sep='\t')
     broad_df = pd.read_csv(opts['maf'], sep='\t')
+    prev_len = len(broad_df)
 
     # get hgvs strings from cravat output
     hgvs_list = generate_hgvs_syntax(cravat_df)
     broad_df['Protein_Change'] = hgvs_list
 
     # filter out variants with mappability warning
-    # if opts['black_list']:
     broad_df = broad_df[cravat_df['Mappability Warning'].isnull()]
+    after_len = len(broad_df)
+    print('Before mappability filtering: {0} lines'.format(prev_len))
+    print('After mappability filtering: {0} lines'.format(after_len))
+    print('Line difference: {0}'.format(prev_len-after_len))
 
     # rename headers
     broad_df.rename(columns={'ttype': 'Tumor_Type',
