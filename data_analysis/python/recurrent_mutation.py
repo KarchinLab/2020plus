@@ -18,8 +18,8 @@ def _count_recurrent_missense(hgvs_iterable,
     """Counts the total missense mutations and stratifies missense
     counts according to position.
 
-    **Parameters**
-
+    Parameters
+    ----------
     hgvs_iterable : iterable
         container object with HGVS protein strings
     bin_width : int
@@ -27,8 +27,8 @@ def _count_recurrent_missense(hgvs_iterable,
         Default is 1, meaning mutations have to occur at the
         exact same position.
 
-    **Returns**
-
+    Returns
+    -------
     gene_pos_ctr : dict
         counts missense mutations by position. {mutation_position: count, ...}
     total_missense_ctr : int
@@ -65,17 +65,18 @@ def count_missense_types(hgvs_iterable,
     """Count the number of recurrent missense and regular missense
     mutations given a valid recurrency range.
 
-    **Parameters**
-
+    Parameters
+    ----------
     hgvs_iterable : iterable
         contains HGVS protein strings for a single gene.
     recurrent_min : int, (default=2)
         minimum number of missense mutations to define a recurrent position.
     recurrent_max : int, (default=infinity)
         maximum number of missense mutations to define a recurrent position.
+        This is just a purely debugging parameter.
 
-    **Returns**
-
+    Returns
+    -------
     recurrent_cts : int
         number of recurrent missense mutations in a gene
     missense_cts : int
@@ -97,6 +98,8 @@ def count_recurrent_by_number(hgvs_iterable):
 
 
 def unique_missense_positions(conn):
+    """This function appears to not be used. Possible bug in calling
+    count_recurrent_by_number function."""
     logger.info('Calculating unique missense positions. . .')
 
     # query database
@@ -120,6 +123,16 @@ def unique_missense_positions(conn):
 
 
 def count_recurrent(conn):
+    """Counts the number of recurrent mutations by how many recurrent
+    mutations were at a particular position.
+
+    All counts are stratified by gene type (oncogene, TSG, other).
+
+    Parameters
+    ----------
+    conn : db connection
+        connection to 20/20+ database
+    """
     logger.info('Counting the number of recurrent positions . . .')
 
     # query database
@@ -189,4 +202,3 @@ def main(conn):
     tmp_path = _utils.plot_dir + cfg_opts['recur_missense_line']
     plot_data.recurrent_missense_pos_line(other_df,
                                           tmp_path)
-
