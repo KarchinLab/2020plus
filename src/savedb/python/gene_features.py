@@ -10,7 +10,7 @@ not clear how important those features are for supervised learning on
 "known" oncogenes and tsgs.
 """
 
-import utils.python.util as _utils
+import src.utils.python.util as _utils
 import pandas as pd
 import pandas.io.sql as psql
 import sqlite3

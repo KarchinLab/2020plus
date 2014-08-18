@@ -16,7 +16,7 @@ NOTE: This module will likely break if minor details in the
 database, etc. change.
 """
 
-import utils.python.util as _utils
+import src.utils.python.util as _utils
 from collections import namedtuple
 import pandas as pd
 import pandas.io.sql as psql
