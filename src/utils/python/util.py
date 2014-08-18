@@ -37,13 +37,13 @@ sim_result_dir = save_dir + _opts['sim_result_dir']
 def read_aa_properties(file_path):
     """Read aa property counts from the data_analysis/results folder.
 
-    **Parameters**
-
+    Parameters
+    ----------
     file_path : str
         path to aa_change.properties.txt
 
-    **Returns**
-
+    Returns
+    -------
     df : pd.DataFrame
         contains mutation counts for amino acid chemical properties
     """
@@ -61,8 +61,8 @@ def read_oncogenes():
     Oncogenes from supplementary 2A:
     http://www.sciencemag.org/content/339/6127/1546.full
 
-    **Returns**
-
+    Returns
+    -------
     oncogenes : tuple
         tuple of gene names considered oncogenes
     """
@@ -75,11 +75,11 @@ def read_oncogenes():
 def read_tsgs():
     """Reads in the tumor suppressor genes from vogelsteins' science paper.
 
-    Oncogenes from supplementary 2A:
+    TSGs from supplementary 2A:
     http://www.sciencemag.org/content/339/6127/1546.full
 
-    **Returns**
-
+    Returns
+    -------
     tsgs : tuple
         tuple of gene names considered as tumor suppressors
     """
@@ -98,8 +98,8 @@ def read_smg():
     SMGs from supplementary:
     http://www.nature.com/nature/journal/v502/n7471/full/nature12634.html
 
-    **Returns**
-
+    Returns
+    -------
     smgs : tuple
         tuple of gene names considered as significantly mutated
     """
@@ -134,8 +134,8 @@ def read_cgc():
     Data from CGC is available from here:
     http://cancer.sanger.ac.uk/cancergenome/projects/census/
 
-    **Returns**
-
+    Returns
+    -------
     cgc_in_database : tuple
         tuple of gene names in cancer gene census also in COSMIC
     """
@@ -167,8 +167,8 @@ def read_cgc():
 def read_olfactory_receptors():
     """Reads in the significant olfactory receptors from Mutsigcv.
 
-    **Returns**
-
+    Returns
+    -------
     olfactory : tuple
         tuple of gene names considered as olfactory receptors
     """
@@ -201,13 +201,13 @@ def read_olfactory_receptors():
 def classify_gene(gene):
     """Return whether the gene is an oncogene, tsg, or other.
 
-    **Parameters**
-
+    Parameters
+    ----------
     gene : str
         Official gene name
 
-    **Returns**
-
+    Returns
+    -------
         Str, ['oncogene' | 'tsg' | 'other']
     """
     if gene in oncogene_set:
@@ -224,8 +224,8 @@ def get_mutation_types(mut_iterable,
                        kind='amino acid'):
     """Classify each protein HGVS mutation as a certain type.
 
-    **Parameters**
-
+    Parameters
+    ----------
     mut_iterable : iterable
         iterable container with HGVS mutaiton strings. If amino acids,
         a secon dna_iterable is needed to identify splice mutations.
@@ -235,8 +235,8 @@ def get_mutation_types(mut_iterable,
     known_type : pd.Series
         contains list of mutation types
 
-    **Returns**
-
+    Returns
+    -------
     mut_type_series : pd.Series
         container of protein mutation types in same order as input
     """
@@ -268,8 +268,8 @@ def count_mutation_types(hgvs_iterable, dna_series=None, known_type=None, kind='
     """Count mutation types from HGVS protein strings (missense, indels, etc.)
     and DNA strings (substitutions, indels).
 
-    **Parameters**
-
+    Parameters
+    ----------
     hgvs_iterable : iterable
         An iterable object containing protein HGVS
     dna_iterable : iterable
@@ -278,8 +278,8 @@ def count_mutation_types(hgvs_iterable, dna_series=None, known_type=None, kind='
     known_type : pd.Series
         known mutation consequence type
 
-    **Returns**
-
+    Returns
+    -------
     unique_cts : pd.Series
         A pandas series object counting protein mutation types
     """
@@ -313,13 +313,13 @@ def read_cosmic_tsv_by_gene(gene_name):
     NOTE: Assumes cosmic flat files are in cosmic_dir specified by input.cfg
     and are sorted into alphabetical directories (eg. 'A'...'Z').
 
-    **Parameters**
-
+    Parameters
+    ----------
     gene_name : str
         gene name
 
-    **Returns**
-
+    Returns
+    -------
     df : pd.DataFrame
         tsv file as a pandas dataframe
     """
@@ -342,8 +342,8 @@ def drop_table(tbl_name,
     table. The bug is found here:
         https://github.com/pydata/pandas/issues/2971
 
-    **Parameters**
-
+    Parameters
+    ----------
     tbl_name : str
         name of table to drop
     kind : str, ['sqlite' | 'mysql']
