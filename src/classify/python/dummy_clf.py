@@ -1,6 +1,6 @@
 from sklearn.dummy import DummyClassifier
 from generic_classifier import GenericClassifier
-import features.python.features as features
+import src.features.python.features as features
 import logging
 
 

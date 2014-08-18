@@ -4,7 +4,7 @@ import rpy2.robjects as ro
 import pandas.rpy.common as com
 import pandas as pd
 from generic_classifier import GenericClassifier
-import features.python.features as features
+import src.features.python.features as features
 import logging
 
 

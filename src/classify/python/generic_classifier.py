@@ -1,9 +1,9 @@
 """The generic_classifier module contains code to do validation
 of the classifier predictions."""
 
-import utils.python.util as _utils
-import utils.python.math as mymath
-import features.python.features as features
+import src.utils.python.util as _utils
+import src.utils.python.math as mymath
+import src.features.python.features as features
 import numpy as np
 from numpy import interp
 from sklearn import cross_validation

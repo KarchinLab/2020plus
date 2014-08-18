@@ -1,7 +1,7 @@
 from __future__ import division
 from sklearn.ensemble import RandomForestClassifier
 from generic_classifier import GenericClassifier
-import features.python.features as features
+import src.features.python.features as features
 import pandas as pd
 import logging
 

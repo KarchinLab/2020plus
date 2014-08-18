@@ -4,7 +4,7 @@ from random_forest_clf import RandomForest
 from multinomial_nb_clf import MultinomialNaiveBayes
 from dummy_clf import DummyClf
 from r_random_forest_clf import RRandomForest
-import utils.python.util as _utils
+import src.utils.python.util as _utils
 import plot_data
 import pandas as pd
 import numpy as np
