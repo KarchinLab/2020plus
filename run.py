@@ -5,15 +5,16 @@ import os
 import sys
 import traceback
 import argparse
-import data_analysis.python.stats
-import classify.python.classifier
-import simulation.python.simulate
-import features.python.features
-import savedb.python.gene_tsv
-import savedb.python.gene_features
-import savedb.python.gene_maf
-import savedb.python.merge_mutations
-import utils.python.util as _utils
+import src.data_analysis.python.stats
+import src.classify.python.classifier
+import src.simulation.python.simulate_performance
+import src.simulation.python.simulate_consistency
+import src.features.python.features
+import src.savedb.python.gene_tsv
+import src.savedb.python.gene_features
+import src.savedb.python.gene_maf
+import src.savedb.python.merge_mutations
+import src.utils.python.util as _utils
 
 # define exit status
 EXCEPTION_EXIT_STATUS = 1
@@ -77,22 +78,25 @@ def _data_analysis():
         #_utils.result_dir = 'data_analysis/results/genes/'
         pass
 
-    data_analysis.python.stats.main(args.recurrent,
-                                    args.recurrent_max,
-                                    args.database,
-                                    args.classify_only)  # run code
+    src.data_analysis.python.stats.main(args.recurrent,
+                                        args.recurrent_max,
+                                        args.database,
+                                        args.classify_only)  # run code
 
 
 def _classify():
     """Wrapper function to call scripts in the classify folder."""
     opts = vars(args)  # create a dictionary for CLI options
-    classify.python.classifier.main(opts)  # run code
+    src.classify.python.classifier.main(opts)  # run code
 
 
 def _simulation():
     """Wrapper function to call scripts in the classify folder."""
     opts = vars(args)  # create a dictionary for CLI options
-    simulation.python.simulate.main(opts)  # run code
+    if not opts['random_half_split']:
+        src.simulation.python.simulate_performance.main(opts)
+    else:
+        src.simulation.python.simulate_consistency.main(opts)
 
 
 def _savedb():
@@ -102,22 +106,22 @@ def _savedb():
     information from the MutSigCV paper is also stored in the gene_features
     table.
     """
-    savedb.python.gene_tsv.main(args.hypermutator,
-                                args.cell_line,
-                                args.input,
-                                args.output,
-                                args.no_cosmic)  # populate the nucleotide table
-    savedb.python.gene_features.main(args.output)  # populate the gene_features table
-    savedb.python.gene_maf.main(args.maf,
-                                args.output,
-                                args.hypermutator)
-    savedb.python.merge_mutations.main(args.output)
+    src.savedb.python.gene_tsv.main(args.hypermutator,
+                                    args.cell_line,
+                                    args.input,
+                                    args.output,
+                                    args.no_cosmic)  # populate the nucleotide table
+    src.savedb.python.gene_features.main(args.output)  # populate the gene_features table
+    src.savedb.python.gene_maf.main(args.maf,
+                                    args.output,
+                                    args.hypermutator)
+    src.savedb.python.merge_mutations.main(args.output)
 
 
 def _features():
     """Wrapper function to call the features main function."""
     opts = vars(args)  # make CLI options a dictionary
-    features.python.features.main(opts)
+    src.features.python.features.main(opts)
 
 
 if __name__ == '__main__':
@@ -226,6 +230,10 @@ if __name__ == '__main__':
                        action='store_true',
                        default=False,
                        help='Perform sample with out replacement based on tumor types')
+    group.add_argument('-rhs', '--random-half-split',
+                       action='store_true',
+                       default=False,
+                       help='Perform a stratified half-split of tumor samples by tumor type')
     parser_simulation.add_argument('-p', '--processes',
                                    type=int,
                                    action='store',
