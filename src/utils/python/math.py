@@ -4,13 +4,13 @@ import numpy as np
 def shannon_entropy(p):
     """Calculates shannon entropy in bits.
 
-    **Parameters**
-
+    Parameters
+    ----------
     p : np.array
         array of probabilities
 
-    **Returns**
-
+    Returns
+    -------
     shannon entropy in bits
     """
     return -np.sum(p * np.log2(p))
@@ -23,13 +23,13 @@ def max_shannon_entropy(n):
     uniform distribution. The uniform distribution has
     entropy equal to log(n) (I will use base 2).
 
-    **Parameters**
-
+    Parameters
+    ----------
     n : int
         total mutation counts
 
-    **Returns**
-
+    Returns
+    -------
     max possible shannon entropy in bits
     """
     if n <= 0:
@@ -40,15 +40,15 @@ def max_shannon_entropy(n):
 def kl_divergence(p, q):
     """Compute the Kullback-Leibler (KL) divergence for discrete distributions.
 
-    **Parameters**
-
+    Parameters
+    ----------
     p : np.array
         "Ideal"/"true" Probability distribution
     q : np.array
         Approximation of probability distribution p
 
-    **Returns**
-
+    Returns
+    -------
     kl : float
         KL divergence of approximating p with the distribution q
     """
@@ -64,15 +64,15 @@ def kl_divergence(p, q):
 def js_divergence(p, q):
     """Compute the Jensen-Shannon Divergence between two discrete distributions.
 
-    **Parameters**
-
+    Parameters
+    ----------
     p : np.array
         probability mass array (sums to 1)
     q : np.array
         probability mass array (sums to 1)
 
-    **Returns**
-
+    Returns
+    -------
     js_div : float
         js divergence between the two distrubtions
     """
@@ -87,15 +87,15 @@ def js_distance(p, q):
     NOTE: JS divergence is not a metric but the sqrt of JS divergence is a
     metric and is called the JS distance.
 
-    **Parameters**
-
+    Parameters
+    ----------
     p : np.array
         probability mass array (sums to 1)
     q : np.array
         probability mass array (sums to 1)
 
-    **Returns**
-
+    Returns
+    -------
     js_dist : float
         Jensen-Shannon distance between two discrete distributions
     """
