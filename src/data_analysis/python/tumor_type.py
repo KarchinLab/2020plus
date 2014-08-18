@@ -1,10 +1,10 @@
 """Calculates stats related to tumor types."""
-import utils.python.util as _utils
-from utils.python.amino_acid import AminoAcid
+import src.utils.python.util as _utils
+from src.utils.python.amino_acid import AminoAcid
 import pandas.io.sql as psql
 import pandas as pd
 import plot_data
-import utils.python.math as mymath
+import src.utils.python.math as mymath
 import numpy as np
 import logging
 

@@ -2,7 +2,7 @@
 and features are specified in different columns. The generate_feature_matrix
 function specifies how the feature matrix is constructed.
 """
-from utils.python.amino_acid import AminoAcid
+from src.utils.python.amino_acid import AminoAcid
 import recurrent_mutation as recur
 import plot_data
 import pandas.io.sql as psql

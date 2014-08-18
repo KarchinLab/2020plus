@@ -1,6 +1,6 @@
-from utils.python.amino_acid import AminoAcid
-import utils.python as up
-import utils.python.util as _utils
+from src.utils.python.amino_acid import AminoAcid
+import src.utils.python as up
+import src.utils.python.util as _utils
 import plot_data
 import pandas as pd
 import pandas.io.sql as psql

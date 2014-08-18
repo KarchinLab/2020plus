@@ -4,9 +4,9 @@ particularly for mutation types present in the table.
 """
 
 import pandas.io.sql as psql
-import utils.python.util as _utils
-from utils.python.cosmic_db import get_cosmic_db
-import data_analysis.python.plot_data as plot_data
+import src.utils.python.util as _utils
+from src.utils.python.cosmic_db import get_cosmic_db
+import src.data_analysis.python.plot_data as plot_data
 import logging
 
 logger = logging.getLogger(__name__)

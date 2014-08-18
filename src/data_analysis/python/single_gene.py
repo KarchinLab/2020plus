@@ -1,9 +1,9 @@
-import utils.python.util as _utils
+import src.utils.python.util as _utils
 import recurrent_mutation as recur
 import pandas as pd
 import pandas.io.sql as psql
 import logging
-import utils.python.plot as myplt
+import src.utils.python.plot as myplt
 import os
 
 logger = logging.getLogger(__name__)

@@ -4,7 +4,7 @@ for amino acids (missense, indel, frame shift, nonsense, and synonymous)
 and nucleotides (substitution, insertions, and deletions).
 """
 
-import utils.python.util as _utils
+import src.utils.python.util as _utils
 import plot_data
 import pandas as pd
 import pandas.io.sql as psql

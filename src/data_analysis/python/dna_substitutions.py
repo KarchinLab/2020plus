@@ -1,7 +1,7 @@
 """This module counts mutational changes at the DNA level.
 """
-import utils.python.util as _utils
-from utils.python.nucleotide import Nucleotide
+import src.utils.python.util as _utils
+from src.utils.python.nucleotide import Nucleotide
 import plot_data
 import pandas.io.sql as psql
 import csv

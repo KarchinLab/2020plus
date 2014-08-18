@@ -2,8 +2,8 @@
 This module handles counting recurrent mutations.
 """
 
-from utils.python.amino_acid import AminoAcid
-import utils.python.util as _utils
+from src.utils.python.amino_acid import AminoAcid
+import src.utils.python.util as _utils
 import pandas as pd
 import pandas.io.sql as psql
 import plot_data

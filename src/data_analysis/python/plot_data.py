@@ -7,10 +7,10 @@ directory is always consistent with the actual plots.
 
 from __future__ import division  # prevents integer division
 import pandas as pd
-import utils.python
+import src.utils.python
 import numpy as np
-import utils.python.plot as myplt
-import utils.python.util as _utils
+import src.utils.python.plot as myplt
+import src.utils.python.util as _utils
 from matplotlib.mlab import PCA
 import matplotlib.pyplot as plt
 import logging

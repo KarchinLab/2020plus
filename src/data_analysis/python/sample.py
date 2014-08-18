@@ -3,8 +3,8 @@ The sample module analyzes characteristics of samples in
 the database by using the `mutation` table.
 """
 
-import utils.python.util as _utils
-from utils.python.amino_acid import AminoAcid
+import src.utils.python.util as _utils
+from src.utils.python.amino_acid import AminoAcid
 import pandas.io.sql as psql
 import plot_data
 import pandas as pd

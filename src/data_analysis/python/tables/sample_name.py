@@ -4,7 +4,7 @@ the `COSMIC_nuc` database by using the `nucleotide`. SampleName
 column.
 """
 
-import utils.python.util as _utils
+import src.utils.python.util as _utils
 import pandas.io.sql as psql
 
 

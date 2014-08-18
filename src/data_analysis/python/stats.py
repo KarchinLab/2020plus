@@ -1,7 +1,7 @@
-import utils.python
-from utils.python.cosmic_db import get_cosmic_db
+import src.utils.python
+from src.utils.python.cosmic_db import get_cosmic_db
 import dna_substitutions
-import utils.python.util as _utils
+import src.utils.python.util as _utils
 import plot_data
 import mutation_types
 import single_gene
