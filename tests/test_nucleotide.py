@@ -1,4 +1,4 @@
-from ..utils.python.nucleotide import Nucleotide
+from ..src.utils.python.nucleotide import Nucleotide
 
 
 def test_substitution():

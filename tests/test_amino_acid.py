@@ -1,4 +1,4 @@
-from ..utils.python.amino_acid import AminoAcid
+from ..src.utils.python.amino_acid import AminoAcid
 
 
 def test_missense_mutation():

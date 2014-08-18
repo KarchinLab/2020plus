@@ -1,4 +1,4 @@
-from ..classify.python.vogelstein_classifier import VogelsteinClassifier
+from ..src.classify.python.vogelstein_classifier import VogelsteinClassifier
 
 
 def test_oncogene_counts():
