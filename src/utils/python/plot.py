@@ -7,7 +7,6 @@ to make a reasonable looking plot.
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as stats
-import IPython
 
 
 def heatmap(df, file_path, title='', xlabel='', ylabel='', cmap=plt.cm.Blues):
