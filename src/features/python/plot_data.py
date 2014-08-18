@@ -1,5 +1,5 @@
-import utils.python.util as _utils
-import utils.python.plot as myplt
+import src.utils.python.util as _utils
+import src.utils.python.plot as myplt
 import logging
 
 logger = logging.getLogger(__name__)
