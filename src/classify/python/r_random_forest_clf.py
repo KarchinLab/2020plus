@@ -28,7 +28,7 @@ class MyClassifier(object):
         self.driver_sample_rate = driver_sample
 
         # Code for R's random forest using rpy2
-        ro.r("library(randomForest)")  # load randomForest library
+        ro.r("suppressPackageStartupMessages(library(randomForest))")  # load randomForest library
 
         # R function for fitting a random forest
         ro.r('''rf_fit <- function(df, ntree, sampSize){
