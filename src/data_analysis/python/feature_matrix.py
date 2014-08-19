@@ -6,7 +6,7 @@ from src.utils.python.amino_acid import AminoAcid
 import recurrent_mutation as recur
 import plot_data
 import pandas.io.sql as psql
-import utils.python.util as _utils
+import src.utils.python.util as _utils
 from collections import OrderedDict
 import shutil
 import csv

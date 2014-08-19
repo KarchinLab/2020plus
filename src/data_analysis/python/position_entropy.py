@@ -1,7 +1,7 @@
-import utils.python.util as _utils
+import src.utils.python.util as _utils
 import recurrent_mutation
-import utils.python.math as mymath
-from utils.python.amino_acid import AminoAcid
+import src.utils.python.math as mymath
+from src.utils.python.amino_acid import AminoAcid
 import plot_data
 import pandas as pd
 import numpy as np
