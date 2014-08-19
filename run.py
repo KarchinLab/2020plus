@@ -1,8 +1,14 @@
 #!/usr/bin/env python
-import logging
-import datetime
+# force project root directory to be in path. Otherwise
+# package imports will fail if run.py is ran from another
+# directory.
 import os
 import sys
+sys.path.append(os.path.abspath(os.path.dirname(__file__)))
+
+# regular imports
+import logging
+import datetime
 import traceback
 import argparse
 import src.data_analysis.python.stats
@@ -127,9 +133,6 @@ def _features():
 if __name__ == '__main__':
     # initializations
     sys.excepthook = handle_uncaught_exceptions  # handle exceptions
-
-    # force working directory to be the location of this script
-    sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
     # parse command line arguments
     parser = argparse.ArgumentParser(description='Run scripts')

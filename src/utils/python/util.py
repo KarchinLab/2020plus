@@ -6,10 +6,12 @@ import sqlite3
 import pandas.io.sql as psql
 import ConfigParser
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
-config_dir = 'config/'
+proj_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
+config_dir = os.path.join(proj_dir, 'config/')
 
 onco_label, tsg_label, other_label = 1, 2, 0
 class_to_label = {'oncogene': onco_label,
@@ -25,7 +27,7 @@ def get_input_config(section):
 
 # setup directory paths
 _opts = get_input_config('result')
-save_dir = _opts['save_dir']
+save_dir = os.path.join(proj_dir, _opts['save_dir'])
 plot_dir = save_dir + _opts['plot_dir']
 result_dir = save_dir + _opts['result_dir']
 clf_plot_dir = save_dir + _opts['clf_plot_dir']
@@ -67,7 +69,8 @@ def read_oncogenes():
         tuple of gene names considered oncogenes
     """
     cfg_opts = get_input_config('input')
-    with open(cfg_opts['oncogene'], 'r') as handle:
+    onco_path = os.path.join(proj_dir, cfg_opts['oncogene'])
+    with open(onco_path, 'r') as handle:
         oncogenes = tuple(gene.strip() for gene in handle.readlines())
     return oncogenes
 
@@ -84,7 +87,8 @@ def read_tsgs():
         tuple of gene names considered as tumor suppressors
     """
     cfg_opts = get_input_config('input')
-    with open(cfg_opts['tsg'], 'r') as handle:
+    tsg_path = os.path.join(proj_dir, cfg_opts['tsg'])
+    with open(tsg_path, 'r') as handle:
         tsgs = tuple(gene.strip() for gene in handle.readlines())
     return tsgs
 
@@ -104,7 +108,8 @@ def read_smg():
         tuple of gene names considered as significantly mutated
     """
     cfg_opts = get_input_config('input')
-    with open(cfg_opts['smg'], 'r') as handle:
+    smg_path = os.path.join(proj_dir, cfg_opts['smg'])
+    with open(smg_path, 'r') as handle:
         smgs = tuple(gene.strip() for gene in handle.readlines())
 
     # open connection
@@ -140,7 +145,8 @@ def read_cgc():
         tuple of gene names in cancer gene census also in COSMIC
     """
     cfg_opts = get_input_config('input')
-    with open(cfg_opts['cgc'], 'r') as handle:
+    cgc_path = os.path.join(proj_dir, cfg_opts['cgc'])
+    with open(cgc_path, 'r') as handle:
         cgc = tuple(gene.strip() for gene in handle.readlines())
 
     # open connection
@@ -173,7 +179,8 @@ def read_olfactory_receptors():
         tuple of gene names considered as olfactory receptors
     """
     cfg_opts = get_input_config('input')
-    with open(cfg_opts['olfactory_receptors'], 'r') as handle:
+    or_path = os.path.join(proj_dir, cfg_opts['olfactory_receptors'])
+    with open(or_path, 'r') as handle:
         olfactory = tuple(gene.strip() for gene in handle.readlines())
 
     # open connection
