@@ -34,12 +34,6 @@ class RandomSampleNames(object):
             prng = np.random.RandomState()
             prng.shuffle(self.sample_names)
 
-            #j = 0  # index for sample names
-            #tmp_total = 0
-            #while(tmp_total < n):
-                #tmp_total += len(self.df[self.df[self.COLUMN_NAME]==self.sample_names[j]])
-                #j+=1
-            #samps_of_interest = self.sample_names[:j]
             samps_of_interest = set(self.sample_names[:int(self.num_sample_names*self.sub_sample)])
 
             # get data from those sample names

@@ -104,3 +104,8 @@ def roc_auc_errorbar(panel_dict, gene_type, save_path,
                         save_path=path_holder,
                         title=title, xlabel=xlabel,
                         ylabel=ylabel, label=label)
+
+
+def spearman_cor_errorbar(df_dict, save_path,
+                          title='', xlabel='', ylabel=''):
+    pass

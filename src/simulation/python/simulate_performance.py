@@ -149,12 +149,6 @@ def merge_feature_df(count_features,
     # merge the features into one data frame
     all_features = pd.merge(count_features, additional_features,
                             how='left', on='gene')
-
-    # re-order columns
-    #cols = all_features.columns.tolist()
-    #new_order = ['gene'] + cols[:cols.index('gene')] + cols[cols.index('gene')+1:]
-    #all_features = all_features[new_order]  # make the gene name the first column
-
     return all_features
 
 
@@ -165,13 +159,13 @@ def calculate_sem(wp):
     me from using it. So instead I am using the numpy apply function
     for calculating sem.
 
-    **Parameters**
-
+    Parameters
+    ----------
     wp : pd.Panel
         panel that stratifies samples
 
-    **Returns**
-
+    Returns
+    -------
     tmp_sem : pd.DataFrame
         standard error of the mean calculated along the sample axis
     """
@@ -186,15 +180,15 @@ def calculate_stats(result_dict,
                     metrics=['precision', 'recall', 'ROC AUC', 'PR AUC', 'count']):
     """Computes mean and sem of classification performance metrics.
 
-    **Parameters**
-
+    Parameters
+    ----------
     result_dict : dict
         dictionary with the i'th sample as the key and data frames
         with "oncogene"/"tsg" (row) classification performance metrics
         (columns) as values
 
-    **Returns**
-
+    Returns
+    -------
     result_df : pd.DataFrame
         Data frame with mean and sem of classification performance
         metrics. (rows: "oncogene"/"tsg", columns: summarized metrics)
