@@ -1,9 +1,9 @@
 import numpy as np
 import pandas as pd
 import pandas.io.sql as psql
-import data_analysis.python.feature_matrix as fmat
-import data_analysis.python.position_entropy as pentropy
-import features.python.features as feat
+import src.data_analysis.python.feature_matrix as fmat
+import src.data_analysis.python.position_entropy as pentropy
+import src.features.python.features as feat
 import logging
 
 logger = logging.getLogger(__name__)

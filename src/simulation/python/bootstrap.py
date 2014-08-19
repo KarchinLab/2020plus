@@ -1,5 +1,5 @@
 import numpy as np
-import features.python.features as features
+import src.features.python.features as features
 
 class Bootstrap(object):
 
