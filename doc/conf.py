@@ -17,7 +17,8 @@ import sphinx_rtd_theme  # import readthedocs.org theme
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('/home/ctokheim/projects/oncogene_classifier/'))
+sys.path.insert(0, os.path.abspath('/home/ctokheim/projects/2020+/'))
+sys.path.insert(0, os.path.abspath('/home/ctokheim/projects/2020+/doc/'))
 
 # -- General configuration -----------------------------------------------------
 
@@ -41,8 +42,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Oncogene Classifier'
-copyright = u'2013, Collin Tokheim'
+project = u'20/20+ Classifier'
+copyright = u'2013-14, Collin Tokheim'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -165,7 +166,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'OncogeneClassifierdoc'
+htmlhelp_basename = '2020plusClassifierdoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -184,7 +185,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'OncogeneClassifier.tex', u'Oncogene Classifier Documentation',
+  ('index', '2020plusClassifier.tex', u'20/20+ Classifier Documentation',
    u'Collin Tokheim', 'manual'),
 ]
 
@@ -214,7 +215,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'oncogeneclassifier', u'Oncogene Classifier Documentation',
+    ('index', '2020plusclassifier', u'20/20+ Classifier Documentation',
      [u'Collin Tokheim'], 1)
 ]
 
@@ -228,8 +229,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'OncogeneClassifier', u'Oncogene Classifier Documentation',
-   u'Collin Tokheim', 'OncogeneClassifier', 'One line description of project.',
+  ('index', '2020plusClassifier', u'20/20+ Classifier Documentation',
+   u'Collin Tokheim', '2020plusClassifier', 'One line description of project.',
    'Miscellaneous'),
 ]
 
