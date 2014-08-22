@@ -318,22 +318,6 @@ if __name__ == '__main__':
                                    default=False,
                                    help='Add gene expression to'
                                    ' features for simulation command')
-    help_msg = 'Number of CNV gains overlapping gene'
-    parser_simulation.add_argument('--cnv-gain',
-                                   action='store_true',
-                                   default=False,
-                                   help=help_msg)
-    help_msg = 'Number of CNV losses overlapping gene'
-    parser_simulation.add_argument('--cnv-loss',
-                                   action='store_true',
-                                   default=False,
-                                   help=help_msg)
-    help_msg = 'Ratio of CNV gain/CNV loss'
-    parser_simulation.add_argument('--cnv-ratio',
-                                   action='store_true',
-                                   default=False,
-                                   help=help_msg)
-    parser_simulation.set_defaults(func=_simulation)
 
     # savedb sub-command
     help_string = ('Concatenate tab delim gene files found in /databases/COSMIC '
@@ -378,10 +362,6 @@ if __name__ == '__main__':
                                action='store_true',
                                default=False,
                                help='Don\'t use mutations from COSMIC')
-    parser_savedb.add_argument('-c', '--cell-line',
-                               type=str, action='store',
-                               default='',
-                               help='COSMIC cell line project download')
 
     # features sub-command
     help_string = ('Generate the features used in classification.'
@@ -425,22 +405,6 @@ if __name__ == '__main__':
                                  default=False,
                                  help='Add gene expression to'
                                  ' features for classify command')
-    help_msg = 'Number of CNV gains overlapping gene'
-    parser_features.add_argument('--cnv-gain',
-                                 action='store_true',
-                                 default=False,
-                                 help=help_msg)
-    help_msg = 'Number of CNV losses overlapping gene'
-    parser_features.add_argument('--cnv-loss',
-                                 action='store_true',
-                                 default=False,
-                                 help=help_msg)
-    help_msg = 'Ratio of CNV gain/CNV loss'
-    parser_features.add_argument('--cnv-ratio',
-                                 action='store_true',
-                                 default=False,
-                                 help=help_msg)
-
 
     parser.set_defaults(database='genes')  # by default work on sqlite db
     args = parser.parse_args()  # parse the command line options

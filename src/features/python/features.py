@@ -43,10 +43,6 @@ def retrieve_gene_features(conn, opts):
         selected_cols.append('gene_betweeness')
     if opts['degree']:
         selected_cols.append('gene_degree')
-    if opts['cnv_gain']:
-        selected_cols.append('cnv_gain')
-    if opts['cnv_loss']:
-        selected_cols.append('cnv_loss')
 
     # get info from gene_features table
     logger.info('Retrieving gene feature information from gene_features table . . . ')
@@ -61,10 +57,6 @@ def retrieve_gene_features(conn, opts):
         df['gene_betweeness'] = df['gene_betweeness'].fillna(0)
     if 'gene_degree' in df.columns:
         df['gene_degree'] = df['gene_degree'].fillna(0)
-
-    # add ratio of CNV gain to CNV loss
-    if opts['cnv_ratio']:
-        df['cnv_ratio'] = (df['cnv_gain'] + 1).astype(float).div(df['cnv_loss']+1)
 
     # get position entropy features
     entropy_cfg = _utils.get_output_config('position_entropy')
