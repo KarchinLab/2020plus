@@ -26,6 +26,72 @@ import os
 import re
 
 
+def handle_cosmic_mutation_export(df, only_genome_wide, use_unknown_status):
+    # rename columns
+    rename_dict = {'Gene name': 'Gene',
+                   'Genome-wide screen': 'GenomeWideScreen',
+                   'Sample name': 'SampleName',
+                   'ID_sample': 'COSMICSampleID',
+                   'Mutation AA': 'AminoAcid',
+                   'Mutation CDS': 'Nucleotide',
+                   'Primary site': 'PrimaryTissue',
+                   'Mutation somatic status': 'SomaticStatus',
+                   'Mutation GRCh37 strand': 'strand',
+                   'Mutation GRCh37 genome position': 'genome_pos',
+                   'Mutation Description': 'Variant_Classification'}
+    df = df.rename(columns=rename_dict)
+
+    # parse genome coordinates
+    is_pos = df['genome_pos'].notnull()
+    genome_pos = df[is_pos]['genome_pos']
+    mychr = genome_pos.apply(lambda x: x.split(':')[0])
+    mystart = genome_pos.apply(lambda x: x.split(':')[1].split('-')[0])
+    myend = genome_pos.apply(lambda x: x.split(':')[1].split('-')[1])
+
+    # assign columns to data frame
+    df['hg19chrom'] = ''
+    df[is_pos]['hg19chrom'] = mychr
+    df['hg19start'] = -1
+    df[is_pos]['hg19start'] = mystart
+    df['hg19end'] = -1
+    df[is_pos]['hg19end'] = myend
+
+    # if only genome wide screen flag is true then remove all non
+    # genome wide data
+    if only_genome_wide:
+        df = df[df['GenomeWideScreen']=='y']
+
+    # filter out genes with _ENST in name
+    df = df[df['Gene'].apply(lambda x: '_ENST' not in x)]
+
+    # filter out designated germline variants
+    df = df[df['SomaticStatus'].apply(lambda x: 'germline' not in x.lower())]
+
+    if not use_unknown_status:
+        # filter out unknown somatic status mutations
+        df = df[df['SomaticStatus'].apply(lambda x: 'unknown' not in x.lower())]
+
+    # correct mutation name
+    mut_type_dict = {'Substitution - Missense': 'Missense_Mutation',
+                     'Substitution - coding silent': 'Silent',
+                     'Substitution - Nonsense': 'Nonsense_Mutation',
+                     'Frameshift': 'Frame_Shift_Indel',
+                     'Deletion - Frameshift': 'Frame_Shift_Indel',
+                     'Insertion - Frameshift': 'Frame_Shift_Indel',
+                     'Complex - frameshift': 'Frame_Shift_Indel',
+                     'Deletion - In frame': 'In_Frame_Indel',
+                     'Insertion - In frame': 'In_Frame_Indel',
+                     'Complex - insertion inframe': 'In_Frame_Indel',
+                     'Complex - deletion inframe': 'In_Frame_Indel'}
+    df['Variant_Classification'] = df['Variant_Classification'].apply(lambda x: mut_type_dict[x] if (x in mut_type_dict) else x)
+
+    col_order = ['Gene', 'SampleName', 'COSMICSampleID', 'AminoAcid',
+                 'Nucleotide', 'PrimaryTissue', 'SomaticStatus',
+                 'strand', 'hg19chrom', 'hg19start', 'hg19end',
+                 'Variant_Classification']
+    return df[col_order]
+
+
 def parse_sample_name(sample):
     if sample.startswith('TCGA'):
         sample = re.sub('-[A-Za-z0-9]+$', '', sample)
@@ -167,8 +233,12 @@ def filter_hypermutators(hypermutator_count, conn, db_path=''):
                      if_exists='replace')
 
 
-def save_db(hypermutator_ct, gene_tsv_path,
-            cnv_tsv_path, cell_line_path, genedb_path):
+def save_db(hypermutator_ct,
+            gene_tsv_path,
+            genedb_path,
+            is_genes_tgz=False,
+            only_genome_wide=True,
+            use_unknown_status=False):
     """Saves tab delim gene mutation file to a sqlite3 db.
 
     NOTE: Uses pandas to store all contents in memory and then
@@ -189,40 +259,43 @@ def save_db(hypermutator_ct, gene_tsv_path,
     """
     # read data
     df = pd.read_csv(gene_tsv_path, sep='\t')
-    cnv_df = pd.read_csv(cnv_tsv_path, sep=r'\t|:|\.\.')
+    # cnv_df = pd.read_csv(cnv_tsv_path, sep=r'\t|:|\.\.')
 
     # filter out cell line samples
-    if cell_line_path:
-        cell_line_df = pd.read_csv(cell_line_path, sep='\t')
-        cell_line_sample_names = set(cell_line_df['Sample name'].tolist())
-    else:
-        cell_line_sample_names = set([])
+    #if cell_line_path:
+        #cell_line_df = pd.read_csv(cell_line_path, sep='\t')
+        #cell_line_sample_names = set(cell_line_df['Sample name'].tolist())
+    #else:
+        #cell_line_sample_names = set([])
 
     # skip this if COSMIC not used
-    df = df[df['SampleName'].apply(lambda x: x not in cell_line_sample_names)]
+    #df = df[df['SampleName'].apply(lambda x: x not in cell_line_sample_names)]
 
-    # fix sample names so they match with external data
-    df['SampleName'] = df['SampleName'].apply(parse_sample_name)
+    if is_genes_tgz:
+        # fix sample names so they match with external data
+        df['SampleName'] = df['SampleName'].apply(parse_sample_name)
 
-    # fix types that pandas gets wrong
-    # see http://pandas.pydata.org/pandas-docs/dev/gotchas.html
-    # for details on missing NA support for integers
-    df['hg18chrom'] = df['hg18chrom'].fillna(-1)
-    df['hg19chrom'] = df['hg19chrom'].fillna(-1)
-    df['hg18start'] = df['hg18start'].fillna(-1)
-    df['hg19start'] = df['hg19start'].fillna(-1)
-    df['hg18end'] = df['hg18end'].fillna(-1)
-    df['hg19end'] = df['hg19end'].fillna(-1)
-    df['hg18chrom'] = df['hg18chrom'].astype(int)
-    df['hg19chrom'] = df['hg19chrom'].astype(int)
-    df['hg18start'] = df['hg18start'].astype(int)
-    df['hg19start'] = df['hg19start'].astype(int)
-    df['hg18end'] = df['hg18end'].astype(int)
-    df['hg19end'] = df['hg19end'].astype(int)
+        # fix types that pandas gets wrong
+        # see http://pandas.pydata.org/pandas-docs/dev/gotchas.html
+        # for details on missing NA support for integers
+        df['hg18chrom'] = df['hg18chrom'].fillna(-1)
+        df['hg19chrom'] = df['hg19chrom'].fillna(-1)
+        df['hg18start'] = df['hg18start'].fillna(-1)
+        df['hg19start'] = df['hg19start'].fillna(-1)
+        df['hg18end'] = df['hg18end'].fillna(-1)
+        df['hg19end'] = df['hg19end'].fillna(-1)
+        df['hg18chrom'] = df['hg18chrom'].astype(int)
+        df['hg19chrom'] = df['hg19chrom'].astype(int)
+        df['hg18start'] = df['hg18start'].astype(int)
+        df['hg19start'] = df['hg19start'].astype(int)
+        df['hg18end'] = df['hg18end'].astype(int)
+        df['hg19end'] = df['hg19end'].astype(int)
+    else:
+        df = handle_cosmic_mutation_export(df, only_genome_wide, use_unknown_status)
 
     # drop table if already exists
     _utils.drop_table('cosmic_mutation', genedb_path, kind='sqlite')
-    _utils.drop_table('cosmic_cnv', genedb_path, kind='sqlite')
+    # _utils.drop_table('cosmic_cnv', genedb_path, kind='sqlite')
 
     conn = sqlite3.connect(genedb_path)  # open connection
 
@@ -232,11 +305,11 @@ def save_db(hypermutator_ct, gene_tsv_path,
                      con=conn,  # connection
                      flavor='sqlite',  # use sqlite
                      if_exists='replace')  # drop table if exists
-    psql.write_frame(cnv_df,  # pandas dataframe
-                     'cosmic_cnv',  # table name
-                     con=conn,  # connection
-                     flavor='sqlite',  # use sqlite
-                     if_exists='replace')  # drop table if exists
+    #psql.write_frame(cnv_df,  # pandas dataframe
+                     #'cosmic_cnv',  # table name
+                     #con=conn,  # connection
+                     #flavor='sqlite',  # use sqlite
+                     #if_exists='replace')  # drop table if exists
 
     # drop table and re-insert data without hypermutators
     filter_hypermutators(hypermutator_ct, conn, genedb_path)
@@ -264,8 +337,8 @@ def create_empty_cosmic_mutation_table(db_path):
                               mycols, coltypes)
 
 
-def main(hypermutator_count, cell_line_path,
-         gene_dir, db_path, no_cosmic_flag):
+def main(hypermutator_count, mut_path, db_path,
+         no_cosmic_flag, opts):
     """Concatenates all the mutation data from tab delmited files in
     the cosmic directory. Next, saves the results to a sqlite db.
 
@@ -273,10 +346,10 @@ def main(hypermutator_count, cell_line_path,
     ----------
     hypermutator_count : int
         remove samples with too many mutations
-    gene_dir : str
-        path to directory containing contents of COSMIC's
-        genes.tgz file. If empty string, just use path
-        from config file.
+    mut_path : str
+        Either path to directory containing contents of COSMIC's
+        genes.tgz file or decompressed CosmicMutantExport.tsv.
+        If empty string, just use path from config file.
     db_path : str
         path to save sqlite database. If string is empty,
         use path from config.
@@ -285,7 +358,7 @@ def main(hypermutator_count, cell_line_path,
     """
     # get input/output configurations
     in_opts = _utils.get_input_config('input')
-    cosmic_dir = in_opts['cosmic_dir']
+    cosmic_path = in_opts['cosmic_path']
     out_opts = _utils.get_output_config('gene_tsv')
     out_path = out_opts['gene_tsv']
     cnv_path = out_opts['cnv_tsv']
@@ -297,13 +370,24 @@ def main(hypermutator_count, cell_line_path,
 
     # save info into a txt file and sqlite3 database
     if not no_cosmic_flag:
-        # concatenate all gene files
-        cosmic_dir = gene_dir if gene_dir else cosmic_dir
-        concatenate_genes(out_path, cosmic_dir)
-
-        # save database
-        save_db(hypermutator_count, out_path, cnv_path,
-                cell_line_path, out_db)
+        cosmic_path = mut_path if mut_path else cosmic_path
+        if os.path.isdir(cosmic_path):
+            # concatenate all gene files
+            concatenate_genes(out_path, cosmic_path)
+            # save database
+            save_db(hypermutator_count, out_path, out_db,
+                    is_genes_tgz=True,
+                    only_genome_wide=opts['only_genome_wide'],
+                    use_unknown_status=opts['use_unknown_status'])
+        elif os.path.isfile(cosmic_path):
+            # save database
+            print cosmic_path
+            save_db(hypermutator_count, cosmic_path, out_db,
+                    is_genes_tgz=False,
+                    only_genome_wide=opts['only_genome_wide'],
+                    use_unknown_status=opts['use_unknown_status'])
+        else:
+            raise ValueError('Please specify a vlid path to COSMIC data')
     else:
         # create an empty table if cosmic not wanted
         create_empty_cosmic_mutation_table(out_db)

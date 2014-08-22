@@ -139,9 +139,18 @@ def main(db_path):
 
     # get data for gene_features table
     logger.info('Processing features for gene_features table ...')
-    gene_length = recursive_gene_length(in_opts['fasta_dir'])
-    genes, lengths = zip(*gene_length.items())
-    gene_length_df = pd.DataFrame({'gene': genes, 'gene length': lengths})
+    if os.path.isdir(in_opts['cosmic_path']):
+        gene_length = recursive_gene_length(in_opts['fasta_dir'])
+        genes, lengths = zip(*gene_length.items())
+        gene_length_df = pd.DataFrame({'gene': genes, 'gene length': lengths})
+    else:
+        gene_length_df = pd.read_csv(in_opts['cosmic_path'], sep='\t')
+        gene_length_df = gene_length_df[['Gene name', 'Gene CDS length']]
+        gene_length_df = gene_length_df.rename(columns={'Gene name': 'gene',
+                                                        'Gene CDS length': 'gene length'})
+        gene_length_df.drop_duplicates(cols=['gene'], inplace=True)
+
+    # merge in data from mutsig and biogrid
     df = pd.read_csv(in_opts['mutsigcv_features'], sep='\t')
     df = pd.merge(gene_length_df, df, how='left', on='gene')  # merge the data frames
     biogrid_df = pd.read_csv('data/biogrid_stats.txt', sep='\t')

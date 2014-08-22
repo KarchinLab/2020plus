@@ -36,10 +36,10 @@ def main(db_path):
     cur.execute(sql)
     conn.commit()
 
-    cols_of_interest = cols_of_interest[:-5] + cols_of_interest[-2:]
-    cosmic_col_list = ['Gene', 'SampleName', 'PrimaryTissue',
-                       'hg19chrom', 'hg19start', 'hg19end',
-                       'AminoAcid', 'Nucleotide']
+    cols_of_interest = cols_of_interest[:-5] + cols_of_interest[-2:] + ['Variant_Classification']
+    cosmic_col_list = ['Gene', 'SampleName', 'PrimaryTissue', 'hg19chrom',
+                       'hg19start', 'hg19end', 'AminoAcid', 'Nucleotide',
+                       'Variant_Classification']
     mut_cols = ', '.join(cols_of_interest)
     cosmic_cols = ', '.join(cosmic_col_list)
     sql = ("INSERT INTO mutation({0}) "
