@@ -381,7 +381,6 @@ def main(hypermutator_count, mut_path, db_path,
                     use_unknown_status=opts['use_unknown_status'])
         elif os.path.isfile(cosmic_path):
             # save database
-            print cosmic_path
             save_db(hypermutator_count, cosmic_path, out_db,
                     is_genes_tgz=False,
                     only_genome_wide=opts['only_genome_wide'],
