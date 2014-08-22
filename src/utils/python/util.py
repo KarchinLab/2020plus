@@ -25,6 +25,7 @@ def get_input_config(section):
     cfg_options = dict(cfg.items(section))
     return cfg_options
 
+
 # setup directory paths
 _opts = get_input_config('result')
 save_dir = os.path.join(proj_dir, _opts['save_dir'])

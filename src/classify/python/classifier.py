@@ -118,7 +118,8 @@ def generate_2020_result(onco_pct, tsg_pct, min_ct):
     """Simply runs the 20/20 rule with given parameters."""
     # process count features from "data_analysis" results
     in_cfg = _utils.get_input_config('classifier')  # get directory
-    df = pd.read_csv(in_cfg['gene_feature'], sep='\t', index_col=0)
+    df = pd.read_csv(_utils.save_dir + in_cfg['gene_feature'],
+                     sep='\t', index_col=0)
     # df['total'] = df.T.sum()
     #df['total recurrent count'] = df['total'] * (df['recurrent missense'] + df['recurrent indel'])
     #df['total deleterious count'] = df['total'] * (df['frame shift'] + df['nonsense'] + df['lost stop'] + df['no protein'] + df['splicing mutation'])
@@ -234,22 +235,22 @@ def main(cli_opts):
     tmp_xlabel = 'Minimum Deleterious Mutations'
     tmp_save_path = _utils.clf_plot_dir + cfg_opts['number_tsg_plot']
     plot_data.tsg_mutations_parameter(tsg_ct,
-                                     tmp_save_path,
-                                     title=tmp_title,
-                                     ylabel=tmp_ylabel,
-                                     xlabel=tmp_xlabel)
+                                      tmp_save_path,
+                                      title=tmp_title,
+                                      ylabel=tmp_ylabel,
+                                      xlabel=tmp_xlabel)
     # plot recall of tsg while varying tsg score threshold
     tmp_title = 'Percentage of Landscape 2013 Oncogenes Recovered'
     tmp_ylabel = 'TSG Recall'
     tmp_xlabel = 'Minimum Deleterious Mutations'
     tmp_save_path = _utils.clf_plot_dir + cfg_opts['pct_tsg_plot']
     plot_data.tsg_mutations_parameter(tsg_pct,
-                                     tmp_save_path,
-                                     title=tmp_title,
-                                     ylabel=tmp_ylabel,
-                                     xlabel=tmp_xlabel)
+                                      tmp_save_path,
+                                      title=tmp_title,
+                                      ylabel=tmp_ylabel,
+                                      xlabel=tmp_xlabel)
 
-    df = pd.read_csv(in_opts['gene_feature'],
+    df = pd.read_csv(_utils.save_dir + in_opts['gene_feature'],
                      sep='\t', index_col=0)
 
     # plot the 20/20 rule scores
