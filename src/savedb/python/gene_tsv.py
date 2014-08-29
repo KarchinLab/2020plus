@@ -325,7 +325,7 @@ def create_empty_cosmic_mutation_table(db_path):
               'Histologysubtype2', 'PubmedID', 'studies',
               'MutationID', 'SomaticStatus', 'SampleSource',
               'Zygosity', 'hg18chrom', 'hg18start', 'hg18end',
-              'hg19chrom', 'hg19start', 'hg19end']
+              'hg19chrom', 'hg19start', 'hg19end', 'Variant_Classification']
     coltypes = ['TEXT']*len(mycols)
     coltypes[-1] = 'INTEGER'
     coltypes[-2] = 'INTEGER'
