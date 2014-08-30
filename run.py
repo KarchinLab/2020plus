@@ -318,6 +318,7 @@ if __name__ == '__main__':
                                    default=False,
                                    help='Add gene expression to'
                                    ' features for simulation command')
+    parser_simulation.set_defaults(func=_simulation)
 
     # savedb sub-command
     help_string = ('Concatenate tab delim gene files found in /databases/COSMIC '
