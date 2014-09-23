@@ -141,8 +141,8 @@ def generate_2020_result(onco_pct, tsg_pct, min_ct):
 def rand_forest_pred(clf, data, result_path):
     """Makes gene predictions using a random forest classifier.
 
-    **Parameters**
-
+    Parameters
+    ----------
     clf : GenericClassifier
         random forest sub-class of GenericClassifier
     data : pd.DataFrame
@@ -150,8 +150,8 @@ def rand_forest_pred(clf, data, result_path):
     result_path : str
         path to save text file result
 
-    **Returns**
-
+    Returns
+    -------
     tmp_df : pd.DataFrame
         random forest results (already saved to file)
     """
@@ -175,10 +175,71 @@ def rand_forest_pred(clf, data, result_path):
     return tmp_df
 
 
+def trained_rand_forest_pred(clf, data, result_path):
+    """Makes gene predictions using a previously trained random forest.
+
+    Parameters
+    ----------
+    clf : GenericClassifier
+        random forest sub-class of GenericClassifier
+    data : pd.DataFrame
+        data frame containing feature information
+    result_path : str
+        path to save text file result
+
+    Returns
+    -------
+    tmp_df : pd.DataFrame
+        random forest results (already saved to file)
+    """
+    # perform prediction
+    onco_prob, tsg_prob, other_prob = clf.predict()
+    true_class = clf.y
+
+    # save features/prediction results
+    tmp_df = data.copy()
+    gene_order = clf.y.index  # get the order of genes predicted on
+    tmp_df['oncogene probability'] = pd.Series(onco_prob, index=gene_order)
+    tmp_df['tsg probability'] = pd.Series(tsg_prob, index=gene_order)
+    tmp_df['other probability'] = pd.Series(other_prob, index=gene_order)
+    pred_class = tmp_df[['other probability', 'oncogene probability', 'tsg probability']].values.argmax(axis=1)
+    tmp_df['predicted class'] = pred_class
+    tmp_df['predicted cancer gene'] = ((tmp_df['oncogene probability'] + tmp_df['tsg probability']) > .5).astype(int)
+    tmp_df['true class'] = true_class
+    tmp_df = tmp_df.fillna(0)
+    tmp_df = tmp_df.sort(['oncogene probability', 'tsg probability'], ascending=False)
+    tmp_df.to_csv(result_path, sep='\t')
+
+    return tmp_df
+
+
 def main(cli_opts):
     cfg_opts = _utils.get_output_config('classifier')
     in_opts = _utils.get_input_config('classifier')
     minimum_ct = cli_opts['min_count']
+
+    # use trained classifier if provided
+    if cli_opts['trained_classifier']:
+        df = pd.read_csv(_utils.save_dir + in_opts['gene_feature'],
+                        sep='\t', index_col=0)
+
+        logger.info('Running R\'s Random forest . . .')
+
+        # initialize R's random forest
+        rrclf = RRandomForest(df,
+                              other_sample_ratio=cli_opts['other_ratio'],
+                              driver_sample=cli_opts['driver_rate'],
+                              ntrees=cli_opts['ntrees'],
+                              min_ct=minimum_ct)
+        rrclf.clf.load(cli_opts['trained_classifier'])
+
+        # do classification
+        pred_results_path = _utils.clf_result_dir + cfg_opts['rrand_forest_pred']
+        logger.info('Saving results to {0}'.format(pred_results_path))
+        trained_rand_forest_pred(rrclf, df, pred_results_path)
+
+        logger.info('Finished classification.')
+        return
 
     # get oncogene info
     onco_count_df, onco_pct_df, tsg_ct, tsg_pct = num_pred_by_pct_threshold(minimum_ct)

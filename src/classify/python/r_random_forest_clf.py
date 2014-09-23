@@ -5,6 +5,7 @@ import pandas.rpy.common as com
 import pandas as pd
 from generic_classifier import GenericClassifier
 import src.features.python.features as features
+import os
 import logging
 
 
@@ -101,6 +102,12 @@ class MyClassifier(object):
     def save(self, path):
         ro.r('''save(rf_clf, rf_pred_prob, rf_pred,
                      rf_imp, rf_fit, file="{0}")'''.format(path))
+
+    def load(self, path):
+        set_wd_str = 'setwd("{0}")'.format(os.getcwd())
+        ro.r(set_wd_str)
+        ro.r('load("{0}")'.format(path))
+        self.rf = ro.r["rf_clf"]
 
     def set_classes(self, oncogene, tsg):
         """Sets the integers used to represent classes in classification."""

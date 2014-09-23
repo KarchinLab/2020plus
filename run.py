@@ -199,6 +199,13 @@ if __name__ == '__main__':
                                            'a provided trained classifier (using '
                                            'train) or evaluates classifier performance '
                                            'using k-fold cross-validation.')
+    parser_classify.add_argument('-t', '--trained-classifier',
+                                 type=str,
+                                 action='store',
+                                 default=None,
+                                 help='If provided, use trained classifier from '
+                                 'the train sub-command. Otherwise, perform '
+                                 'cross-validation within the data set (default: None)')
     parser_classify.add_argument('-m', '--min-count',
                                  type=int,
                                  action='store',

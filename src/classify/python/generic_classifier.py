@@ -220,8 +220,8 @@ class GenericClassifier(object):
         overall_pred = np.zeros(num_genes)
 
         # do predictions
-        y_pred = self.clf.predict(self.x.iloc[test_ix])
-        proba_ = self.clf.predict_proba(self.x.iloc[test_ix])
+        y_pred = self.clf.predict(self.x)
+        proba_ = self.clf.predict_proba(self.x)
 
         # update information
         overall_pred = y_pred  # prediction including all classes
@@ -229,20 +229,9 @@ class GenericClassifier(object):
         onco_prob = proba_[:, self.onco_num] # predicted oncogenes
         tsg_pred = (y_pred==self.tsg_num).astype(int)  # predicted oncogenes
         tsg_prob = proba_[:, self.tsg_num] # predicted oncogenes
+        other_prob = 1 - (onco_prob + tsg_prob)
 
-        # update prediction results
-        true_onco = (self.y==self.onco_num).astype(int)
-        self._update_onco_metrics(true_onco,
-                                  onco_pred,
-                                  onco_prob)
-        true_tsg = (self.y==self.tsg_num).astype(int)  # true oncogenes
-        self._update_tsg_metrics(true_tsg,
-                                 tsg_pred,
-                                 tsg_prob)
-        self._update_metrics(self.y,
-                             overall_pred,
-                             onco_prob,
-                             tsg_prob)
+        return onco_prob, tsg_prob, other_prob
 
     def kfold_validation(self, k=10):
         self.num_pred = 0  # number of predictions
