@@ -202,6 +202,48 @@ class GenericClassifier(object):
         self.logger.info('Driver: Precision=%s, Recall=%s' % (
                          np.mean(self.driver_precision), np.mean(self.driver_recall)))
 
+    def train(self):
+        """Train classifier on entire data set provided."""
+        self.x, self.y = features.randomize(self.x)
+        self.clf.fit(self.x, self.y)
+
+    def predict(self):
+        """Predict after using the train method."""
+        self.num_pred = 1  # only one prediction
+
+        # initialize predicted results variables
+        num_genes = len(self.y)
+        onco_pred = np.zeros(num_genes)
+        onco_prob = np.zeros(num_genes)
+        tsg_pred = np.zeros(num_genes)
+        tsg_prob = np.zeros(num_genes)
+        overall_pred = np.zeros(num_genes)
+
+        # do predictions
+        y_pred = self.clf.predict(self.x.iloc[test_ix])
+        proba_ = self.clf.predict_proba(self.x.iloc[test_ix])
+
+        # update information
+        overall_pred = y_pred  # prediction including all classes
+        onco_pred = (y_pred==self.onco_num).astype(int)  # predicted oncogenes
+        onco_prob = proba_[:, self.onco_num] # predicted oncogenes
+        tsg_pred = (y_pred==self.tsg_num).astype(int)  # predicted oncogenes
+        tsg_prob = proba_[:, self.tsg_num] # predicted oncogenes
+
+        # update prediction results
+        true_onco = (self.y==self.onco_num).astype(int)
+        self._update_onco_metrics(true_onco,
+                                  onco_pred,
+                                  onco_prob)
+        true_tsg = (self.y==self.tsg_num).astype(int)  # true oncogenes
+        self._update_tsg_metrics(true_tsg,
+                                 tsg_pred,
+                                 tsg_prob)
+        self._update_metrics(self.y,
+                             overall_pred,
+                             onco_prob,
+                             tsg_prob)
+
     def kfold_validation(self, k=10):
         self.num_pred = 0  # number of predictions
         cfg = _utils.get_output_config('tumor_type')

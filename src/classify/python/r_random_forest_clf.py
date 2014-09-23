@@ -18,7 +18,7 @@ class MyClassifier(object):
     """
 
     def __init__(self,
-                 ntrees=250,
+                 ntrees=200,
                  other_sample_ratio=3.,
                  # other_sample=.02,
                  driver_sample=.7):
@@ -33,14 +33,14 @@ class MyClassifier(object):
         # R function for fitting a random forest
         ro.r('''rf_fit <- function(df, ntree, sampSize){
                 df$true_class <- as.factor(df$true_class)
-                rf <- randomForest(true_class~.,
-                                   data=df,
-                                   replace=TRUE,
-                                   ntree=ntree,
-                                   classwt=1/sampSize,
-                                   sampsize=sampSize,
-                                   importance=TRUE)
-                return(rf)
+                rf_clf <<- randomForest(true_class~.,
+                                        data=df,
+                                        replace=TRUE,
+                                        ntree=ntree,
+                                        classwt=1/sampSize,
+                                        sampsize=sampSize,
+                                        importance=TRUE)
+                return(rf_clf)
              }''')
         self.rf_fit = ro.r['rf_fit']
 
@@ -98,6 +98,10 @@ class MyClassifier(object):
         r_imp = self.rf_imp(self.rf)  # importance dataframe in R
         self.feature_importances_ = com.convert_robj(r_imp)
 
+    def save(self, path):
+        ro.r('''save(rf_clf, rf_pred_prob, rf_pred,
+                     rf_imp, rf_fit, file="{0}")'''.format(path))
+
     def set_classes(self, oncogene, tsg):
         """Sets the integers used to represent classes in classification."""
         if not oncogene and not tsg:
@@ -151,7 +155,7 @@ class RRandomForest(GenericClassifier):
                  total_iter=5,
                  weight=False,
                  min_ct=5,
-                 ntrees=250,
+                 ntrees=200,
                  other_sample_ratio=3.,
                  driver_sample=.7):
         self.logger = logging.getLogger(__name__)

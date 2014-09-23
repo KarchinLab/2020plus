@@ -20,6 +20,7 @@ import src.savedb.python.gene_tsv
 import src.savedb.python.gene_features
 import src.savedb.python.gene_maf
 import src.savedb.python.merge_mutations
+import src.train.python.train
 import src.utils.python.util as _utils
 
 # define exit status
@@ -94,6 +95,12 @@ def _classify():
     """Wrapper function to call scripts in the classify folder."""
     opts = vars(args)  # create a dictionary for CLI options
     src.classify.python.classifier.main(opts)  # run code
+
+
+def _train():
+    """Wrapper function to call script in the train folder."""
+    opts = vars(args)  # create a dictionary for CLI options
+    src.train.python.train.main(opts)  # run code
 
 
 def _simulation():
@@ -188,8 +195,10 @@ if __name__ == '__main__':
 
     # classify sub-command
     parser_classify = subparser.add_parser('classify',
-                                           help='Run classification scripts'
-                                           ' in the classify folder')
+                                           help='Runs classification either with '
+                                           'a provided trained classifier (using '
+                                           'train) or evaluates classifier performance '
+                                           'using k-fold cross-validation.')
     parser_classify.add_argument('-m', '--min-count',
                                  type=int,
                                  action='store',
@@ -216,6 +225,40 @@ if __name__ == '__main__':
                                  help='Number of decision trees for random forests. '
                                  '(default: 200)')
     parser_classify.set_defaults(func=_classify)
+
+    # train sub-command
+    parser_train = subparser.add_parser('train',
+                                        help='Train random forest classifier')
+    parser_train.add_argument('-m', '--min-count',
+                              type=int,
+                              action='store',
+                              default=0,
+                              help='Minimum number of mutations in a gene '
+                              'for the gene to be considered in classification.'
+                              ' (default: 0)')
+    parser_train.add_argument('-d', '--driver-rate',
+                              type=float,
+                              action='store',
+                              default=.7,
+                              help='Sample rate for R\'s random forest for '
+                              'oncogenes and TSGs. (default: .7)')
+    parser_train.add_argument('-o', '--other-ratio',
+                              type=float,
+                              action='store',
+                              default=3.,
+                              help='Ratio of sample size for R\'s random forest for '
+                              '"other" genes. (default: 3.0)')
+    parser_train.add_argument('-n', '--ntrees',
+                              type=int,
+                              action='store',
+                              default=200,
+                              help='Number of decision trees for random forests. '
+                              '(default: 200)')
+    parser_train.add_argument('-r', '--output',
+                              type=str, required=True,
+                              help="Store the .Rdata file containing the trained"
+                              " random forest classifier")
+    parser_train.set_defaults(func=_train)
 
     # simulation sub-command
     parser_simulation = subparser.add_parser('simulation',
