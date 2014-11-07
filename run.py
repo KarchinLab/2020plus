@@ -288,6 +288,11 @@ if __name__ == '__main__':
                        action='store_true',
                        default=False,
                        help='Perform a stratified half-split of tumor samples by tumor type')
+    help_str = ('If -rhs specified, use with replacement sampling if greater than zero.'
+                'Else if zero, then use sampling without replacement.')
+    parser_simulation.add_argument('-with-replacement', '--with-replacement',
+                                   type=float,  default=0.0,
+                                   help=help_str)
     parser_simulation.add_argument('-p', '--processes',
                                    type=int,
                                    action='store',
@@ -310,6 +315,24 @@ if __name__ == '__main__':
                                    default=7,
                                    help='Number of sampling rates to simulate between '
                                    'LOWER_SAMPLE_RATE and UPPER_SAMPLE_RATE. (Default: 7)')
+    help_str = ('Step size for progessing further down list of top genes. Only '
+                'used when random half split flag is specified')
+    parser_simulation.add_argument('-step', '--step-size',
+                                   type=int,
+                                   default=50,
+                                   help=help_str)
+    help_str = ('Weight factor for ranked biased consistency measure. Only used '
+                'when random half split flag is specified.')
+    parser_simulation.add_argument('-weight', '--weight',
+                                   type=float,
+                                   default=.1,
+                                   help=help_str)
+    help_str = ('Maximum depth of genes from top of list to consider for consistency. '
+                'Only used when random half split flag is specified.')
+    parser_simulation.add_argument('-depth', '--depth',
+                                   type=int,
+                                   default=200,
+                                   help=help_str)
     parser_simulation.add_argument('-m', '--min-count',
                                    type=int,
                                    action='store',
