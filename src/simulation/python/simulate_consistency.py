@@ -1,6 +1,7 @@
 from src.classify.python.r_random_forest_clf import RRandomForest
 from src.classify.python.random_forest_clf import RandomForest
 from src.classify.python.multinomial_nb_clf import MultinomialNaiveBayes
+import src.simulation.python.simulation as sim
 import src.utils.python.util as _utils
 import simulate_performance as sp
 from random_split import RandomSplit
@@ -10,47 +11,6 @@ import sqlite3
 from multiprocessing import Pool
 import itertools as it
 import time
-
-
-def rank_genes(s1, s2,
-               mask1=None, mask2=None,
-               thresh=None):
-    #s1.sort(ascending=False)
-    #s2.sort(ascending=False)
-    # use score threshold if provided
-    if thresh:
-        all_ixs = list(set(s1[s1>thresh].index) | set(s2[s2>thresh].index))
-    elif mask1 is not None and mask2 is not None:
-        all_ixs = list(set(s1[mask1].index) | set(s2[mask2].index))
-    else:
-        all_ixs = list(set(s1.index) | set(s2.index))
-
-    top_s1 = s1[all_ixs]
-    top_s2 = s2[all_ixs]
-    top_rank1 = top_s1.fillna(0).rank()
-    top_rank2 = top_s2.fillna(0).rank()
-    top_rank2 = top_rank2[top_rank1.index]  # match ordering of index
-    return top_rank1, top_rank2
-
-
-def jaccard_index(s1, s2,
-                  mask1=None, mask2=None,
-                  thresh=None):
-    if thresh:
-        s1, s2 = s1[s1>thresh], s2[s2>thresh]
-    elif mask1 is not None and mask2 is not None:
-        s1, s2 = s1[mask1], s2[mask2]
-    s1_genes = set(s1.index)
-    s2_genes = set(s2.index)
-    num_intersect = len(s1_genes & s2_genes)
-    num_union = len(s1_genes | s2_genes)
-    if num_union:
-        # provided series are not empty
-        jaccard_sim = num_intersect / float(num_union)
-    else:
-        # empty series case
-        jaccard_sim = 0
-    return jaccard_sim
 
 
 def r_random_forest_compare(df1, df2, opts):
@@ -86,18 +46,18 @@ def r_random_forest_compare(df1, df2, opts):
     tsg_pred2 = (df2['tsg'] > df2['onco']) & (df2['tsg'] > df2['other'])
 
     # rank genes
-    driver_top_rank1, driver_top_rank2 = rank_genes(driver_prob1, driver_prob2, thresh=.5)
-    onco_top_rank1, onco_top_rank2 = rank_genes(onco_prob1, onco_prob2,
-                                                mask1=onco_pred1, mask2=onco_pred2)
-    tsg_top_rank1, tsg_top_rank2 = rank_genes(tsg_prob1, tsg_prob2,
-                                              mask1=tsg_pred1, mask2=tsg_pred2)
+    driver_top_rank1, driver_top_rank2 = sim.rank_genes(driver_prob1, driver_prob2, thresh=.5)
+    onco_top_rank1, onco_top_rank2 = sim.rank_genes(onco_prob1, onco_prob2,
+                                                    mask1=onco_pred1, mask2=onco_pred2)
+    tsg_top_rank1, tsg_top_rank2 = sim.rank_genes(tsg_prob1, tsg_prob2,
+                                                  mask1=tsg_pred1, mask2=tsg_pred2)
 
     # calculate jaccard index
-    driver_jaccard = jaccard_index(driver_prob1, driver_prob2, thresh=.5)
-    onco_jaccard = jaccard_index(onco_prob1, onco_prob2,
-                                 mask1=onco_pred1, mask2=onco_pred2)
-    tsg_jaccard = jaccard_index(tsg_prob1, tsg_prob2,
-                                mask1=tsg_pred1, mask2=tsg_pred2)
+    driver_jaccard = sim.overlap(driver_prob1, driver_prob2, thresh=.5)
+    onco_jaccard = sim.overlap(onco_prob1, onco_prob2,
+                                     mask1=onco_pred1, mask2=onco_pred2)
+    tsg_jaccard = sim.overlap(tsg_prob1, tsg_prob2,
+                                    mask1=tsg_pred1, mask2=tsg_pred2)
 
     # calc spearman rank correlation
     sp_rho_driver, sp_pval_driver = stats.pearsonr(driver_top_rank1, driver_top_rank2)
@@ -108,6 +68,29 @@ def r_random_forest_compare(df1, df2, opts):
     kt_rho_driver, kt_pval_driver = stats.kendalltau(driver_top_rank1, driver_top_rank2)
     kt_rho_onco, kt_pval_onco = stats.kendalltau(onco_top_rank1, onco_top_rank2)
     kt_rho_tsg, kt_pval_tsg = stats.kendalltau(tsg_top_rank1, tsg_top_rank2)
+
+    # calculate jaccard index at specified depths
+    driver_prob1.sort(ascending=False)
+    driver_prob2.sort(ascending=False)
+    tmp_tuple = sim.weighted_overlap(driver_prob1, driver_prob2,
+                                           max_depth=opts['depth'],
+                                           step_size=opts['step_size'],
+                                           weight_factor=opts['weight'])
+    _, mean_driver_ji, weighted_mean_driver_ji = tmp_tuple
+    onco_prob1.sort(ascending=False)
+    onco_prob2.sort(ascending=False)
+    tmp_tuple = sim.weighted_overlap(onco_prob1, onco_prob2,
+                                           max_depth=opts['depth'],
+                                           step_size=opts['step_size'],
+                                           weight_factor=opts['weight'])
+    _, mean_onco_ji, weighted_mean_onco_ji = tmp_tuple
+    tsg_prob1.sort(ascending=False)
+    tsg_prob2.sort(ascending=False)
+    tmp_tuple = sim.weighted_overlap(tsg_prob1, tsg_prob2,
+                                           max_depth=opts['depth'],
+                                           step_size=opts['step_size'],
+                                           weight_factor=opts['weight'])
+    _, mean_tsg_ji, weighted_mean_tsg_ji = tmp_tuple
 
     results = pd.DataFrame({'jaccard index': [onco_jaccard,
                                               tsg_jaccard,
@@ -123,7 +106,13 @@ def r_random_forest_compare(df1, df2, opts):
                                                  sp_pval_driver],
                             'kendall tau p-value': [kt_pval_onco,
                                                     kt_pval_tsg,
-                                                    kt_pval_driver]},
+                                                    kt_pval_driver],
+                            'mean jaccard index': [mean_onco_ji,
+                                                   mean_tsg_ji,
+                                                   mean_driver_ji],
+                            'weighted mean jaccard index': [weighted_mean_onco_ji,
+                                                            weighted_mean_tsg_ji,
+                                                            weighted_mean_driver_ji]},
                             index=['oncogene', 'tsg', 'driver'])
     return results
 
@@ -157,18 +146,18 @@ def py_random_forest_compare(df1, df2, opts):
     tsg_pred2 = (df2['tsg'] > df2['onco']) & (df2['tsg'] > df2['other'])
 
     # rank genes
-    driver_top_rank1, driver_top_rank2 = rank_genes(driver_prob1, driver_prob2, thresh=.5)
-    onco_top_rank1, onco_top_rank2 = rank_genes(onco_prob1, onco_prob2,
-                                                mask1=onco_pred1, mask2=onco_pred2)
-    tsg_top_rank1, tsg_top_rank2 = rank_genes(tsg_prob1, tsg_prob2,
-                                              mask1=tsg_pred1, mask2=tsg_pred2)
+    driver_top_rank1, driver_top_rank2 = sim.rank_genes(driver_prob1, driver_prob2, thresh=.5)
+    onco_top_rank1, onco_top_rank2 = sim.rank_genes(onco_prob1, onco_prob2,
+                                                    mask1=onco_pred1, mask2=onco_pred2)
+    tsg_top_rank1, tsg_top_rank2 = sim.rank_genes(tsg_prob1, tsg_prob2,
+                                                  mask1=tsg_pred1, mask2=tsg_pred2)
 
     # calculate jaccard index
-    driver_jaccard = jaccard_index(driver_prob1, driver_prob2, thresh=.5)
-    onco_jaccard = jaccard_index(onco_prob1, onco_prob2,
-                                 mask1=onco_pred1, mask2=onco_pred2)
-    tsg_jaccard = jaccard_index(tsg_prob1, tsg_prob2,
-                                mask1=tsg_pred1, mask2=tsg_pred2)
+    driver_jaccard = sim.overlap(driver_prob1, driver_prob2, thresh=.5)
+    onco_jaccard = sim.overlap(onco_prob1, onco_prob2,
+                                     mask1=onco_pred1, mask2=onco_pred2)
+    tsg_jaccard = sim.overlap(tsg_prob1, tsg_prob2,
+                                    mask1=tsg_pred1, mask2=tsg_pred2)
 
     # calc spearman rank correlation
     sp_rho_driver, sp_pval_driver = stats.pearsonr(driver_top_rank1, driver_top_rank2)
@@ -179,6 +168,29 @@ def py_random_forest_compare(df1, df2, opts):
     kt_rho_driver, kt_pval_driver = stats.kendalltau(driver_top_rank1, driver_top_rank2)
     kt_rho_onco, kt_pval_onco = stats.kendalltau(onco_top_rank1, onco_top_rank2)
     kt_rho_tsg, kt_pval_tsg = stats.kendalltau(tsg_top_rank1, tsg_top_rank2)
+
+    # calculate jaccard index at specified depths
+    driver_prob1.sort(ascending=False)
+    driver_prob2.sort(ascending=False)
+    tmp_tuple = sim.weighted_overlap(driver_prob1, driver_prob2,
+                                           max_depth=opts['depth'],
+                                           step_size=opts['step_size'],
+                                           weight_factor=opts['weight'])
+    _, mean_driver_ji, weighted_mean_driver_ji = tmp_tuple
+    onco_prob1.sort(ascending=False)
+    onco_prob2.sort(ascending=False)
+    tmp_tuple = sim.weighted_overlap(onco_prob1, onco_prob2,
+                                           max_depth=opts['depth'],
+                                           step_size=opts['step_size'],
+                                           weight_factor=opts['weight'])
+    _, mean_onco_ji, weighted_mean_onco_ji = tmp_tuple
+    tsg_prob1.sort(ascending=False)
+    tsg_prob2.sort(ascending=False)
+    tmp_tuple = sim.weighted_overlap(tsg_prob1, tsg_prob2,
+                                           max_depth=opts['depth'],
+                                           step_size=opts['step_size'],
+                                           weight_factor=opts['weight'])
+    _, mean_tsg_ji, weighted_mean_tsg_ji = tmp_tuple
 
     results = pd.DataFrame({'jaccard index': [onco_jaccard,
                                               tsg_jaccard,
@@ -194,7 +206,13 @@ def py_random_forest_compare(df1, df2, opts):
                                                  sp_pval_driver],
                             'kendall tau p-value': [kt_pval_onco,
                                                     kt_pval_tsg,
-                                                    kt_pval_driver]},
+                                                    kt_pval_driver],
+                            'mean jaccard index': [mean_onco_ji,
+                                                   mean_tsg_ji,
+                                                   mean_driver_ji],
+                            'weighted mean jaccard index': [weighted_mean_onco_ji,
+                                                            weighted_mean_tsg_ji,
+                                                            weighted_mean_driver_ji]},
                             index=['oncogene', 'tsg', 'driver'])
     return results
 
@@ -224,18 +242,18 @@ def naive_bayes_compare(df1, df2, opts):
     tsg_pred2 = (df2['tsg'] > df2['onco']) & (df2['tsg'] > df2['other'])
 
     # rank genes
-    driver_top_rank1, driver_top_rank2 = rank_genes(driver_prob1, driver_prob2, thresh=.5)
-    onco_top_rank1, onco_top_rank2 = rank_genes(onco_prob1, onco_prob2,
-                                                mask1=onco_pred1, mask2=onco_pred2)
-    tsg_top_rank1, tsg_top_rank2 = rank_genes(tsg_prob1, tsg_prob2,
-                                              mask1=tsg_pred1, mask2=tsg_pred2)
+    driver_top_rank1, driver_top_rank2 = sim.rank_genes(driver_prob1, driver_prob2, thresh=.5)
+    onco_top_rank1, onco_top_rank2 = sim.rank_genes(onco_prob1, onco_prob2,
+                                                    mask1=onco_pred1, mask2=onco_pred2)
+    tsg_top_rank1, tsg_top_rank2 = sim.rank_genes(tsg_prob1, tsg_prob2,
+                                                  mask1=tsg_pred1, mask2=tsg_pred2)
 
     # calculate jaccard index
-    driver_jaccard = jaccard_index(driver_prob1, driver_prob2, thresh=.5)
-    onco_jaccard = jaccard_index(onco_prob1, onco_prob2,
-                                 mask1=onco_pred1, mask2=onco_pred2)
-    tsg_jaccard = jaccard_index(tsg_prob1, tsg_prob2,
-                                mask1=tsg_pred1, mask2=tsg_pred2)
+    driver_jaccard = sim.overlap(driver_prob1, driver_prob2, thresh=.5)
+    onco_jaccard = sim.overlap(onco_prob1, onco_prob2,
+                                     mask1=onco_pred1, mask2=onco_pred2)
+    tsg_jaccard = sim.overlap(tsg_prob1, tsg_prob2,
+                                    mask1=tsg_pred1, mask2=tsg_pred2)
 
     # calc spearman rank correlation
     sp_rho_driver, sp_pval_driver = stats.pearsonr(driver_top_rank1, driver_top_rank2)
@@ -247,6 +265,28 @@ def naive_bayes_compare(df1, df2, opts):
     kt_rho_onco, kt_pval_onco = stats.kendalltau(onco_top_rank1, onco_top_rank2)
     kt_rho_tsg, kt_pval_tsg = stats.kendalltau(tsg_top_rank1, tsg_top_rank2)
 
+    # calculate jaccard index at specified depths
+    driver_prob1.sort(ascending=False)
+    driver_prob2.sort(ascending=False)
+    tmp_tuple = sim.weighted_overlap(driver_prob1, driver_prob2,
+                                           max_depth=opts['depth'],
+                                           step_size=opts['step_size'],
+                                           weight_factor=opts['weight'])
+    _, mean_driver_ji, weighted_mean_driver_ji = tmp_tuple
+    onco_prob1.sort(ascending=False)
+    onco_prob2.sort(ascending=False)
+    tmp_tuple = sim.weighted_overlap(onco_prob1, onco_prob2,
+                                           max_depth=opts['depth'],
+                                           step_size=opts['step_size'],
+                                           weight_factor=opts['weight'])
+    _, mean_onco_ji, weighted_mean_onco_ji = tmp_tuple
+    tsg_prob1.sort(ascending=False)
+    tsg_prob2.sort(ascending=False)
+    tmp_tuple = sim.weighted_overlap(tsg_prob1, tsg_prob2,
+                                           max_depth=opts['depth'],
+                                           step_size=opts['step_size'],
+                                           weight_factor=opts['weight'])
+    _, mean_tsg_ji, weighted_mean_tsg_ji = tmp_tuple
 
     results = pd.DataFrame({'jaccard index': [onco_jaccard,
                                               tsg_jaccard,
@@ -262,7 +302,13 @@ def naive_bayes_compare(df1, df2, opts):
                                                  sp_pval_driver],
                             'kendall tau p-value': [kt_pval_onco,
                                                     kt_pval_tsg,
-                                                    kt_pval_driver]},
+                                                    kt_pval_driver],
+                            'mean jaccard index': [mean_onco_ji,
+                                                   mean_tsg_ji,
+                                                   mean_driver_ji],
+                            'weighted mean jaccard index': [weighted_mean_onco_ji,
+                                                            weighted_mean_tsg_ji,
+                                                            weighted_mean_driver_ji]},
                             index=['oncogene', 'tsg', 'driver'])
     return results
 
@@ -303,6 +349,7 @@ def compare_prediction(df1, df2, gene_df, opts):
     return r_sim_results, py_sim_results, nb_sim_results
 
 
+@_utils.log_error_decorator
 def singleprocess_compare_prediction(info):
     dfg, gene_df, opts = info  # unpack tuple
     df1, df2 = next(dfg.dataframe_generator())
@@ -311,21 +358,36 @@ def singleprocess_compare_prediction(info):
 
 
 def multiprocess_compare_prediction(dfg, gene_df, opts):
-    num_processes = opts['processes']
+    # handle the number of processes to use, should it even use the
+    # multiprocessing module?
+    multiprocess_flag = opts['processes']>0
+    if multiprocess_flag:
+        num_processes = opts['processes']
+    else:
+        num_processes = 1
+    opts['processes'] = 0  # do not use multi-processing within permutation test
+    # num_processes = opts['processes']
+
+    # initialize output
     process_results = None
 
     for i in range(0, dfg.num_iter, num_processes):
-        pool = Pool(processes=num_processes)
-        del process_results  # possibly help free up more memory
-        time.sleep(5)  # wait 5 seconds, might help make sure memory is free
-        tmp_num_pred = dfg.num_iter - i if  i + num_processes > dfg.num_iter else num_processes
-        # df_generator = dfg.dataframe_generator()
-        info_repeat = it.repeat((dfg, gene_df, opts), tmp_num_pred)
-        #pool = Pool(processes=tmp_num_pred)
-        process_results = pool.imap(singleprocess_compare_prediction, info_repeat)
-        pool.close()
-        pool.join()
-        yield process_results
+        if multiprocess_flag:
+            pool = Pool(processes=num_processes)
+            del process_results  # possibly help free up more memory
+            time.sleep(5)  # wait 5 seconds, might help make sure memory is free
+            tmp_num_pred = dfg.num_iter - i if  i + num_processes > dfg.num_iter else num_processes
+            # df_generator = dfg.dataframe_generator()
+            info_repeat = it.repeat((dfg, gene_df, opts), tmp_num_pred)
+            #pool = Pool(processes=tmp_num_pred)
+            process_results = pool.imap(singleprocess_compare_prediction, info_repeat)
+            pool.close()
+            pool.join()
+            yield process_results
+        else:
+            info = (dfg, gene_df, opts)
+            tmp_result = singleprocess_compare_prediction(info)
+            yield (tmp_result,)
 
 
 def main(cli_opts):
@@ -340,10 +402,17 @@ def main(cli_opts):
 
     # object that generates features from randomly choosen sample names while
     # still respecting the stratification of tumor types
-    sample_rate = .5  # always do half splits
-    dfg = RandomSplit(sub_sample=sample_rate,
-                      num_iter=cli_opts['samples'],
-                      db_conn=conn)
+    if not cli_opts['with_replacement']:
+        sample_rate = .5  # always do half splits
+        dfg = RandomSplit(sub_sample=sample_rate,
+                          num_iter=cli_opts['samples'],
+                          db_conn=conn)
+    else:
+        sample_rate = cli_opts['with_replacement']
+        dfg = RandomSplit(sub_sample=sample_rate,
+                          num_iter=cli_opts['samples'],
+                          db_conn=conn,
+                          with_replacement=True)
 
     # iterate through each sampled data set
     r_sim_results, py_sim_results, nb_sim_results = {}, {}, {}
