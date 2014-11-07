@@ -42,7 +42,7 @@ def overlap(s1, s2,
     # calculate jaccard index
     num_intersect = len(s1_genes & s2_genes)
     num_total = len(s1_genes)
-    if num_union:
+    if num_total:
         # provided series are not empty
         ov_sim = num_intersect / float(num_total)
     else:
