@@ -58,8 +58,8 @@ def weighted_overlap(s1, s2,
     # calculate jaccard index at specified intervals
     num_depths = (max_depth) // step_size
     num_depths_total = (len(s2)) // step_size
-    ji = np.zeros(num_depths)
-    ji_all = np.zeros(num_depths_total)
+    ov = np.zeros(num_depths)
+    ov_all = np.zeros(num_depths_total)
     for i, depth in enumerate(range(step_size, num_depths_total+1, step_size)):
         if depth <= max_depth:
             ov_tmp = overlap(s1.iloc[:depth].copy(), s2, depth=max_depth)
