@@ -7,6 +7,7 @@ import pandas.io.sql as psql
 import ConfigParser
 import logging
 import os
+from functools import wraps
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +37,33 @@ clf_result_dir = save_dir + _opts['clf_result_dir']
 feature_plot_dir = save_dir + _opts['feature_plot_dir']
 sim_plot_dir = save_dir + _opts['sim_plot_dir']
 sim_result_dir = save_dir + _opts['sim_result_dir']
+
+def log_error_decorator(f):
+    """Writes exception to log file if occured in decorated function.
+
+    This decorator wrapper is needed for multiprocess logging since otherwise
+    the python multiprocessing module will obscure the actual line of the error.
+    """
+    @wraps(f)
+    def wrapper(*args, **kwds):
+        try:
+            result = f(*args, **kwds)
+            return result
+        except KeyboardInterrupt:
+            logger.info('Ctrl-C stopped a process.')
+        except Exception, e:
+            logger.exception(e)
+            raise
+    return wrapper
+
+
+def keyboard_exit_wrapper(func):
+    def wrap(self, timeout=None):
+        # Note: the timeout of 1 googol seconds introduces a rather subtle
+        # bug for Python scripts intended to run many times the age of the universe.
+        return func(self, timeout=timeout if timeout is not None else 1e100)
+    return wrap
+
 
 def read_aa_properties(file_path):
     """Read aa property counts from the data_analysis/results folder.
