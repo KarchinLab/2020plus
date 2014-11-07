@@ -14,10 +14,12 @@ class RandomSplit(object):
                  num_iter,
                  db_conn,
                  table_name='mutation',
-                 col_name='Tumor_Sample'):
+                 col_name='Tumor_Sample',
+                 with_replacement=False):
         self.db_conn = db_conn
         self.set_sub_sample(sub_sample)
         self.set_num_iter(num_iter)
+        self.with_replacement = with_replacement
         self.TABLE_NAME = table_name
         self.COLUMN_NAME = col_name
         self.set_df(None)
@@ -40,10 +42,17 @@ class RandomSplit(object):
             prng = np.random.RandomState()
             for tmp_ttype, tmp_samples in self.sample_names.iteritems():
                 tmp_num_samps = len(tmp_samples)
-                prng.shuffle(tmp_samples)  # shuffle order of samples
-                split_pos = int(tmp_num_samps*self.sub_sample)
-                tmp_left = tmp_samples[:split_pos]
-                tmp_right = tmp_samples[split_pos:]
+                if not self.with_replacement:
+                    # sample without replacement
+                    prng.shuffle(tmp_samples)  # shuffle order of samples
+                    split_pos = int(tmp_num_samps*self.sub_sample)
+                    tmp_left = tmp_samples[:split_pos]
+                    tmp_right = tmp_samples[split_pos:]
+                else:
+                    # sample with replacement
+                    tmp_num_samps = int(tmp_num_samps*self.sub_sample)
+                    tmp_left = prng.choice(tmp_samples, tmp_num_samps, replace=True)
+                    tmp_right = prng.choice(tmp_samples, tmp_num_samps, replace=True)
                 left_samples += tmp_left
                 right_samples += tmp_right
 
