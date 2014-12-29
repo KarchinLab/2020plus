@@ -62,11 +62,13 @@ def weighted_overlap(s1, s2,
     ov_all = np.zeros(num_depths_total)
     for i, depth in enumerate(range(step_size, num_depths_total+1, step_size)):
         if depth <= max_depth:
-            ov_tmp = overlap(s1.iloc[:depth].copy(), s2, depth=max_depth)
+            #ov_tmp = overlap(s1.iloc[:depth].copy(), s2, depth=max_depth)
+            ov_tmp = overlap(s1.iloc[:depth].copy(), s2.iloc[:depth+100].copy())
             ov[i] = ov_tmp
             ov_all[i] = ov_tmp
         else:
-            ov_all[i] = overlap(s1.iloc[:max_depth], s2, depth=depth)
+            #ov_all[i] = overlap(s1.iloc[:max_depth], s2, depth=depth)
+            ov_all[i] = overlap(s1.iloc[:max_depth], s2.iloc[:depth+100].copy())
 
     # calculate the weighting for jaccard index
     p = weight_factor ** (1./(num_depths-1))
