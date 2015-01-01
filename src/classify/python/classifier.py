@@ -161,15 +161,16 @@ def rand_forest_pred(clf, data, result_path):
 
     # save features/prediction results
     tmp_df = data.copy()
-    tmp_df['oncogene probability'] = onco_prob
-    tmp_df['tsg probability'] = tsg_prob
-    tmp_df['other probability'] = other_prob
-    pred_class = tmp_df[['other probability', 'oncogene probability', 'tsg probability']].values.argmax(axis=1)
+    tmp_df['oncogene score'] = onco_prob
+    tmp_df['tsg score'] = tsg_prob
+    tmp_df['other score'] = other_prob
+    tmp_df['driver score'] = 1 - other_prob
+    pred_class = tmp_df[['other score', 'oncogene score', 'tsg score']].values.argmax(axis=1)
     tmp_df['predicted class'] = pred_class
-    tmp_df['predicted cancer gene'] = ((tmp_df['oncogene probability'] + tmp_df['tsg probability']) > .5).astype(int)
+    tmp_df['predicted cancer gene'] = (tmp_df['driver score'] > .5).astype(int)
     tmp_df['true class'] = true_class
     tmp_df = tmp_df.fillna(0)
-    tmp_df = tmp_df.sort(['oncogene probability', 'tsg probability'], ascending=False)
+    tmp_df = tmp_df.sort(['driver score',], ascending=False)
     tmp_df.to_csv(result_path, sep='\t')
 
     return tmp_df
@@ -199,15 +200,16 @@ def trained_rand_forest_pred(clf, data, result_path):
     # save features/prediction results
     tmp_df = data.copy()
     gene_order = clf.y.index  # get the order of genes predicted on
-    tmp_df['oncogene probability'] = pd.Series(onco_prob, index=gene_order)
-    tmp_df['tsg probability'] = pd.Series(tsg_prob, index=gene_order)
-    tmp_df['other probability'] = pd.Series(other_prob, index=gene_order)
-    pred_class = tmp_df[['other probability', 'oncogene probability', 'tsg probability']].values.argmax(axis=1)
+    tmp_df['oncogene score'] = pd.Series(onco_prob, index=gene_order)
+    tmp_df['tsg score'] = pd.Series(tsg_prob, index=gene_order)
+    tmp_df['other score'] = pd.Series(other_prob, index=gene_order)
+    tmp_df['driver score'] = 1 - tmp_df['other score']
+    pred_class = tmp_df[['other score', 'oncogene score', 'tsg score']].values.argmax(axis=1)
     tmp_df['predicted class'] = pred_class
-    tmp_df['predicted cancer gene'] = ((tmp_df['oncogene probability'] + tmp_df['tsg probability']) > .5).astype(int)
+    tmp_df['predicted cancer gene'] = (tmp_df['driver score'] > .5).astype(int)
     tmp_df['true class'] = true_class
     tmp_df = tmp_df.fillna(0)
-    tmp_df = tmp_df.sort(['oncogene probability', 'tsg probability'], ascending=False)
+    tmp_df = tmp_df.sort(['driver score',], ascending=False)
     tmp_df.to_csv(result_path, sep='\t')
 
     return tmp_df
@@ -368,18 +370,18 @@ def main(cli_opts):
                            plot_path=_utils.clf_plot_dir + cfg_opts['rrand_forest_plot'],
                            title='Sub-sampled Random Forest Predictions')
     plot_data.prob_kde(result_df,
-                       col_name='oncogene probability',
+                       col_name='oncogene score',
                        save_path=_utils.clf_plot_dir + cfg_opts['onco_kde_rrand_forest'],
-                       title='Distribution of Oncogene Probabilities (sub-sampled random forest)')
+                       title='Distribution of Oncogene Scores (sub-sampled random forest)')
     plot_data.prob_kde(result_df,
-                       col_name='tsg probability',
+                       col_name='tsg score',
                        save_path=_utils.clf_plot_dir + cfg_opts['tsg_kde_rrand_forest'],
-                       title='Distribution of TSG Probabilities (sub-sampled random forest)')
-    result_df['driver gene probability'] = result_df['oncogene probability'] + result_df['tsg probability']
+                       title='Distribution of TSG Scores (sub-sampled random forest)')
+    #result_df['driver gene probability'] = result_df['oncogene probability'] + result_df['tsg probability']
     plot_data.prob_kde(result_df,
-                       col_name='driver gene probability',
+                       col_name='driver score',
                        save_path='results/classify/plots/r_random_forest_driver_prob.kde.png',
-                       title='Distribution of Driver Gene Probabilities (sub-sampled random forest)')
+                       title='Distribution of Driver Gene Score (sub-sampled random forest)')
     #plot_data.sample_boxplot(pred_onco,
                              #pred_tsg,
                              #pred_driver,
@@ -427,18 +429,18 @@ def main(cli_opts):
                            plot_path=_utils.clf_plot_dir + cfg_opts['rand_forest_plot'],
                            title='Random Forest Predictions')
     plot_data.prob_kde(result_df,
-                       col_name='oncogene probability',
+                       col_name='oncogene score',
                        save_path=_utils.clf_plot_dir + cfg_opts['onco_kde_rand_forest'],
                        title='Distribution of Oncogene Probabilities (random forest)')
     plot_data.prob_kde(result_df,
-                       col_name='tsg probability',
+                       col_name='tsg score',
                        save_path=_utils.clf_plot_dir + cfg_opts['tsg_kde_rand_forest'],
-                       title='Distribution of TSG Probabilities (random forest)')
-    result_df['driver gene probability'] = result_df['oncogene probability'] + result_df['tsg probability']
+                       title='Distribution of TSG Score (random forest)')
+    # result_df['driver gene probability'] = result_df['oncogene probability'] + result_df['tsg probability']
     plot_data.prob_kde(result_df,
-                       col_name='driver gene probability',
+                       col_name='driver score',
                        save_path='results/classify/plots/random_forest_driver_prob.kde.png',
-                       title='Distribution of Driver Gene Probabilities (random forest)')
+                       title='Distribution of Driver Gene Scores (random forest)')
     logger.info('Finished running Random Forest')
 
     # multinomial naive bayes

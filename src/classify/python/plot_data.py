@@ -155,11 +155,11 @@ def prob_scatter(df, plot_path, title):
         title of scatter plot
     """
     # scatter plot of oncogene/tsg probabilities
-    myplt.scatter(df['oncogene probability'],
-                  df['tsg probability'],
+    myplt.scatter(df['oncogene score'],
+                  df['tsg score'],
                   plot_path,
-                  xlabel='Oncogene Probability',
-                  ylabel='TSG Probability',
+                  xlabel='Oncogene Score',
+                  ylabel='TSG Score',
                   title=title,
                   colors='#348ABD')
 
