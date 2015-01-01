@@ -206,6 +206,20 @@ if __name__ == '__main__':
                                  help='If provided, use trained classifier from '
                                  'the train sub-command. Otherwise, perform '
                                  'cross-validation within the data set (default: None)')
+    parser_classify.add_argument('-f', '--features',
+                                 type=str,
+                                 action='store',
+                                 default=None,
+                                 help='Path to file containing features in tab'
+                                 'separated format. Defaults to path specified '
+                                 'in config.')
+    parser_classify.add_argument('-e', '--empirical-p-values',
+                                 type=str,
+                                 action='store',
+                                 default=None,
+                                 help='Path to file outputing empirical p-values '
+                                 'if provided input represents simulated data. '
+                                 '(Default: None)')
     parser_classify.add_argument('-m', '--min-count',
                                  type=int,
                                  action='store',

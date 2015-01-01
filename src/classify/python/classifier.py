@@ -220,10 +220,16 @@ def main(cli_opts):
     in_opts = _utils.get_input_config('classifier')
     minimum_ct = cli_opts['min_count']
 
+    # get path to features used for classification
+    if cli_opts['features']:
+        feature_path = cli_opts['features']
+    else:
+        feature_path = _utils.save_dir + in_opts['gene_feature']
+
     # use trained classifier if provided
     if cli_opts['trained_classifier']:
-        df = pd.read_csv(_utils.save_dir + in_opts['gene_feature'],
-                        sep='\t', index_col=0)
+        # read in features
+        df = pd.read_csv(feature_path, sep='\t', index_col=0)
 
         logger.info('Running R\'s Random forest . . .')
 
@@ -238,7 +244,16 @@ def main(cli_opts):
         # do classification
         pred_results_path = _utils.clf_result_dir + cfg_opts['rrand_forest_pred']
         logger.info('Saving results to {0}'.format(pred_results_path))
-        trained_rand_forest_pred(rrclf, df, pred_results_path)
+        result_df = trained_rand_forest_pred(rrclf, df, pred_results_path)
+
+        if cli_opts['empirical_p_values']:
+            score_cts = result_df['driver score'].value_counts()
+            score_cts = score_cts.sort_index(ascending=False)
+            score_cum_cts = score_cts.cumsum()
+            score_pvals = score_cum_cts / float(score_cts.sum())
+            score_pvals.name = 'p-value'
+            score_pvals.to_csv(cli_opts['empirical_p_values'], sep='\t',
+                               header=True, index_label='score')
 
         logger.info('Finished classification.')
         return
@@ -313,8 +328,7 @@ def main(cli_opts):
                                       ylabel=tmp_ylabel,
                                       xlabel=tmp_xlabel)
 
-    df = pd.read_csv(_utils.save_dir + in_opts['gene_feature'],
-                     sep='\t', index_col=0)
+    df = pd.read_csv(feature_path, sep='\t', index_col=0)
 
     # plot the 20/20 rule scores
     #plot_data.vogelstein_score_scatter(df.copy(),
