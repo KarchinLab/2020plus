@@ -10,6 +10,7 @@ import pandas as pd
 import numpy as np
 import glob
 import re
+import bisect
 import logging
 
 logger = logging.getLogger(__name__)
@@ -138,7 +139,17 @@ def generate_2020_result(onco_pct, tsg_pct, min_ct):
     return df
 
 
-def rand_forest_pred(clf, data, result_path):
+def compute_p_value(scores, empirical_p_values):
+    num_scores = len(scores)
+    pvals = pd.Series(np.zeros(num_scores))
+    emp_p_val_scores = list(reversed(empirical_p_values.index.tolist()))
+    num_emp_p_val_scores = len(emp_p_val_scores)
+    score2pval = lambda x: empirical_p_values.iloc[num_emp_p_val_scores-bisect.bisect_right(emp_p_val_scores, x)]
+    pvals = scores.apply(score2pval)
+    return pvals
+
+
+def rand_forest_pred(clf, data, result_path, empirical_pvals=None):
     """Makes gene predictions using a random forest classifier.
 
     Parameters
@@ -171,12 +182,19 @@ def rand_forest_pred(clf, data, result_path):
     tmp_df['true class'] = true_class
     tmp_df = tmp_df.fillna(0)
     tmp_df = tmp_df.sort(['driver score',], ascending=False)
+
+    if empirical_pvals is not None:
+        # add p-values
+        tmp_df['driver p-value'] = compute_p_value(tmp_df['driver score'],
+                                                   empirical_pvals)
+        tmp_df['driver q-value'] = _utils.bh_fdr(tmp_df['driver p-value'])
+
     tmp_df.to_csv(result_path, sep='\t')
 
     return tmp_df
 
 
-def trained_rand_forest_pred(clf, data, result_path):
+def trained_rand_forest_pred(clf, data, result_path, empirical_pvals=None):
     """Makes gene predictions using a previously trained random forest.
 
     Parameters
@@ -210,6 +228,13 @@ def trained_rand_forest_pred(clf, data, result_path):
     tmp_df['true class'] = true_class
     tmp_df = tmp_df.fillna(0)
     tmp_df = tmp_df.sort(['driver score',], ascending=False)
+
+    if empirical_pvals is not None:
+        # add p-values
+        tmp_df['driver p-value'] = compute_p_value(tmp_df['driver score'],
+                                                   empirical_pvals)
+        tmp_df['driver q-value'] = _utils.bh_fdr(tmp_df['driver p-value'])
+
     tmp_df.to_csv(result_path, sep='\t')
 
     return tmp_df
@@ -244,9 +269,15 @@ def main(cli_opts):
         # do classification
         pred_results_path = _utils.clf_result_dir + cfg_opts['rrand_forest_pred']
         logger.info('Saving results to {0}'.format(pred_results_path))
-        result_df = trained_rand_forest_pred(rrclf, df, pred_results_path)
 
-        if cli_opts['empirical_p_values']:
+        if not cli_opts['simulated']:
+            emp_pvals = pd.read_csv(cli_opts['empirical_p_values'], sep='\t',
+                                    index_col=0)['p-value']
+        else:
+            emp_pvals = None
+        result_df = trained_rand_forest_pred(rrclf, df, pred_results_path, emp_pvals)
+
+        if cli_opts['simulated']:
             score_cts = result_df['driver score'].value_counts()
             score_cts = score_cts.sort_index(ascending=False)
             score_cum_cts = score_cts.cumsum()
