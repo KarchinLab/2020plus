@@ -184,9 +184,23 @@ def rand_forest_pred(clf, data, result_path, empirical_pvals=None):
     tmp_df = tmp_df.sort(['driver score',], ascending=False)
 
     if empirical_pvals is not None:
-        # add p-values
+        # add oncogene p-value
+        onco_score = tmp_df['oncogene score'].copy()
+        onco_score.sort(ascending=False)
+        tmp_df['oncogene p-value'] = compute_p_value(onco_score,
+                                                     empirical_pvals['oncogene p-value'].dropna())
+        tmp_df['oncogene q-value'] = _utils.bh_fdr(tmp_df['oncogene p-value'])
+
+        # add tsg p-value
+        tsg_score = tmp_df['tsg score'].copy()
+        tsg_score.sort(ascending=False)
+        tmp_df['tsg p-value'] = compute_p_value(tsg_score,
+                                                empirical_pvals['tsg p-value'].dropna())
+        tmp_df['tsg q-value'] = _utils.bh_fdr(tmp_df['tsg p-value'])
+
+        # add driver p-values
         tmp_df['driver p-value'] = compute_p_value(tmp_df['driver score'],
-                                                   empirical_pvals)
+                                                   empirical_pvals['driver p-value'].dropna())
         tmp_df['driver q-value'] = _utils.bh_fdr(tmp_df['driver p-value'])
 
     tmp_df.to_csv(result_path, sep='\t')
@@ -230,9 +244,23 @@ def trained_rand_forest_pred(clf, data, result_path, empirical_pvals=None):
     tmp_df = tmp_df.sort(['driver score',], ascending=False)
 
     if empirical_pvals is not None:
-        # add p-values
+        # add oncogene p-value
+        onco_score = tmp_df['oncogene score'].copy()
+        onco_score.sort(ascending=False)
+        tmp_df['oncogene p-value'] = compute_p_value(onco_score,
+                                                     empirical_pvals['oncogene p-value'].dropna())
+        tmp_df['oncogene q-value'] = _utils.bh_fdr(tmp_df['oncogene p-value'])
+
+        # add tsg p-value
+        tsg_score = tmp_df['tsg score'].copy()
+        tsg_score.sort(ascending=False)
+        tmp_df['tsg p-value'] = compute_p_value(tsg_score,
+                                                empirical_pvals['tsg p-value'].dropna())
+        tmp_df['tsg q-value'] = _utils.bh_fdr(tmp_df['tsg p-value'])
+
+        # add driver p-value
         tmp_df['driver p-value'] = compute_p_value(tmp_df['driver score'],
-                                                   empirical_pvals)
+                                                   empirical_pvals['driver p-value'].dropna())
         tmp_df['driver q-value'] = _utils.bh_fdr(tmp_df['driver p-value'])
 
     tmp_df.to_csv(result_path, sep='\t')
@@ -272,19 +300,40 @@ def main(cli_opts):
 
         if not cli_opts['simulated']:
             emp_pvals = pd.read_csv(cli_opts['empirical_p_values'], sep='\t',
-                                    index_col=0)['p-value']
+                                    index_col=0)
         else:
             emp_pvals = None
         result_df = trained_rand_forest_pred(rrclf, df, pred_results_path, emp_pvals)
 
         if cli_opts['simulated']:
-            score_cts = result_df['driver score'].value_counts()
-            score_cts = score_cts.sort_index(ascending=False)
-            score_cum_cts = score_cts.cumsum()
-            score_pvals = score_cum_cts / float(score_cts.sum())
-            score_pvals.name = 'p-value'
+            # driver scores
+            driver_score_cts = result_df['driver score'].value_counts()
+            driver_score_cts = driver_score_cts.sort_index(ascending=False)
+            driver_score_cum_cts = driver_score_cts.cumsum()
+            driver_score_pvals = driver_score_cum_cts / float(driver_score_cts.sum())
+
+            # oncogene scores
+            onco_score_cts = result_df['oncogene score'].value_counts()
+            onco_score_cts = onco_score_cts.sort_index(ascending=False)
+            onco_score_cum_cts = onco_score_cts.cumsum()
+            onco_score_pvals = onco_score_cum_cts / float(onco_score_cts.sum())
+
+            # tsg score
+            tsg_score_cts = result_df['tsg score'].value_counts()
+            tsg_score_cts = tsg_score_cts.sort_index(ascending=False)
+            tsg_score_cum_cts = tsg_score_cts.cumsum()
+            tsg_score_pvals = tsg_score_cum_cts / float(tsg_score_cts.sum())
+
+            # construct empirical p-value score distribution
+            score_ix = set(driver_score_pvals.index) | set(onco_score_pvals.index) | set(tsg_score_pvals.index)
+            score_pvals = pd.DataFrame(index=list(score_ix))
+            score_pvals['oncogene p-value'] = onco_score_pvals
+            score_pvals['tsg p-value'] = tsg_score_pvals
+            score_pvals['driver p-value'] = driver_score_pvals
+            score_pvals = score_pvals.sort_index(ascending=False)
+
             score_pvals.to_csv(cli_opts['empirical_p_values'], sep='\t',
-                               header=True, index_label='score')
+                               index_label='score')
 
         logger.info('Finished classification.')
         return

@@ -220,6 +220,12 @@ if __name__ == '__main__':
                                  help='Path to file outputing empirical p-values '
                                  'if provided input represents simulated data. '
                                  '(Default: None)')
+    parser_classify.add_argument('-s', '--simulated',
+                                 action='store_true',
+                                 default=False,
+                                 help='Flag indicating if input features were simulated. '
+                                 'Simulated data is used to construct an empirical null distribution. '
+                                 '(Default: False)')
     parser_classify.add_argument('-m', '--min-count',
                                  type=int,
                                  action='store',
