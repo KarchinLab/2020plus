@@ -279,6 +279,13 @@ def main(cli_opts):
     else:
         feature_path = _utils.save_dir + in_opts['gene_feature']
 
+    # read in empirical p-value distribution
+    if not cli_opts['simulated'] and cli_opts['empirical_p_values']:
+        emp_pvals = pd.read_csv(cli_opts['empirical_p_values'], sep='\t',
+                                index_col=0)
+    else:
+        emp_pvals = None
+
     # use trained classifier if provided
     if cli_opts['trained_classifier']:
         # read in features
@@ -298,11 +305,6 @@ def main(cli_opts):
         pred_results_path = _utils.clf_result_dir + cfg_opts['rrand_forest_pred']
         logger.info('Saving results to {0}'.format(pred_results_path))
 
-        if not cli_opts['simulated']:
-            emp_pvals = pd.read_csv(cli_opts['empirical_p_values'], sep='\t',
-                                    index_col=0)
-        else:
-            emp_pvals = None
         result_df = trained_rand_forest_pred(rrclf, df, pred_results_path, emp_pvals)
 
         if cli_opts['simulated']:
@@ -442,7 +444,8 @@ def main(cli_opts):
 
     # run predictions using R's random forest
     pred_results_path = _utils.clf_result_dir + cfg_opts['rrand_forest_pred']
-    result_df = rand_forest_pred(rrclf, df, result_path=pred_results_path)
+    result_df = rand_forest_pred(rrclf, df, result_path=pred_results_path,
+                                 empirical_pvals=emp_pvals)
 
     # save a list of oncogenes/tsgs in separate files
     pred_onco = result_df[result_df['predicted class']==_utils.onco_label].index.to_series()
@@ -502,7 +505,9 @@ def main(cli_opts):
 
     # predict using scikit learn's random forest
     pred_path = _utils.clf_result_dir + cfg_opts['rand_forest_pred']
-    result_df = rand_forest_pred(rclf, df, result_path=pred_path)
+    result_df = rand_forest_pred(rclf, df,
+                                 result_path=pred_path,
+                                 empirical_pvals=emp_pvals)
 
     # save a list of oncogenes/tsgs in separate files
     pred_onco = result_df[result_df['predicted class']==_utils.onco_label].index.to_series()
