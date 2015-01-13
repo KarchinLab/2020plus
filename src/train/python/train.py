@@ -10,8 +10,14 @@ def main(cli_opts):
     in_opts = _utils.get_input_config('classifier')
     minimum_ct = cli_opts['min_count']
 
+    # get path to features used for classification
+    if cli_opts['features']:
+        feature_path = cli_opts['features']
+    else:
+        feature_path = _utils.save_dir + in_opts['gene_feature']
+
     # read in features
-    df = pd.read_csv(_utils.save_dir + in_opts['gene_feature'],
+    df = pd.read_csv(feature_path,
                      sep='\t', index_col=0)
 
     logger.info('Training R\'s Random forest . . .')
