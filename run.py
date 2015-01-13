@@ -256,11 +256,11 @@ if __name__ == '__main__':
     # train sub-command
     parser_train = subparser.add_parser('train',
                                         help='Train random forest classifier')
-    parser_classify.add_argument('-f', '--features',
-                                 type=str,
-                                 action='store',
-                                 default=None,
-                                 help='Path to file containing features in tab'
+    parser_train.add_argument('-f', '--features',
+                              type=str,
+                              action='store',
+                              default=None,
+                              help='Path to file containing features in tab'
                                  'separated format. Defaults to path specified '
                                  'in config.')
     parser_train.add_argument('-m', '--min-count',
