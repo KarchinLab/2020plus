@@ -11,17 +11,6 @@ import logging
 import datetime
 import traceback
 import argparse
-import src.data_analysis.python.stats
-import src.classify.python.classifier
-import src.simulation.python.simulate_performance
-import src.simulation.python.simulate_consistency
-import src.features.python.features
-import src.savedb.python.gene_tsv
-import src.savedb.python.gene_features
-import src.savedb.python.gene_maf
-import src.savedb.python.merge_mutations
-import src.train.python.train
-import src.utils.python.util as _utils
 
 # define exit status
 EXCEPTION_EXIT_STATUS = 1
@@ -155,6 +144,11 @@ if __name__ == '__main__':
                         action='store',
                         default='',
                         help='Path to log file. (accepts stdout)')
+    parser.add_argument('--out-dir',
+                        type=str,
+                        action='store',
+                        default=None,
+                        help='Path to output directory.')
     subparser = parser.add_subparsers(help='sub-command help')
 
     # data analysis sub-command
@@ -521,6 +515,19 @@ if __name__ == '__main__':
     log_level = args.log_level
     start_logging(log_file=log_file,
                   log_level=log_level)  # start logging
+
+    # import all the modules for 20/20+
+    import src.data_analysis.python.stats
+    import src.classify.python.classifier
+    import src.simulation.python.simulate_performance
+    import src.simulation.python.simulate_consistency
+    import src.features.python.features
+    import src.savedb.python.gene_tsv
+    import src.savedb.python.gene_features
+    import src.savedb.python.gene_maf
+    import src.savedb.python.merge_mutations
+    import src.train.python.train
+    import src.utils.python.util as _utils
 
     args.func()  # run function corresponding to user's command
     logging.info('FINISHED SUCCESSFULLY!')
