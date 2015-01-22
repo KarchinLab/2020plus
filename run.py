@@ -529,5 +529,24 @@ if __name__ == '__main__':
     import src.train.python.train
     import src.utils.python.util as _utils
 
+    # make output directory if specified by user
+    save_dir = args.out_dir
+    if save_dir is not None:
+        _opts = _utils.get_input_config('result')
+        _utils.plot_dir = os.path.join(save_dir, _opts['plot_dir'])
+        _utils.result_dir = os.path.join(save_dir, _opts['result_dir'])
+        _utils.clf_plot_dir = os.path.join(save_dir, _opts['clf_plot_dir'])
+        _utils.clf_result_dir = os.path.join(save_dir, _opts['clf_result_dir'])
+        _utils.feature_plot_dir = os.path.join(save_dir, _opts['feature_plot_dir'])
+        _utils.sim_plot_dir = os.path.join(save_dir, _opts['sim_plot_dir'])
+        _utils.sim_result_dir = os.path.join(save_dir, _opts['sim_result_dir'])
+        if not os.path.exists(_utils.plot_dir): os.makedirs(_utils.plot_dir)
+        if not os.path.exists(_utils.result_dir): os.makedirs(_utils.result_dir)
+        if not os.path.exists(_utils.clf_plot_dir): os.makedirs(_utils.clf_plot_dir)
+        if not os.path.exists(_utils.clf_result_dir): os.makedirs(_utils.clf_result_dir)
+        if not os.path.exists(_utils.feature_plot_dir): os.makedirs(_utils.feature_plot_dir)
+        if not os.path.exists(_utils.sim_plot_dir): os.makedirs(_utils.sim_plot_dir)
+        if not os.path.exists(_utils.sim_result_dir): os.makedirs(_utils.sim_result_dir)
+
     args.func()  # run function corresponding to user's command
     logging.info('FINISHED SUCCESSFULLY!')
