@@ -133,6 +133,12 @@ if __name__ == '__main__':
 
     # parse command line arguments
     parser = argparse.ArgumentParser(description='Run scripts')
+    parser.add_argument('--out-dir',
+                        type=str,
+                        action='store',
+                        default=None,
+                        help='Path to output directory. Used by all positional arguments. '
+                        '(Default: result/)')
     parser.add_argument('-ll', '--log-level',
                         type=str,
                         action='store',
@@ -144,11 +150,6 @@ if __name__ == '__main__':
                         action='store',
                         default='',
                         help='Path to log file. (accepts stdout)')
-    parser.add_argument('--out-dir',
-                        type=str,
-                        action='store',
-                        default=None,
-                        help='Path to output directory.')
     subparser = parser.add_subparsers(help='sub-command help')
 
     # data analysis sub-command
