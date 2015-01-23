@@ -93,6 +93,10 @@ def parse_arguments():
     parser.add_argument('-m', '--maf',
                         type=str, action='store',
                         help='Filtered MAF file from broad website')
+    parser.add_argument('-n', '--non-coding',
+                        type=str, default=None,
+                        help='Non-coding portion of MAF file from broad'
+                        ' website. Only needed if want non-coding.')
     parser.add_argument('-c', '--cravat',
                         type=str, action='store',
                         help='Cravat output which includes amino '
@@ -100,6 +104,9 @@ def parse_arguments():
     parser.add_argument('-o', '--output',
                         type=str, action='store',
                         help='Modified MAF format acceptable for input')
+    parser.add_argument('-no', '--non-coding-output',
+                        type=str, default=None,
+                        help='Modified MAF format for non-coding output')
     args = parser.parse_args()
     return vars(args)
 
@@ -109,6 +116,10 @@ def main(opts):
     cravat_df = pd.read_csv(opts['cravat'], sep='\t')
     broad_df = pd.read_csv(opts['maf'], sep='\t')
     prev_len = len(broad_df)
+
+    # read non-coding
+    if opts['non_coding'] is not None:
+        non_coding_df = pd.read_csv(opts['non_coding'], sep='\t')
 
     # get hgvs strings from cravat output
     hgvs_list = generate_hgvs_syntax(cravat_df)
@@ -122,14 +133,15 @@ def main(opts):
     print('Line difference: {0}'.format(prev_len-after_len))
 
     # rename headers
-    broad_df.rename(columns={'ttype': 'Tumor_Type',
-                             'patient': 'Tumor_Sample',
-                             'gene': 'Gene_Symbol',
-                             'type': 'Variant_Classification',
-                             'chr': 'Chromosome',
-                             'ref_allele': 'Reference_Allele',
-                             'newbase': 'Tumor_Allele',
-                             'pos': 'Start_Position'},
+    rename_cols = {'ttype': 'Tumor_Type',
+                   'patient': 'Tumor_Sample',
+                   'gene': 'Gene_Symbol',
+                   'type': 'Variant_Classification',
+                   'chr': 'Chromosome',
+                   'ref_allele': 'Reference_Allele',
+                   'newbase': 'Tumor_Allele',
+                   'pos': 'Start_Position'}
+    broad_df.rename(columns=rename_cols,
                     inplace=True)
 
     # add end position column
@@ -145,12 +157,32 @@ def main(opts):
     broad_df['Tumor_Type'] = broad_df['Tumor_Type'].apply(fix_tumor_type)
     broad_df['Tumor_Sample'] = broad_df['Tumor_Sample'].apply(fix_tumor_sample)
 
-    # output results to file
     cols_of_interest = ['Gene_Symbol', 'Tumor_Sample', 'Tumor_Type',
                         'Chromosome', 'Start_Position',
                         'End_Position', 'Variant_Classification',
                         'Reference_Allele', 'Tumor_Allele',
                         'Protein_Change']
+
+    if opts['non_coding'] is not None:
+        non_coding_df.rename(columns=rename_cols, inplace=True)
+
+        # add end position column
+        non_coding_df['End_Position'] = non_coding_df['Start_Position'] + non_coding_df['Tumor_Allele'].apply(lambda x: len(x) - 1)
+
+        # fix variant classigfication column
+        non_coding_df['Variant_Classification'] = non_coding_df['Variant_Classification'].apply(fix_variant_type)
+
+        # add chr to chromosome names
+        non_coding_df['Chromosome'] = non_coding_df['Chromosome'].astype(str).apply(lambda x: 'chr' + x)
+
+        # fix tumor names
+        non_coding_df['Tumor_Type'] = non_coding_df['Tumor_Type'].apply(fix_tumor_type)
+        non_coding_df['Tumor_Sample'] = non_coding_df['Tumor_Sample'].apply(fix_tumor_sample)
+
+        # save non-coding
+        non_coding_df[cols_of_interest[:-1]].to_csv(opts['non_coding_output'], sep='\t', index=False)
+
+    # output results to file
     broad_df[cols_of_interest].to_csv(opts['output'], sep='\t', index=False)
 
 
