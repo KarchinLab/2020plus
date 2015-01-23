@@ -75,7 +75,7 @@ def parse_arguments():
                         type=str, required=True,
                         help='path to save pr curve')
     help_str = ('comma separated list of "-1" and "+1", which indicate'
-                'performance metric is a p/q-value vs probability, respectively')
+                'performance metric is a p/q-value vs score/probability, respectively')
     parser.add_argument('-pt', '--performance-type',
                         type=str, required=True,
                         help=help_str)
