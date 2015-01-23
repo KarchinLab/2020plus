@@ -1,6 +1,5 @@
 import argparse
 import pandas as pd
-import IPython
 
 
 def parse_arguments():
@@ -17,6 +16,11 @@ def parse_arguments():
     help_str = 'Oncogene output from probabilistic 20/20'
     parser.add_argument('-og-test', '--og-test',
                         type=str, required=True,
+                        help=help_str)
+    help_str = 'simmulate_non_silent_ratio output'
+    parser.add_argument('-n', '--non-silent',
+                        type=str,
+                        default=None,
                         help=help_str)
     help_str = 'Mutsigcv covariate features'
     parser.add_argument('-c', '--covariates',
@@ -38,9 +42,26 @@ def parse_arguments():
     return vars(args)
 
 
-def process_features(df):
+def process_features(df, non_silent_df=None):
     """Processes mutation consequence types from probabilistic 20/20.
     """
+    # calculate the mean/std for the entire cohort
+    if non_silent_df is not None:
+        non_silent_df = non_silent_df.rename(columns=lambda x: x.replace(' count', ''))
+        non_sil_cols = ['nonsense', 'silent', 'splice site', 'lost stop',
+                        'missense', 'lost start']
+        total_cts = non_silent_df[non_sil_cols].sum(axis=1)
+        mycounts = non_silent_df[non_sil_cols]
+        miss_to_silent = (non_silent_df['missense']+1).astype(float)/(non_silent_df['silent']+1)
+        norm_cts = mycounts.div(total_cts.astype(float), axis=0)
+        norm_cts = norm_cts.fillna(0.0)
+        lost_start_stop = norm_cts['lost stop'] + norm_cts['lost start']
+        norm_cts = norm_cts.drop(['lost start', 'lost stop'], axis=1)
+        norm_cts['lost start/stop'] = lost_start_stop
+        norm_cts['missense to silent'] = miss_to_silent
+        feature_means = norm_cts.mean()
+        feature_stdev = norm_cts.std()
+
     # rename column headers
     rename_dict = {'silent snv': 'silent'}
     df = df.rename(columns=rename_dict)
@@ -73,6 +94,12 @@ def process_features(df):
     df['lost start/stop'] = lost_start_stop
     df['missense to silent'] = miss_to_silent
 
+    # normalize
+    if non_silent_df is not None:
+        cols = ['nonsense', 'silent', 'splice site', 'lost start/stop', 'missense', 'missense to silent']
+        normed = (df[cols] - feature_means) #/ feature_stdev.astype(float)
+        df[normed.columns] = normed
+
     return df
 
 
@@ -81,6 +108,7 @@ def main(opts):
     count_df = pd.read_csv(opts['summary'], sep='\t')
     tsg_test_df = pd.read_csv(opts['tsg_test'], sep='\t')
     og_test_df = pd.read_csv(opts['og_test'], sep='\t')
+    non_sil_df = pd.read_csv(opts['non_silent'], sep='\t')
     covar_df = pd.read_csv(opts['covariates'], sep='\t')
     og_test_df = og_test_df.rename(columns={'gene':'Gene'})
     tsg_test_df = tsg_test_df.rename(columns={'gene':'Gene'})
@@ -92,7 +120,7 @@ def main(opts):
         tsg_list = [line.strip() for line in handle]
 
     # make feature matrix
-    feature_df = process_features(count_df)
+    feature_df = process_features(count_df, non_sil_df)
     tsg_test_cols = ['Gene', 'deleterious p-value']
     feature_df = pd.merge(feature_df, tsg_test_df[tsg_test_cols],
                           how='left', on='Gene')
