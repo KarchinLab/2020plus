@@ -20,7 +20,7 @@ plot_data module
    :members:
 
 feature_matrix module
----------------
+---------------------
 
 .. automodule:: data_analysis.python.feature_matrix
    :members:
