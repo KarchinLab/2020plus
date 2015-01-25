@@ -24,6 +24,12 @@ def start_logging(log_file='', log_level='INFO'):
     not actually be written to a file.
     """
     if not log_file:
+        # create log directory if it doesn't exist
+        log_dir = os.path.abspath('log') + '/'
+        if not os.path.isdir(log_dir):
+            os.mkdir(log_dir)
+
+        # specify auto-stamped log file
         log_file = 'log/log.run.' + str(datetime.datetime.now()).replace(':', '.') + '.txt'
 
     # logger options
