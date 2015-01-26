@@ -214,11 +214,11 @@ if __name__ == '__main__':
                                  help='Path to file containing features in tab'
                                  'separated format. Defaults to path specified '
                                  'in config.')
-    parser_classify.add_argument('-e', '--empirical-p-values',
+    parser_classify.add_argument('-nd', '--null-distribution',
                                  type=str,
                                  action='store',
                                  default=None,
-                                 help='Path to file outputing empirical p-values '
+                                 help='Path to file outputing null distiribution for p-values '
                                  'if provided input represents simulated data. '
                                  '(Default: None)')
     parser_classify.add_argument('-s', '--simulated',
