@@ -471,12 +471,12 @@ oncogene_set = set(oncogene_list)
 tsg_set = set(tsg_list)
 
 # significantly mutate genes from kandoth et al
-smg_list = read_smg()
-smg_set = set(smg_list)
+#smg_list = read_smg()
+#smg_set = set(smg_list)
 
 # cancer gene census
-cgc_list = read_cgc()
-cgc_set = set(cgc_list)
+#cgc_list = read_cgc()
+#cgc_set = set(cgc_list)
 
 # olfactory receptors from mutsigcv
 olfactory_list = read_olfactory_receptors()

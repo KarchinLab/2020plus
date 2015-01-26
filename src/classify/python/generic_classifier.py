@@ -32,7 +32,7 @@ class GenericClassifier(object):
 
         # gene's categorized by the significantly mutate gene
         # list from the pan-cancer nature paper
-        self.smg_list = _utils.smg_list
+        # self.smg_list = _utils.smg_list
 
     def _init_metrics(self):
         """Initialize classification diagnostric metrics."""
