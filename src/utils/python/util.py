@@ -145,11 +145,11 @@ def read_smg():
     # open connection
     try:
         # if DB is not created this will throw an error
-        gene_db_path = get_db_config('2020plus')['db']
+        gene_db_path = os.path.join(proj_dir, get_db_config('2020plus')['db'])
         conn = sqlite3.connect(gene_db_path)
 
         sql = ("SELECT DISTINCT Gene"
-              " FROM cosmic_mutation"
+              " FROM mutation"
               " WHERE Gene in " + str(smgs))
         df = psql.frame_query(sql, con=conn)
         conn.close()  # close connection
@@ -182,11 +182,11 @@ def read_cgc():
     # open connection
     try:
         # if DB is not created this will throw an error
-        gene_db_path = get_db_config('2020plus')['db']
+        gene_db_path = os.path.join(proj_dir, get_db_config('2020plus')['db'])
         conn = sqlite3.connect(gene_db_path)
 
         sql = ("SELECT DISTINCT Gene"
-              " FROM cosmic_mutation"
+              " FROM mutation"
               " WHERE Gene in " + str(cgc))
         df = psql.frame_query(sql, con=conn)
         conn.close()  # close connection
@@ -216,12 +216,12 @@ def read_olfactory_receptors():
     # open connection
     try:
         # it table is not found just catch exception
-        gene_db_path = get_db_config('genes')['db']
+        gene_db_path = os.path.join(proj_dir, get_db_config('2020plus')['db'])
         conn = sqlite3.connect(gene_db_path)
 
         sql = ("SELECT DISTINCT Gene"
-              " FROM cosmic_mutation"
-              " WHERE Gene in " + str(olfactory))
+               " FROM mutation"
+               " WHERE Gene in " + str(olfactory))
 
         df = psql.frame_query(sql, con=conn)
         conn.close()  # close connection
