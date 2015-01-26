@@ -156,8 +156,8 @@ def read_smg():
 
         # get significantly mutated genes found in database
         smgs_in_database = tuple(df['Gene'].astype(str))
-        logger.info('There are only %d/%d significantly mutated genes found in the database.'
-                    % (len(smgs_in_database), len(smgs)))
+        logger.debug('There are only %d/%d significantly mutated genes found in the database.'
+                     % (len(smgs_in_database), len(smgs)))
     except:
         smgs_in_database = smgs
     return smgs_in_database
@@ -193,8 +193,8 @@ def read_cgc():
 
         # get significantly mutated genes found in database
         cgc_in_database = tuple(df['Gene'].astype(str))
-        logger.info('There are only %d/%d CGC genes found in the database.'
-                    % (len(cgc_in_database), len(cgc)))
+        logger.debug('There are only %d/%d CGC genes found in the database.'
+                     % (len(cgc_in_database), len(cgc)))
     except:
         cgc_in_database = cgc
     return cgc_in_database
@@ -228,8 +228,8 @@ def read_olfactory_receptors():
 
         # get significantly mutated genes found in database
         olfactory_in_database = tuple(df['Gene'])
-        logger.info('There are only %d/%d olfactory receptors found in the database.'
-                    % (len(olfactory_in_database), len(olfactory)))
+        logger.debug('There are only %d/%d olfactory receptors found in the database.'
+                     % (len(olfactory_in_database), len(olfactory)))
     except:
         olfactory_in_database = olfactory
     return olfactory_in_database
