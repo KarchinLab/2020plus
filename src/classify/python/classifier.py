@@ -149,7 +149,7 @@ def compute_p_value(scores, empirical_p_values):
     return pvals
 
 
-def rand_forest_pred(clf, data, result_path, empirical_pvals=None):
+def rand_forest_pred(clf, data, result_path, null_dist=None):
     """Makes gene predictions using a random forest classifier.
 
     Parameters
@@ -183,24 +183,24 @@ def rand_forest_pred(clf, data, result_path, empirical_pvals=None):
     tmp_df = tmp_df.fillna(0)
     tmp_df = tmp_df.sort(['driver score',], ascending=False)
 
-    if empirical_pvals is not None:
+    if null_dist is not None:
         # add oncogene p-value
         onco_score = tmp_df['oncogene score'].copy()
         onco_score.sort(ascending=False)
         tmp_df['oncogene p-value'] = compute_p_value(onco_score,
-                                                     empirical_pvals['oncogene p-value'].dropna())
+                                                     null_dist['oncogene p-value'].dropna())
         tmp_df['oncogene q-value'] = _utils.bh_fdr(tmp_df['oncogene p-value'])
 
         # add tsg p-value
         tsg_score = tmp_df['tsg score'].copy()
         tsg_score.sort(ascending=False)
         tmp_df['tsg p-value'] = compute_p_value(tsg_score,
-                                                empirical_pvals['tsg p-value'].dropna())
+                                                null_dist['tsg p-value'].dropna())
         tmp_df['tsg q-value'] = _utils.bh_fdr(tmp_df['tsg p-value'])
 
         # add driver p-values
         tmp_df['driver p-value'] = compute_p_value(tmp_df['driver score'],
-                                                   empirical_pvals['driver p-value'].dropna())
+                                                   null_dist['driver p-value'].dropna())
         tmp_df['driver q-value'] = _utils.bh_fdr(tmp_df['driver p-value'])
 
     tmp_df.to_csv(result_path, sep='\t')
@@ -208,7 +208,7 @@ def rand_forest_pred(clf, data, result_path, empirical_pvals=None):
     return tmp_df
 
 
-def trained_rand_forest_pred(clf, data, result_path, empirical_pvals=None):
+def trained_rand_forest_pred(clf, data, result_path, null_dist=None):
     """Makes gene predictions using a previously trained random forest.
 
     Parameters
@@ -243,24 +243,24 @@ def trained_rand_forest_pred(clf, data, result_path, empirical_pvals=None):
     tmp_df = tmp_df.fillna(0)
     tmp_df = tmp_df.sort(['driver score',], ascending=False)
 
-    if empirical_pvals is not None:
+    if null_dist is not None:
         # add oncogene p-value
         onco_score = tmp_df['oncogene score'].copy()
         onco_score.sort(ascending=False)
         tmp_df['oncogene p-value'] = compute_p_value(onco_score,
-                                                     empirical_pvals['oncogene p-value'].dropna())
+                                                     null_dist['oncogene p-value'].dropna())
         tmp_df['oncogene q-value'] = _utils.bh_fdr(tmp_df['oncogene p-value'])
 
         # add tsg p-value
         tsg_score = tmp_df['tsg score'].copy()
         tsg_score.sort(ascending=False)
         tmp_df['tsg p-value'] = compute_p_value(tsg_score,
-                                                empirical_pvals['tsg p-value'].dropna())
+                                                null_dist['tsg p-value'].dropna())
         tmp_df['tsg q-value'] = _utils.bh_fdr(tmp_df['tsg p-value'])
 
         # add driver p-value
         tmp_df['driver p-value'] = compute_p_value(tmp_df['driver score'],
-                                                   empirical_pvals['driver p-value'].dropna())
+                                                   null_dist['driver p-value'].dropna())
         tmp_df['driver q-value'] = _utils.bh_fdr(tmp_df['driver p-value'])
 
     tmp_df.to_csv(result_path, sep='\t')
@@ -279,12 +279,12 @@ def main(cli_opts):
     else:
         feature_path = _utils.save_dir + in_opts['gene_feature']
 
-    # read in empirical p-value distribution
-    if not cli_opts['simulated'] and cli_opts['empirical_p_values']:
-        emp_pvals = pd.read_csv(cli_opts['empirical_p_values'], sep='\t',
-                                index_col=0)
+    # read in null distribution p-values
+    if not cli_opts['simulated'] and cli_opts['null_distribution']:
+        null_pvals = pd.read_csv(cli_opts['null_distribution'], sep='\t',
+                                 index_col=0)
     else:
-        emp_pvals = None
+        null_pvals = None
 
     # use trained classifier if provided
     if cli_opts['trained_classifier']:
@@ -305,7 +305,7 @@ def main(cli_opts):
         pred_results_path = _utils.clf_result_dir + cfg_opts['rrand_forest_pred']
         logger.info('Saving results to {0}'.format(pred_results_path))
 
-        result_df = trained_rand_forest_pred(rrclf, df, pred_results_path, emp_pvals)
+        result_df = trained_rand_forest_pred(rrclf, df, pred_results_path, null_pvals)
 
         if cli_opts['simulated']:
             # driver scores
@@ -326,7 +326,7 @@ def main(cli_opts):
             tsg_score_cum_cts = tsg_score_cts.cumsum()
             tsg_score_pvals = tsg_score_cum_cts / float(tsg_score_cts.sum())
 
-            # construct empirical p-value score distribution
+            # construct null p-value score distribution
             score_ix = set(driver_score_pvals.index) | set(onco_score_pvals.index) | set(tsg_score_pvals.index)
             score_pvals = pd.DataFrame(index=list(score_ix))
             score_pvals['oncogene p-value'] = onco_score_pvals
@@ -334,7 +334,7 @@ def main(cli_opts):
             score_pvals['driver p-value'] = driver_score_pvals
             score_pvals = score_pvals.sort_index(ascending=False)
 
-            score_pvals.to_csv(cli_opts['empirical_p_values'], sep='\t',
+            score_pvals.to_csv(cli_opts['null_distribution'], sep='\t',
                                index_label='score')
 
         logger.info('Finished classification.')
@@ -445,7 +445,7 @@ def main(cli_opts):
     # run predictions using R's random forest
     pred_results_path = _utils.clf_result_dir + cfg_opts['rrand_forest_pred']
     result_df = rand_forest_pred(rrclf, df, result_path=pred_results_path,
-                                 empirical_pvals=emp_pvals)
+                                 null_dist=null_pvals)
 
     # save a list of oncogenes/tsgs in separate files
     pred_onco = result_df[result_df['predicted class']==_utils.onco_label].index.to_series()
@@ -507,7 +507,7 @@ def main(cli_opts):
     pred_path = _utils.clf_result_dir + cfg_opts['rand_forest_pred']
     result_df = rand_forest_pred(rclf, df,
                                  result_path=pred_path,
-                                 empirical_pvals=emp_pvals)
+                                 null_dist=null_pvals)
 
     # save a list of oncogenes/tsgs in separate files
     pred_onco = result_df[result_df['predicted class']==_utils.onco_label].index.to_series()
