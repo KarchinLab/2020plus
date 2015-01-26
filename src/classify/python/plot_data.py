@@ -131,9 +131,9 @@ def prob_kde(df, col_name, save_path,
         df[df['olfactory flag']==1][col_name].plot(kind='kde', label='Olfactory Receptors')
     except:
         pass
-    df[df['true class']==2][col_name].plot(kind='kde', label='TSG')
-    df[df['true class']==1][col_name].plot(kind='kde', label='Oncogenes')
-    df[df['true class']==0][col_name].plot(kind='kde', label='Other genes')
+    df[df['true class']==_utils.tsg_label][col_name].plot(kind='kde', label='TSG')
+    df[df['true class']==_utils.onco_label][col_name].plot(kind='kde', label='Oncogenes')
+    df[df['true class']==_utils.other_label][col_name].plot(kind='kde', label='Other genes')
     plt.title(title)
     plt.xlabel(xlabel)
     plt.legend()
