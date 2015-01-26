@@ -225,7 +225,7 @@ if __name__ == '__main__':
                                  action='store_true',
                                  default=False,
                                  help='Flag indicating if input features were simulated. '
-                                 'Simulated data is used to construct an empirical null distribution. '
+                                 'Simulated data is used to construct a null distribution. '
                                  '(Default: False)')
     parser_classify.add_argument('-m', '--min-count',
                                  type=int,
