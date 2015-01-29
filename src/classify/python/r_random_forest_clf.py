@@ -21,7 +21,6 @@ class MyClassifier(object):
     def __init__(self,
                  ntrees=200,
                  other_sample_ratio=3.,
-                 # other_sample=.02,
                  driver_sample=.7):
         self.ntrees = ntrees
         # self.other_sample_rate = other_sample
@@ -68,9 +67,13 @@ class MyClassifier(object):
 
     def set_sample_size(self, sampsize):
         # sampsize[0] *= self.other_sample_rate
-        sampsize[1] *= self.driver_sample_rate
-        sampsize[2] *= self.driver_sample_rate
-        tmp_total_driver = sampsize[1] + sampsize[2]
+        if self.is_onco_pred and self.is_tsg_pred:
+            sampsize[1] *= self.driver_sample_rate
+            sampsize[2] *= self.driver_sample_rate
+            tmp_total_driver = sampsize[1] + sampsize[2]
+        else:
+            sampsize[1] *= self.driver_sample_rate
+            tmp_total_driver = sampsize[1]
         sampsize[0] = int(self.other_sample_ratio * tmp_total_driver)
         self.sample_size = ro.IntVector(sampsize)
 
@@ -80,17 +83,25 @@ class MyClassifier(object):
         NOTE: the method name ("fit") and method signature were choosen
         to be consistent with scikit learn's fit method.
 
-        **Parameters**
-
+        Parameters
+        ----------
         xtrain : pd.DataFrame
             features for training set
         ytrain : pd.DataFrame
             true class labels (as integers) for training set
         """
         label_counts = ytrain.value_counts()
-        sampsize = [label_counts[self.other_num],
-                    label_counts[self.onco_num],
-                    label_counts[self.tsg_num]]
+        if self.is_onco_pred and self.is_tsg_pred:
+            sampsize = [label_counts[self.other_num],
+                        label_counts[self.onco_num],
+                        label_counts[self.tsg_num]]
+        elif self.is_onco_pred:
+            sampsize = [label_counts[self.other_num],
+                        label_counts[self.onco_num]]
+        elif self.is_tsg_pred:
+            sampsize = [label_counts[self.other_num],
+                        label_counts[self.tsg_num]]
+
         self.set_sample_size(sampsize)
         ytrain.index = xtrain.index  # ensure indexes match
         xtrain['true_class'] = ytrain
@@ -113,7 +124,9 @@ class MyClassifier(object):
         """Sets the integers used to represent classes in classification."""
         if not oncogene and not tsg:
             raise ValueError('Classification needs at least two classes')
-        elif oncogene and tsg:
+        self.is_onco_pred = oncogene
+        self.is_tsg_pred = tsg
+        if oncogene and tsg:
             self.other_num = 0
             self.onco_num = 1
             self.tsg_num = 2
