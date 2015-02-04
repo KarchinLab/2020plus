@@ -56,25 +56,57 @@ class RandomSplit(object):
                 left_samples += tmp_left
                 right_samples += tmp_right
 
-            # process features with newly defined tumor samples to use
-            left_feat_df = self._process_features(left_samples)
-            right_feat_df = self._process_features(right_samples)
+            # get data frame split
+            if not self.with_replacement:
+                # simple sample without replacment case
+                left_feat_df = self._process_features(self._process_samples(left_samples))
+                right_feat_df = self._process_features(self._process_samples(left_samples))
+            else:
+                # sample with replacement case
+                # count occurrences of samples
+                left_cts = Counter(left_samples)
+                right_cts = Counter(right_samples)
+
+                # identify data frame indices for samples
+                left_ixs, right_ixs = [], []
+                left_names, right_names = [], []
+                for cname in left_cts:
+                    for k in range(left_cts[cname]):
+                        left_names += [cname + '.{0}'.format(k)
+                                       for _ in range(len(self.colname2ix[cname]))]
+                        left_ixs += self.colname2ix[cname]
+                for cname in right_cts:
+                    for k in range(right_cts[cname]):
+                        right_names += [cname + '.{0}'.format(k)
+                                        for _ in range(len(self.colname2ix[cname]))]
+                        right_ixs += self.colname2ix[cname]
+
+                # get samples from original data frame
+                left_df = self.df.ix[left_ixs,:].copy()
+                right_df = self.df.ix[right_ixs,:].copy()
+                left_df[self.COLUMN_NAME] = left_names
+                right_df[self.COLUMN_NAME] = right_names
+
+                # process features with newly defined tumor samples to use
+                left_feat_df = self._process_features(left_df)
+                right_feat_df = self._process_features(right_df)
 
             logger.info('Finished feature generation: Sub-sample rate={0}, Iteration={1}'.format(self.sub_sample, i))
             yield left_feat_df, right_feat_df
 
-    def _process_features(self, samps_of_interest):
+    def _process_samples(self, samps_of_interest):
         """Processes features from only the specified tumor samples of interest.
 
         Parameters
         ----------
-        samps_of_interest: list/set
+        samps_of_interest : list/set
             list/set of tumor sample id's to use for generating features
 
         Returns
         -------
-        proc_feat_df: pd.DataFrame
-            dataframe consisting of features for classification
+        subset_df : pd.DataFrame
+            dataframe consisting of data but only for the subset specified
+            int samps_of_interest
         """
         # make sure samples are a set object to speed up computation
         samps_of_interest = set(samps_of_interest)
@@ -82,15 +114,31 @@ class RandomSplit(object):
         # get data from those sample names
         samp_flag = self.df[self.COLUMN_NAME].apply(lambda x: x in samps_of_interest)
         ixs = samp_flag[samp_flag==True].index
-        tmp_df = self.df.ix[ixs].copy()
+        subset_df = self.df.ix[ixs].copy()
 
+        return subset_df
+
+    def _process_features(self, mydf):
+        """Performs feature processing pipeline.
+
+        Parameters
+        ----------
+        mydf : pd.DataFrame
+            data frame containing the desired raw data for computation of
+            features for classifier
+
+        Returns
+        -------
+        proc_feat_df: pd.DataFrame
+            dataframe consisting of features for classification
+        """
         # process features
-        feat_list = fmat.generate_feature_matrix(tmp_df, 2)
+        feat_list = fmat.generate_feature_matrix(mydf, 2)
         headers = feat_list.pop(0)  # remove header row
         feat_df = pd.DataFrame(feat_list, columns=headers)  # convert to data frame
         proc_feat_df = feat.process_features(feat_df, 0)
-        miss_ent_df = pentropy.missense_position_entropy(tmp_df[['Gene', 'AminoAcid']])
-        mut_ent_df = pentropy.mutation_position_entropy(tmp_df[['Gene', 'AminoAcid']])
+        miss_ent_df = pentropy.missense_position_entropy(mydf[['Gene', 'AminoAcid']])
+        mut_ent_df = pentropy.mutation_position_entropy(mydf[['Gene', 'AminoAcid']])
 
         # encorporate entropy features
         proc_feat_df['mutation position entropy'] = mut_ent_df['mutation position entropy']
@@ -149,5 +197,8 @@ class RandomSplit(object):
             # yikes there are more than one tumor type associated with this sample
             # raise ValueError('A tumor sample has more than one tumor type!')
             pass
+
+        # mapping between tumor sample id to data frame indices
+        self.colname2ix = self.df.groupby(self.COLUMN_NAME).groups
 
         self.total_count = len(self.df)
