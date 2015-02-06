@@ -8,21 +8,27 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def retrieve_gene_features(conn, opts):
+def retrieve_gene_features(conn, opts, get_entropy=True):
     """Retrieve gene information from the gene_features table.
 
     See the gene_features module to understand the gene_features
     database table.
 
-    **Parameters**
-
+    Parameters
+    ----------
     conn : mysql/sqlite connection
         connection to db with gene_features table
     options : dict
         options for getting info
+    get_entropy : bool
+        option to togle the use of entropy features.
+        Since entropy features are read from a file in this function, it may
+        induce a not necessary dependency on previously running commands.
+        To avoid this, set get_entropy=False and then compute entropy features
+        separately.
 
-    **Returns**
-
+    Returns
+    -------
     df : pd.dataframe
         dataframe of gene lengths
     """
@@ -59,15 +65,16 @@ def retrieve_gene_features(conn, opts):
         df['gene_degree'] = df['gene_degree'].fillna(0)
 
     # get position entropy features
-    entropy_cfg = _utils.get_output_config('position_entropy')
-    mutation_pos_entropy = pd.read_csv(_utils.result_dir + entropy_cfg['mutation_pos_entropy'],
-                                       sep='\t', index_col=0)
-    missense_pos_entropy = pd.read_csv(_utils.result_dir + entropy_cfg['missense_pos_entropy'],
-                                       sep='\t', index_col=0)
-    df['mutation position entropy'] = mutation_pos_entropy['mutation position entropy']
-    df['pct of uniform mutation entropy'] = mutation_pos_entropy['pct of uniform mutation entropy']
-    df['missense position entropy'] = missense_pos_entropy['missense position entropy']
-    df['pct of uniform missense entropy'] = missense_pos_entropy['pct of uniform missense entropy']
+    if get_entropy:
+        entropy_cfg = _utils.get_output_config('position_entropy')
+        mutation_pos_entropy = pd.read_csv(_utils.result_dir + entropy_cfg['mutation_pos_entropy'],
+                                        sep='\t', index_col=0)
+        missense_pos_entropy = pd.read_csv(_utils.result_dir + entropy_cfg['missense_pos_entropy'],
+                                        sep='\t', index_col=0)
+        df['mutation position entropy'] = mutation_pos_entropy['mutation position entropy']
+        df['pct of uniform mutation entropy'] = mutation_pos_entropy['pct of uniform mutation entropy']
+        df['missense position entropy'] = missense_pos_entropy['missense position entropy']
+        df['pct of uniform missense entropy'] = missense_pos_entropy['pct of uniform missense entropy']
 
     return df
 
