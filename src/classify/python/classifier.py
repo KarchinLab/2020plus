@@ -140,6 +140,9 @@ def generate_2020_result(onco_pct, tsg_pct, min_ct):
 
 
 def compute_p_value(scores, empirical_p_values):
+    """Get the p-value for each score by examining the list null distribution
+    where scores are obtained by a certain probability.
+    """
     num_scores = len(scores)
     pvals = pd.Series(np.zeros(num_scores))
     emp_p_val_scores = list(reversed(empirical_p_values.index.tolist()))
