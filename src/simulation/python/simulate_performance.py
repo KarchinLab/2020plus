@@ -133,14 +133,14 @@ def retrieve_gene_features(opts):
     # get additional features
     db_cfg = _utils.get_db_config('2020plus')
     conn = sqlite3.connect(db_cfg['db'])
-    additional_features = features.retrieve_gene_features(conn, opts)
+    additional_features = features.retrieve_gene_features(conn, opts, get_entropy=False)
     conn.close()
 
     # drop mutation entropy features
-    additional_features = additional_features.drop('mutation position entropy', 1)
-    additional_features = additional_features.drop('missense position entropy', 1)
-    additional_features = additional_features.drop('pct of uniform mutation entropy', 1)
-    additional_features = additional_features.drop('pct of uniform missense entropy', 1)
+    #additional_features = additional_features.drop('mutation position entropy', 1)
+    #additional_features = additional_features.drop('missense position entropy', 1)
+    #additional_features = additional_features.drop('pct of uniform mutation entropy', 1)
+    #additional_features = additional_features.drop('pct of uniform missense entropy', 1)
     return additional_features
 
 
