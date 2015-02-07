@@ -88,6 +88,11 @@ class GenericClassifier(object):
 
     def _update_metrics(self, y_true, y_pred,
                         onco_prob, tsg_prob):
+        # record which genes were predicted what
+        self.driver_gene_pred = pd.Series(y_pred, self.y.index)
+        self.driver_gene_score = pd.Series(onco_prob+tsg_prob, self.y.index)
+
+        # evaluate performance
         prec, recall, fscore, support = metrics.precision_recall_fscore_support(y_true, y_pred,
                                                                                 average='macro')
         cancer_gene_pred = ((onco_prob + tsg_prob)>.5).astype(int)
@@ -119,6 +124,8 @@ class GenericClassifier(object):
         # estabilish confusion matrix
         #tmp_confusion_matrix = metrics.confusion_matrix(y_true, y_pred)
         #self.confusion_matrix += tmp_confusion_matrix
+        self.onco_gene_pred = pd.Series(y_pred, self.y.index)
+        self.onco_gene_score = pd.Series(prob, self.y.index)
 
         # compute metrics for classification
         self.onco_gene_count[self.num_pred] = sum(y_pred)
@@ -146,6 +153,8 @@ class GenericClassifier(object):
         # estabilish confusion matrix
         #tmp_confusion_matrix = metrics.confusion_matrix(y_true, y_pred)
         #self.confusion_matrix += tmp_confusion_matrix
+        self.tsg_gene_pred = pd.Series(y_pred, self.y.index)
+        self.tsg_gene_score = pd.Series(prob, self.y.index)
 
         # compute metrics for classification
         self.tsg_gene_count[self.num_pred] = sum(y_pred)
