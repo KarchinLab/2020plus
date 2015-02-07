@@ -4,6 +4,7 @@ import pandas.io.sql as psql
 import src.data_analysis.python.feature_matrix as fmat
 import src.data_analysis.python.position_entropy as pentropy
 import src.features.python.features as feat
+from src.utils.python.amino_acid import AminoAcid
 import logging
 
 logger = logging.getLogger(__name__)
@@ -39,15 +40,15 @@ class RandomSampleNames(object):
             # get data from those sample names
             samp_flag = self.df[self.COLUMN_NAME].apply(lambda x: x in samps_of_interest)
             ixs = samp_flag[samp_flag==True].index
-            tmp_df = self.df.ix[ixs].copy()
+            self.current_df = self.df.ix[ixs].copy()
 
             # process features
-            feat_list = fmat.generate_feature_matrix(tmp_df, 2)
+            feat_list = fmat.generate_feature_matrix(self.current_df, 2)
             headers = feat_list.pop(0)  # remove header row
             feat_df = pd.DataFrame(feat_list, columns=headers)  # convert to data frame
             proc_feat_df = feat.process_features(feat_df, 0)
-            miss_ent_df = pentropy.missense_position_entropy(tmp_df[['Gene', 'AminoAcid']])
-            mut_ent_df = pentropy.mutation_position_entropy(tmp_df[['Gene', 'AminoAcid']])
+            miss_ent_df = pentropy.missense_position_entropy(self.current_df[['Gene', 'AminoAcid']])
+            mut_ent_df = pentropy.mutation_position_entropy(self.current_df[['Gene', 'AminoAcid']])
 
             # encorporate entropy features
             proc_feat_df['mutation position entropy'] = mut_ent_df['mutation position entropy']
@@ -99,6 +100,7 @@ class RandomSampleNames(object):
                    "       Tumor_Sample "
                    "FROM {0}".format(self.TABLE_NAME))
             self.df = psql.frame_query(sql, con=self.db_conn)
+        self.df['is_non_silent'] = self.df['AminoAcid'].apply(lambda x: int(AminoAcid(x).is_non_silent))
         self.sample_names = self.df[self.COLUMN_NAME].unique()
         self.num_sample_names = len(self.sample_names)
         self.total_count = len(self.df)

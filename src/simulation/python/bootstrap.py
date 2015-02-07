@@ -19,14 +19,14 @@ class Bootstrap(object):
         """Generate subsampled data frames according to the subsample
         and num_samples arguments.
         """
-        tmp_df = self.df.copy()  # copy df so it is not mutable
+        self.current_df = self.df.copy()  # copy df so it is not mutable
         n = int(self.subsample * self.total_count)  # number of counts to sample
         for i in range(self.num_iter):
             prng = np.random.RandomState()
             multinomial_sample = prng.multinomial(n,  # total counts for multinomial
                                                   self.prob)  # probability
-            tmp_df.values[self.nonzero_indices] = multinomial_sample
-            tmp_df = features.process_features(tmp_df, 0)
+            self.current_df.values[self.nonzero_indices] = multinomial_sample
+            tmp_df = features.process_features(self.current_df, 0)
             yield tmp_df
 
     def set_subsample(self, subsample):

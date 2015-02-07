@@ -39,15 +39,15 @@ class RandomTumorTypes(object):
             # get data from those sample names
             samp_flag = self.df[self.COLUMN_NAME].apply(lambda x: x in types_of_interest)
             ixs = samp_flag[samp_flag==True].index
-            tmp_df = self.df.ix[ixs].copy()
+            self.current_df = self.df.ix[ixs].copy()
 
             # process features
-            feat_list = fmat.generate_feature_matrix(tmp_df, 2)
+            feat_list = fmat.generate_feature_matrix(self.current_tmp_df, 2)
             headers = feat_list.pop(0)  # remove header row
             feat_df = pd.DataFrame(feat_list, columns=headers)  # convert to data frame
             proc_feat_df = feat.process_features(feat_df, 0)
-            miss_ent_df = pentropy.missense_position_entropy(tmp_df[['Gene', 'AminoAcid']])
-            mut_ent_df = pentropy.mutation_position_entropy(tmp_df[['Gene', 'AminoAcid']])
+            miss_ent_df = pentropy.missense_position_entropy(self.current_df[['Gene', 'AminoAcid']])
+            mut_ent_df = pentropy.mutation_position_entropy(self.current_df[['Gene', 'AminoAcid']])
 
             # encorporate entropy features
             proc_feat_df['mutation position entropy'] = mut_ent_df['mutation position entropy']
@@ -96,6 +96,7 @@ class RandomTumorTypes(object):
                    "       Tumor_Sample, Tumor_Type "
                    "FROM {0}".format(self.TABLE_NAME))
             self.df = psql.frame_query(sql, con=self.db_conn)
+        self.df['is_non_silent'] = self.df['AminoAcid'].apply(lambda x: int(AminoAcid(x).is_non_silent))
         self.tumor_types = self.df[self.COLUMN_NAME].unique()
         self.num_tumor_types = len(self.tumor_types)
         self.total_count = len(self.df)
