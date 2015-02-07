@@ -61,7 +61,7 @@ class RandomSplit(object):
             if not self.with_replacement:
                 # simple sample without replacment case
                 left_feat_df = self._process_features(self._process_samples(left_samples))
-                right_feat_df = self._process_features(self._process_samples(left_samples))
+                right_feat_df = self._process_features(self._process_samples(right_samples))
             else:
                 # sample with replacement case
                 # count occurrences of samples
