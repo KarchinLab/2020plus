@@ -1,6 +1,28 @@
 import src.utils.python.plot as myplt
 
 
+
+def avg_drivers_errorbar(panel_dict, gene_type, save_path,
+                         title='', xlabel='', ylabel=''):
+    path_holder = ''
+    counter, dict_len,  = 0, len(panel_dict)
+    for label, wp in panel_dict.iteritems():
+        samprates = wp.items
+        mean_prec = wp.ix[:, gene_type, 'avgerage num drivers mean']
+        sem_prec = wp.ix[:, gene_type, 'average num drivers sem']
+        ci_prec = 1.96 * sem_prec  # confidence interval
+
+        # figure out whether to save yet
+        counter += 1  # counter for figuring out when to save plot
+        if counter == dict_len:
+            path_holder = save_path
+
+        myplt.errorbars(samprates, mean_prec, ci_prec,
+                        save_path=path_holder,
+                        title=title, xlabel=xlabel,
+                        ylabel=ylabel, label=label)
+
+
 def count_errorbar(panel_dict, gene_type, save_path,
                    title='', xlabel='', ylabel=''):
     path_holder = ''
