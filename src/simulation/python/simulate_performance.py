@@ -16,9 +16,50 @@ from multiprocessing import Pool
 import itertools as it
 import time
 import sqlite3
+import IPython
 
 
-def r_random_forest(df, opts):
+def compute_num_drivers(gclf, mut_df):
+    # get predicted genes
+    tsg_pred = gclf.tsg_gene_pred[gclf.tsg_gene_pred==1].index
+    onco_pred = gclf.onco_gene_pred[gclf.onco_gene_pred==1].index
+    driver_pred = gclf.driver_gene_pred[gclf.driver_gene_pred>=1].index
+
+    # drop duplicates for counting average number of "driver" genes mutated
+    all_samples = mut_df['Tumor_Sample'].unique()
+    mut_df = mut_df[mut_df['is_non_silent']==1]  # keep nonsilent mutations
+    mut_df = mut_df.drop_duplicates(cols=['Tumor_Sample', 'Gene'])
+
+    # count number of driver genes with non-silent mutations
+    df_tsg = mut_df[mut_df['Gene'].isin(tsg_pred)]
+    df_onco = mut_df[mut_df['Gene'].isin(onco_pred)]
+    df_driver = mut_df[mut_df['Gene'].isin(driver_pred)]
+    num_drivers_tsg = df_tsg.groupby('Tumor_Sample')['is_non_silent'].sum()
+    num_drivers_onco = df_onco.groupby('Tumor_Sample')['is_non_silent'].sum()
+    num_drivers_all = df_driver.groupby('Tumor_Sample')['is_non_silent'].sum()
+
+    # handle cases with samples with no driver genes mutated
+    no_drivers_tsg = list(set(all_samples) - set(num_drivers_tsg.index))
+    no_drivers_onco = list(set(all_samples) - set(num_drivers_onco.index))
+    no_drivers_all = list(set(all_samples) - set(num_drivers_all.index))
+    no_drivers_tsg_series = pd.Series(np.zeros(len(no_drivers_tsg)),
+                                      index=no_drivers_tsg)
+    no_drivers_onco_series = pd.Series(np.zeros(len(no_drivers_onco)),
+                                       index=no_drivers_onco)
+    no_drivers_all_series = pd.Series(np.zeros(len(no_drivers_all)),
+                                      index=no_drivers_all)
+    num_drivers_tsg = pd.concat([num_drivers_tsg, no_drivers_tsg_series])
+    num_drivers_onco = pd.concat([num_drivers_onco, no_drivers_onco_series])
+    num_drivers_all = pd.concat([num_drivers_all, no_drivers_all_series])
+
+    avg_drivers_per_sample = [np.mean(num_drivers_onco),
+                              np.mean(num_drivers_tsg),
+                              np.mean(num_drivers_all)]
+    return avg_drivers_per_sample
+
+
+def r_random_forest(df, mut_df, opts):
+    # make predictions
     rrclf = RRandomForest(df,
                           total_iter=1,
                           other_sample_ratio=opts['other_ratio'],
@@ -26,6 +67,8 @@ def r_random_forest(df, opts):
                           ntrees=opts['ntrees'],
                           min_ct=opts['min_count'])
     rrclf.kfold_validation()  # run random forest
+
+    # construct a dataframe with results
     results = pd.DataFrame({'precision': [rrclf.onco_precision,
                                           rrclf.tsg_precision,
                                           rrclf.driver_precision],
@@ -40,12 +83,13 @@ def r_random_forest(df, opts):
                                        rrclf.driver_mean_pr_auc],
                             'count': [rrclf.onco_gene_count,
                                       rrclf.tsg_gene_count,
-                                      rrclf.cancer_gene_count]},
+                                      rrclf.cancer_gene_count],
+                            'average num drivers': compute_num_drivers(rrclf, mut_df)},
                            index=['oncogene', 'tsg', 'driver'])
     return results
 
 
-def py_random_forest(df, opts):
+def py_random_forest(df, mut_df, opts):
     rclf = RandomForest(df,
                         total_iter=1,
                         ntrees=opts['ntrees'],
@@ -65,12 +109,13 @@ def py_random_forest(df, opts):
                                        rclf.driver_mean_pr_auc],
                             'count': [rclf.onco_gene_count,
                                       rclf.tsg_gene_count,
-                                      rclf.cancer_gene_count]},
+                                      rclf.cancer_gene_count],
+                            'average num drivers': compute_num_drivers(rclf, mut_df)},
                            index=['oncogene', 'tsg', 'driver'])
     return results
 
 
-def naive_bayes(df, opts):
+def naive_bayes(df, mut_df, opts):
     nbclf = MultinomialNaiveBayes(df, min_ct=opts['min_count'], total_iter=1)
     nbclf.kfold_validation()  # run random forest
     results = pd.DataFrame({'precision': [nbclf.onco_precision,
@@ -87,7 +132,8 @@ def naive_bayes(df, opts):
                                        nbclf.driver_mean_pr_auc],
                             'count': [nbclf.onco_gene_count,
                                       nbclf.tsg_gene_count,
-                                      nbclf.cancer_gene_count]},
+                                      nbclf.cancer_gene_count],
+                            'average num drivers': compute_num_drivers(nbclf, mut_df)},
                            index=['oncogene', 'tsg', 'driver'])
     return results
 
@@ -136,11 +182,6 @@ def retrieve_gene_features(opts):
     additional_features = features.retrieve_gene_features(conn, opts, get_entropy=False)
     conn.close()
 
-    # drop mutation entropy features
-    #additional_features = additional_features.drop('mutation position entropy', 1)
-    #additional_features = additional_features.drop('missense position entropy', 1)
-    #additional_features = additional_features.drop('pct of uniform mutation entropy', 1)
-    #additional_features = additional_features.drop('pct of uniform missense entropy', 1)
     return additional_features
 
 
@@ -254,7 +295,7 @@ def save_simulation_result(r_panel, r_path,
     v_lin_df.to_csv(v_lin_path, sep='\t')
 
 
-def predict(df, gene_df, opts):
+def predict(df, gene_df, mut_df, opts):
     """Function called by multiprocessing to run predictions.
 
     **Parameters**
@@ -276,9 +317,9 @@ def predict(df, gene_df, opts):
     df = df.set_index('gene')  # get rid of gene column
 
     # run classifiers on bootstrap sampled counts
-    r_sim_results = r_random_forest(df, opts)
-    py_sim_results = py_random_forest(df, opts)
-    nb_sim_results = naive_bayes(df, opts)
+    r_sim_results = r_random_forest(df, mut_df, opts)
+    py_sim_results = py_random_forest(df, mut_df, opts)
+    nb_sim_results = naive_bayes(df, mut_df, opts)
 
     # do both non-scaling and linear scaling
     opts['scale_type'] = None
@@ -342,8 +383,14 @@ def multiprocess_predict(dfg, gene_df, opts):
 
 def singleprocess_predict(info):
     dfg, gene_df, opts = info  # unpack tuple
+
+    # get random dataframe
     df = next(dfg.dataframe_generator())
-    single_result = predict(df, gene_df, opts)
+
+    # dataframe containing specific mutations rather than summarized features
+    mut_df = dfg.current_df
+
+    single_result = predict(df, gene_df, mut_df, opts)
     return single_result
 
 
@@ -355,9 +402,6 @@ def main(cli_opts):
 
     gene_df = retrieve_gene_features(cli_opts)  # features like gene length, etc
 
-    df = pd.read_csv(_utils.result_dir + out_opts['gene_feature_matrix'],
-                     sep='\t', index_col=0)
-
     # iterate through each sampling rate
     r_result, py_result, nb_result, v_result, v_linear_result = {}, {}, {}, {}, {}
     for sample_rate in np.linspace(cli_opts['lower_sample_rate'],
@@ -365,6 +409,8 @@ def main(cli_opts):
                                    cli_opts['num_sample_rate']):
         if cli_opts['bootstrap']:
             # bootstrap object for sub-sampling
+            df = pd.read_csv(_utils.result_dir + out_opts['gene_feature_matrix'],
+                            sep='\t', index_col=0)
             dfg = Bootstrap(df.copy(),
                             subsample=sample_rate,
                             num_iter=cli_opts['samples'])
@@ -378,7 +424,6 @@ def main(cli_opts):
             dfg = RandomTumorTypes(sub_sample=sample_rate,
                                    num_iter=cli_opts['samples'],
                                    db_conn=conn)
-
 
         # iterate through each sampled data set
         r_sim_results, py_sim_results, nb_sim_results, v_sim_results, v_linear_sim_results = {}, {}, {}, {}, {}
@@ -554,3 +599,27 @@ def main(cli_opts):
                              title='Number of predicted driver vs. DB size',
                              xlabel='Sample rate',
                              ylabel='Number of predicted driver')
+
+    # plot average num of predicted genes per sample
+    #IPython.embed()
+    #tmp_save_path = _utils.sim_plot_dir + sim_opts['onco_average_plot']
+    #plot_data.avg_drivers_errorbar(results,
+                             #gene_type='oncogene',
+                             #save_path=tmp_save_path,
+                             #title='Number of predicted oncogenes vs. DB size',
+                             #xlabel='Sample rate',
+                             #ylabel='Number of predicted oncogenes')
+    #tmp_save_path = _utils.sim_plot_dir + sim_opts['tsg_average_plot']
+    #plot_data.avg_drivers_errorbar(results,
+                             #gene_type='tsg',
+                             #save_path=tmp_save_path,
+                             #title='Number of predicted TSG vs. DB size',
+                             #xlabel='Sample rate',
+                             #ylabel='Number of predicted TSG')
+    #tmp_save_path = _utils.sim_plot_dir + sim_opts['driver_average_plot']
+    #plot_data.avg_drivers_errorbar(results,
+                             #gene_type='driver',
+                             #save_path=tmp_save_path,
+                             #title='Number of predicted driver vs. DB size',
+                             #xlabel='Sample rate',
+                             #ylabel='Number of predicted driver')
