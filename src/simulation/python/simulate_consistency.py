@@ -65,9 +65,9 @@ def r_random_forest_compare(df1, df2, opts):
     sp_rho_tsg, sp_pval_tsg = stats.pearsonr(tsg_top_rank1, tsg_top_rank2)
 
     # calc kendall tau correlation
-    kt_rho_driver, kt_pval_driver = stats.kendalltau(driver_top_rank1, driver_top_rank2)
-    kt_rho_onco, kt_pval_onco = stats.kendalltau(onco_top_rank1, onco_top_rank2)
-    kt_rho_tsg, kt_pval_tsg = stats.kendalltau(tsg_top_rank1, tsg_top_rank2)
+    #kt_rho_driver, kt_pval_driver = stats.kendalltau(driver_top_rank1, driver_top_rank2)
+    #kt_rho_onco, kt_pval_onco = stats.kendalltau(onco_top_rank1, onco_top_rank2)
+    #kt_rho_tsg, kt_pval_tsg = stats.kendalltau(tsg_top_rank1, tsg_top_rank2)
 
     # calculate jaccard index at specified depths
     driver_prob1.sort(ascending=False)
@@ -98,15 +98,15 @@ def r_random_forest_compare(df1, df2, opts):
                             'spearman correlation': [sp_rho_onco,
                                                      sp_rho_tsg,
                                                      sp_rho_driver],
-                            'kendall tau correlation': [kt_rho_onco,
-                                                        kt_rho_tsg,
-                                                        kt_rho_driver],
+                            #'kendall tau correlation': [kt_rho_onco,
+                                                        #kt_rho_tsg,
+                                                        #kt_rho_driver],
                             'spearman p-value': [sp_pval_onco,
                                                  sp_pval_tsg,
                                                  sp_pval_driver],
-                            'kendall tau p-value': [kt_pval_onco,
-                                                    kt_pval_tsg,
-                                                    kt_pval_driver],
+                            #'kendall tau p-value': [kt_pval_onco,
+                                                    #kt_pval_tsg,
+                                                    #kt_pval_driver],
                             'mean jaccard index': [mean_onco_ji,
                                                    mean_tsg_ji,
                                                    mean_driver_ji],
@@ -165,9 +165,9 @@ def py_random_forest_compare(df1, df2, opts):
     sp_rho_tsg, sp_pval_tsg = stats.pearsonr(tsg_top_rank1, tsg_top_rank2)
 
     # calc kendall tau correlation
-    kt_rho_driver, kt_pval_driver = stats.kendalltau(driver_top_rank1, driver_top_rank2)
-    kt_rho_onco, kt_pval_onco = stats.kendalltau(onco_top_rank1, onco_top_rank2)
-    kt_rho_tsg, kt_pval_tsg = stats.kendalltau(tsg_top_rank1, tsg_top_rank2)
+    #kt_rho_driver, kt_pval_driver = stats.kendalltau(driver_top_rank1, driver_top_rank2)
+    #kt_rho_onco, kt_pval_onco = stats.kendalltau(onco_top_rank1, onco_top_rank2)
+    #kt_rho_tsg, kt_pval_tsg = stats.kendalltau(tsg_top_rank1, tsg_top_rank2)
 
     # calculate jaccard index at specified depths
     driver_prob1.sort(ascending=False)
@@ -198,15 +198,15 @@ def py_random_forest_compare(df1, df2, opts):
                             'spearman correlation': [sp_rho_onco,
                                                      sp_rho_tsg,
                                                      sp_rho_driver],
-                            'kendall tau correlation': [kt_rho_onco,
-                                                        kt_rho_tsg,
-                                                        kt_rho_driver],
+                            #'kendall tau correlation': [kt_rho_onco,
+                                                        #kt_rho_tsg,
+                                                        #kt_rho_driver],
                             'spearman p-value': [sp_pval_onco,
                                                  sp_pval_tsg,
                                                  sp_pval_driver],
-                            'kendall tau p-value': [kt_pval_onco,
-                                                    kt_pval_tsg,
-                                                    kt_pval_driver],
+                            #'kendall tau p-value': [kt_pval_onco,
+                                                    #kt_pval_tsg,
+                                                    #kt_pval_driver],
                             'mean jaccard index': [mean_onco_ji,
                                                    mean_tsg_ji,
                                                    mean_driver_ji],
@@ -261,9 +261,9 @@ def naive_bayes_compare(df1, df2, opts):
     sp_rho_tsg, sp_pval_tsg = stats.pearsonr(tsg_top_rank1, tsg_top_rank2)
 
     # calc kendall tau correlation
-    kt_rho_driver, kt_pval_driver = stats.kendalltau(driver_top_rank1, driver_top_rank2)
-    kt_rho_onco, kt_pval_onco = stats.kendalltau(onco_top_rank1, onco_top_rank2)
-    kt_rho_tsg, kt_pval_tsg = stats.kendalltau(tsg_top_rank1, tsg_top_rank2)
+    #kt_rho_driver, kt_pval_driver = stats.kendalltau(driver_top_rank1, driver_top_rank2)
+    #kt_rho_onco, kt_pval_onco = stats.kendalltau(onco_top_rank1, onco_top_rank2)
+    #kt_rho_tsg, kt_pval_tsg = stats.kendalltau(tsg_top_rank1, tsg_top_rank2)
 
     # calculate jaccard index at specified depths
     driver_prob1.sort(ascending=False)
@@ -294,15 +294,15 @@ def naive_bayes_compare(df1, df2, opts):
                             'spearman correlation': [sp_rho_onco,
                                                      sp_rho_tsg,
                                                      sp_rho_driver],
-                            'kendall tau correlation': [kt_rho_onco,
-                                                        kt_rho_tsg,
-                                                        kt_rho_driver],
+                            #'kendall tau correlation': [kt_rho_onco,
+                                                        #kt_rho_tsg,
+                                                        #kt_rho_driver],
                             'spearman p-value': [sp_pval_onco,
                                                  sp_pval_tsg,
                                                  sp_pval_driver],
-                            'kendall tau p-value': [kt_pval_onco,
-                                                    kt_pval_tsg,
-                                                    kt_pval_driver],
+                            #'kendall tau p-value': [kt_pval_onco,
+                                                    #kt_pval_tsg,
+                                                    #kt_pval_driver],
                             'mean jaccard index': [mean_onco_ji,
                                                    mean_tsg_ji,
                                                    mean_driver_ji],
