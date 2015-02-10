@@ -100,10 +100,15 @@ def main(opts):
     count_df = pd.read_csv(opts['summary'], sep='\t')
     tsg_test_df = pd.read_csv(opts['tsg_test'], sep='\t')
     og_test_df = pd.read_csv(opts['og_test'], sep='\t')
-    non_sil_df = pd.read_csv(opts['non_silent'], sep='\t')
     covar_df = pd.read_csv(opts['covariates'], sep='\t')
     og_test_df = og_test_df.rename(columns={'gene':'Gene'})
     tsg_test_df = tsg_test_df.rename(columns={'gene':'Gene'})
+
+    # use cohort simulation if provided
+    if opts['non_silent']:
+        non_sil_df = pd.read_csv(opts['non_silent'], sep='\t')
+    else:
+        non_sil_df = None
 
     # make feature matrix
     feature_df = process_features(count_df, non_sil_df)
