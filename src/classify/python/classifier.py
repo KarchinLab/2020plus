@@ -344,13 +344,13 @@ def main(cli_opts):
         return
 
     # get oncogene info
-    onco_count_df, onco_pct_df, tsg_ct, tsg_pct = num_pred_by_pct_threshold(minimum_ct)
-    onco_count_df = onco_count_df.sort_index()  # sort df by recurrent mutation cts
-    onco_pct_df = onco_pct_df.sort_index()  # sort df by recurrent mutation cts
+    #onco_count_df, onco_pct_df, tsg_ct, tsg_pct = num_pred_by_pct_threshold(minimum_ct)
+    #onco_count_df = onco_count_df.sort_index()  # sort df by recurrent mutation cts
+    #onco_pct_df = onco_pct_df.sort_index()  # sort df by recurrent mutation cts
 
     # save results
-    onco_count_df.to_csv(_utils.clf_result_dir + cfg_opts['oncogene_parameters_ct'], sep='\t')
-    onco_pct_df.to_csv(_utils.clf_result_dir + cfg_opts['oncogene_parameters_pct'], sep='\t')
+    #onco_count_df.to_csv(_utils.clf_result_dir + cfg_opts['oncogene_parameters_ct'], sep='\t')
+    #onco_pct_df.to_csv(_utils.clf_result_dir + cfg_opts['oncogene_parameters_pct'], sep='\t')
 
     # get the "normal" results from the 20/20 rule, based on
     # gene_feature_matrix.txt (aka last settings for data_analysis command)
@@ -373,45 +373,45 @@ def main(cli_opts):
     # plot results
     #logger.info('Plotting results of 20/20 rule . . .')
     # plot number of predicted oncogenes while varying parameters
-    tmp_save_path = _utils.clf_plot_dir + cfg_opts['number_oncogenes_plot']
-    tmp_title = r"Landscape 2013 Classifier Predicted Oncogenes"
-    tmp_ylabel = 'Number of Oncogenes'
-    tmp_xlabel = 'Number of Mutations Required for Recurrency'
-    plot_data.onco_mutations_parameter(onco_count_df,
-                                       tmp_save_path,
-                                       title=tmp_title,
-                                       ylabel=tmp_ylabel,
-                                       xlabel=tmp_xlabel)
+    #tmp_save_path = _utils.clf_plot_dir + cfg_opts['number_oncogenes_plot']
+    #tmp_title = r"Landscape 2013 Classifier Predicted Oncogenes"
+    #tmp_ylabel = 'Number of Oncogenes'
+    #tmp_xlabel = 'Number of Mutations Required for Recurrency'
+    #plot_data.onco_mutations_parameter(onco_count_df,
+                                       #tmp_save_path,
+                                       #title=tmp_title,
+                                       #ylabel=tmp_ylabel,
+                                       #xlabel=tmp_xlabel)
     # plot percentage of vogelstein's oncogenes recovered
-    tmp_title = 'Percentage of Landscape 2013 Oncogenes Recovered'
-    tmp_ylabel = 'Oncogene Recall'
-    tmp_xlabel = 'Number of Mutations Required for Recurrency'
-    tmp_save_path = _utils.clf_plot_dir + cfg_opts['pct_oncogenes_plot']
-    plot_data.onco_mutations_parameter(onco_pct_df,
-                                       tmp_save_path,
-                                       title=tmp_title,
-                                       ylabel=tmp_ylabel,
-                                       xlabel=tmp_xlabel)
+    #tmp_title = 'Percentage of Landscape 2013 Oncogenes Recovered'
+    #tmp_ylabel = 'Oncogene Recall'
+    #tmp_xlabel = 'Number of Mutations Required for Recurrency'
+    #tmp_save_path = _utils.clf_plot_dir + cfg_opts['pct_oncogenes_plot']
+    #plot_data.onco_mutations_parameter(onco_pct_df,
+                                       #tmp_save_path,
+                                       #title=tmp_title,
+                                       #ylabel=tmp_ylabel,
+                                       #xlabel=tmp_xlabel)
     # plot tsg of number of tsg's predicted
-    tmp_title = 'Landscape 2013 Classifier Predicted TSGs'
-    tmp_ylabel = 'Number of Predicted TSGs'
-    tmp_xlabel = 'Minimum Deleterious Mutations'
-    tmp_save_path = _utils.clf_plot_dir + cfg_opts['number_tsg_plot']
-    plot_data.tsg_mutations_parameter(tsg_ct,
-                                      tmp_save_path,
-                                      title=tmp_title,
-                                      ylabel=tmp_ylabel,
-                                      xlabel=tmp_xlabel)
+    #tmp_title = 'Landscape 2013 Classifier Predicted TSGs'
+    #tmp_ylabel = 'Number of Predicted TSGs'
+    #tmp_xlabel = 'Minimum Deleterious Mutations'
+    #tmp_save_path = _utils.clf_plot_dir + cfg_opts['number_tsg_plot']
+    #plot_data.tsg_mutations_parameter(tsg_ct,
+                                      #tmp_save_path,
+                                      #title=tmp_title,
+                                      #ylabel=tmp_ylabel,
+                                      #xlabel=tmp_xlabel)
     # plot recall of tsg while varying tsg score threshold
-    tmp_title = 'Percentage of Landscape 2013 Oncogenes Recovered'
-    tmp_ylabel = 'TSG Recall'
-    tmp_xlabel = 'Minimum Deleterious Mutations'
-    tmp_save_path = _utils.clf_plot_dir + cfg_opts['pct_tsg_plot']
-    plot_data.tsg_mutations_parameter(tsg_pct,
-                                      tmp_save_path,
-                                      title=tmp_title,
-                                      ylabel=tmp_ylabel,
-                                      xlabel=tmp_xlabel)
+    #tmp_title = 'Percentage of Landscape 2013 Oncogenes Recovered'
+    #tmp_ylabel = 'TSG Recall'
+    #tmp_xlabel = 'Minimum Deleterious Mutations'
+    #tmp_save_path = _utils.clf_plot_dir + cfg_opts['pct_tsg_plot']
+    #plot_data.tsg_mutations_parameter(tsg_pct,
+                                      #tmp_save_path,
+                                      #title=tmp_title,
+                                      #ylabel=tmp_ylabel,
+                                      #xlabel=tmp_xlabel)
 
     df = pd.read_csv(feature_path, sep='\t', index_col=0)
 
