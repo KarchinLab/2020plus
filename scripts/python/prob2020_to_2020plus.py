@@ -26,14 +26,6 @@ def parse_arguments():
     parser.add_argument('-c', '--covariates',
                         type=str, required=True,
                         help=help_str)
-    help_str = 'File with list of oncogenes'
-    parser.add_argument('-og', '--og',
-                        type=str, required=True,
-                        help=help_str)
-    help_str = 'File with list of TSGs'
-    parser.add_argument('-tsg', '--tsg',
-                        type=str, required=True,
-                        help=help_str)
     help_str = 'Output feature file for 20/20+'
     parser.add_argument('-o', '--output',
                         type=str, required=True,
@@ -113,12 +105,6 @@ def main(opts):
     og_test_df = og_test_df.rename(columns={'gene':'Gene'})
     tsg_test_df = tsg_test_df.rename(columns={'gene':'Gene'})
 
-    # read in list of oncogenes / tsgs
-    with open(opts['og']) as handle:
-        og_list = [line.strip() for line in handle]
-    with open(opts['tsg']) as handle:
-        tsg_list = [line.strip() for line in handle]
-
     # make feature matrix
     feature_df = process_features(count_df, non_sil_df)
     tsg_test_cols = ['Gene', 'deleterious p-value']
@@ -130,7 +116,8 @@ def main(opts):
 
     # add covariate feature columns
     covar_cols = ['gene',
-                  #'expression_CCLE', 'replication_time',
+                  #'expression_CCLE',
+                  #'replication_time',
                   'noncoding_mutation_rate',
                   #'HiC_compartment',
                   ]
