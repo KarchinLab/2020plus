@@ -17,7 +17,7 @@ def parse_arguments():
     parser.add_argument('-og-test', '--og-test',
                         type=str, required=True,
                         help=help_str)
-    help_str = 'simmulate_non_silent_ratio output'
+    help_str = 'simulate_non_silent_ratio output'
     parser.add_argument('-n', '--non-silent',
                         type=str,
                         default=None,
