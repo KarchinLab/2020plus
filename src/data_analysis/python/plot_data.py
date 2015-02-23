@@ -165,8 +165,8 @@ def mutation_types_barplot(mutation_cts,
     Currently synonymous, missense, nonsense, frame shift, and indels
     are plotted for amino acids in the bar graph.
 
-    **Parameters**
-
+    Parameters
+    ----------
     mutation_cts : pd.Series
         unique counts for mutation types
     save_path : str
