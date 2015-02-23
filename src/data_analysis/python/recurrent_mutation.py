@@ -41,7 +41,7 @@ def _count_recurrent_missense(hgvs_iterable,
     total_missense_ctr = 0
     for hgvs in hgvs_iterable:
         aa = AminoAcid(hgvs)
-        if aa.mutation_type == 'missense':
+        if aa.mutation_type == 'Missense_Mutation':
             gene_pos_ctr.setdefault(aa.pos, 0)
             gene_pos_ctr[aa.pos] += 1  # add 1 to dict of pos
             total_missense_ctr += 1  # add 1 to total missense

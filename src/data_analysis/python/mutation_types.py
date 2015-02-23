@@ -198,7 +198,7 @@ def main(conn):
     # plot non-silent/silent mutation ratio
     tmp_df = pd.DataFrame(index=tmp_mut_df.index)
     total = tmp_mut_df.sum(axis=1)
-    silent = tmp_mut_df['synonymous']
+    silent = tmp_mut_df['Silent']
     non_silent = total - silent
     silent += 1
     non_silent += 1

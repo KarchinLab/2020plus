@@ -49,21 +49,23 @@ def generate_feature_matrix(df, recurrency_threshold,
     design_matrix = []
     not_used_types = ['not valid',
                       'missing',
-                      'unknown effect']  # only include known mutations
+                      'unknown effect',
+                      'no protein']  # only include known mutations
     for gene, indexes in gene_to_indexes.iteritems():
         tmp_df = df.ix[indexes]
         gene_pos_counter = {}
         identical_indel = {}
-        mut_type_ctr = OrderedDict([['missense', 0],
-                                    ['frame shift', 0],
-                                    ['synonymous', 0],
+        mut_type_ctr = OrderedDict([['Missense_Mutation', 0],
+                                    ['Frame_Shift_Indel', 0],
+                                    ['Silent', 0],
                                     #['not valid', 0],
-                                    ['inframe indel', 0],
-                                    ['no protein', 0],
-                                    ['lost stop', 0],
-                                    ['splicing mutation', 0],
+                                    ['In_Frame_Indel', 0],
+                                    #['no protein', 0],
+                                    ['Nonstop_Mutation', 0],
+                                    ['Translation_Start_Site', 0],
+                                    ['Splice_Site', 0],
                                     #['missing', 0],
-                                    ['nonsense', 0]])
+                                    ['Nonsense_Mutation', 0]])
                                     #['unknown effect', 0]])
         # count identical indels
         for i, hgvs in enumerate(tmp_df['AminoAcid']):
@@ -74,7 +76,7 @@ def generate_feature_matrix(df, recurrency_threshold,
                     # keep track of missense pos for recurrency
                 #    gene_pos_counter.setdefault(aa.pos, 0)
                 #    gene_pos_counter[aa.pos] += 1
-                if aa.mutation_type == 'inframe indel' and tmp_df['mut_types'].iloc[i] != 'splicing mutation':
+                if aa.mutation_type == 'In_Frame_Indel' and tmp_df['mut_types'].iloc[i] != 'Splice_Site':
                     # keep track of missense pos for recurrency
                     identical_indel.setdefault(aa.hgvs_original, 0)
                     identical_indel[aa.hgvs_original] += 1
@@ -83,6 +85,11 @@ def generate_feature_matrix(df, recurrency_threshold,
         for mt in tmp_df['mut_types']:
             if mt not in not_used_types:
                 mut_type_ctr[mt] += 1
+
+        # combine lost start and lost stop
+        lost_stop_ct = mut_type_ctr.pop('Nonstop_Mutation', 0)
+        lost_start_ct = mut_type_ctr.pop('Translation_Start_Site', 0)
+        mut_type_ctr['Nonstop_Mutation+Translation_Start_Site'] = lost_start_ct + lost_stop_ct
 
         recur_ct, missense_ct = recur.count_missense_types(tmp_df['AminoAcid'],
                                                            recurrency_threshold,
@@ -96,7 +103,7 @@ def generate_feature_matrix(df, recurrency_threshold,
             identical_cts = sum([cts for cts in identical_indel.values()
                                  if cts >= recurrency_threshold])
             #mut_type_ctr['missense'] -= recurrent_cts  # subtract off the recurrent missense
-            mut_type_ctr['inframe indel'] -= identical_cts  # subtract off the recurrent missense
+            mut_type_ctr['In_Frame_Indel'] -= identical_cts  # subtract off the recurrent missense
             design_matrix.append([gene, recur_ct, identical_cts] + list(mut_type_ctr.values()))
     header = [['gene', 'recurrent missense', 'recurrent indel'] + list(mut_type_ctr)]
     logger.info('Finished creating feature matrix.')
