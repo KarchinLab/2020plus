@@ -74,21 +74,23 @@ class AminoAcid(object):
             else:
                 # valid mutation type to be counted
                 if self.is_lost_stop:
-                    self.mutation_type = 'lost stop'
+                    self.mutation_type = 'Nonstop_Mutation'
+                elif self.is_lost_start:
+                    self.mutation_type = 'Translation_Start_Site'
                 elif self.is_synonymous:
                     # synonymous must go before missense since mutations
                     # can be categorized as synonymous and missense. Although
                     # in reality such cases are actually synonymous and not
                     # missense mutations.
-                    self.mutation_type = 'synonymous'
+                    self.mutation_type = 'Silent'
                 elif self.is_missense:
-                    self.mutation_type = 'missense'
+                    self.mutation_type = 'Missense_Mutation'
                 elif self.is_indel:
-                    self.mutation_type = 'inframe indel'
+                    self.mutation_type = 'In_Frame_Indel'
                 elif self.is_nonsense_mutation:
-                    self.mutation_type = 'nonsense'
+                    self.mutation_type = 'Nonsense_Mutation'
                 elif self.is_frame_shift:
-                    self.mutation_type = 'frame shift'
+                    self.mutation_type = 'Frame_Shift_Indel'
 
     def set_occurrence(self, occur):
         self.occurrence = occur
@@ -116,6 +118,7 @@ class AminoAcid(object):
             hgvs_string (str): hgvs syntax with "p." removed
         """
         self.__set_lost_stop_status(hgvs_string)
+        self.__set_lost_start_status(hgvs_string)
         self.__set_missense_status(hgvs_string)  # missense mutations
         self.__set_indel_status()  # indel mutations
         self.__set_frame_shift_status()  # check for fs
@@ -124,11 +127,25 @@ class AminoAcid(object):
     def __set_missense_status(self, hgvs_string):
         """Sets the self.is_missense flag."""
         # set missense status
-        if re.search('^[A-Z?*]\d+[A-Z?]$', hgvs_string):
+        if re.search('^[A-Z?]\d+[A-Z?]$', hgvs_string):
             self.is_missense = True
             self.is_non_silent = True
         else:
             self.is_missense = False
+
+    def __set_lost_start_status(self, hgvs_string):
+        """Sets the self.is_lost_start flag."""
+        # set is lost start status
+        mymatch = re.search('^([A-Z?])(\d+)([A-Z?])$', hgvs_string)
+        if mymatch:
+            grps = mymatch.groups()
+            if int(grps[1]) == 1 and grps[0] != grps[2]:
+                self.is_lost_start = True
+                self.is_non_silent = True
+            else:
+                self.is_lost_start = False
+        else:
+            self.is_lost_start = False
 
     def __set_frame_shift_status(self):
         """Check for frame shift and set the self.is_frame_shift flag."""
@@ -250,6 +267,10 @@ class AminoAcid(object):
             self.mutated = re.findall('([A-Z?*]+)$', aa_hgvs)[0]
             self.pos = int(re.findall('^\*(\d+)', aa_hgvs)[0])
             self.stop_pos = None
+        elif self.is_lost_start:
+            self.initial = aa_hgvs[0]
+            self.mutated = aa_hgvs[-1]
+            self.pos = int(aa_hgvs[1:-1])
         elif self.is_missense:
             self.initial = aa_hgvs[0]
             self.mutated = aa_hgvs[-1]
