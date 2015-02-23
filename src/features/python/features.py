@@ -45,6 +45,8 @@ def retrieve_gene_features(conn, opts, get_entropy=True):
         selected_cols.append('replication_time')
     if opts['expression']:
         selected_cols.append('expression_CCLE as expression')
+    if opts['hic']:
+        selected_cols.append('HiC_compartment')
     if opts['betweeness']:
         selected_cols.append('gene_betweeness')
     if opts['degree']:
@@ -127,7 +129,8 @@ def process_features(df, min_count):
         df = df.set_index('gene')  # hack to prevent dividing genes by a number
     df = _filter_rows(df, min_ct=min_count)  # drop rows below minimum total mutations
     recurrent_mutation = df['recurrent missense'] + df['recurrent indel']
-    deleterious_mutation = df['lost stop'] + df['nonsense'] + df['frame shift'] + df['no protein'] + df['splicing mutation']
+    #deleterious_mutation = df['lost stop'] + df['nonsense'] + df['frame shift'] + df['no protein'] + df['splicing mutation']
+    deleterious_mutation = df['Nonstop_Mutation+Translation_Start_Site'] + df['Nonsense_Mutation'] + df['Frame_Shift_Indel'] + df['Splice_Site']
     row_sums = df.sum(axis=1).astype(float)
     df = df.div(row_sums, axis=0)  # normalize each row
     df['recurrent count'] = recurrent_mutation

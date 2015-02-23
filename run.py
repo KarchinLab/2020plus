@@ -507,6 +507,10 @@ if __name__ == '__main__':
                                  default=False,
                                  help='Add gene expression to'
                                  ' features for classify command')
+    parser_features.add_argument('--hic',
+                                 action='store_true',
+                                 default=False,
+                                 help='HiC comparment covariate feature')
 
     parser.set_defaults(database='genes')  # by default work on sqlite db
     args = parser.parse_args()  # parse the command line options
