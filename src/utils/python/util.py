@@ -287,9 +287,9 @@ def get_mutation_types(mut_iterable,
             nuc = Nucleotide(hgvs=dna_series.iloc[i])
             if nuc.is_splicing_mutation:
                 # check if mutation in splice site
-                mut_type.append('splicing mutation')
+                mut_type.append('Splice_Site')
             elif known_type is not None and known_type.iloc[i]=='Splice_Site':
-                mut_type.append('splicing mutation')
+                mut_type.append('Splice_Site')
             else:
                 # if not in splice site, just add
                 mut_type.append(aa.mutation_type)
