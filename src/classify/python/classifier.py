@@ -180,9 +180,9 @@ def rand_forest_pred(clf, data, result_path, null_dist=None):
     tmp_df['other score'] = other_prob
     tmp_df['driver score'] = 1 - other_prob
     pred_class = tmp_df[['other score', 'oncogene score', 'tsg score']].values.argmax(axis=1)
-    tmp_df['predicted class'] = pred_class
-    tmp_df['predicted cancer gene'] = (tmp_df['driver score'] > .5).astype(int)
-    tmp_df['true class'] = true_class
+    tmp_df['majority vote class'] = pred_class
+    tmp_df['majority vote cancer gene'] = (tmp_df['driver score'] > .5).astype(int)
+    tmp_df['training list class'] = true_class
     tmp_df = tmp_df.fillna(0)
     tmp_df = tmp_df.sort(['driver score',], ascending=False)
 
@@ -240,9 +240,9 @@ def trained_rand_forest_pred(clf, data, result_path, null_dist=None):
     tmp_df['other score'] = pd.Series(other_prob, index=gene_order)
     tmp_df['driver score'] = 1 - tmp_df['other score']
     pred_class = tmp_df[['other score', 'oncogene score', 'tsg score']].values.argmax(axis=1)
-    tmp_df['predicted class'] = pred_class
-    tmp_df['predicted cancer gene'] = (tmp_df['driver score'] > .5).astype(int)
-    tmp_df['true class'] = true_class
+    tmp_df['majority vote class'] = pred_class
+    tmp_df['majority vote cancer gene'] = (tmp_df['driver score'] > .5).astype(int)
+    tmp_df['training list class'] = true_class
     tmp_df = tmp_df.fillna(0)
     tmp_df = tmp_df.sort(['driver score',], ascending=False)
 
