@@ -173,18 +173,6 @@ def vogelstein_classification(df, opts):
     return results
 
 
-def retrieve_gene_features(opts):
-    """Wrapper arround the retrieve_gene_features function in the
-    features module."""
-    # get additional features
-    db_cfg = _utils.get_db_config('2020plus')
-    conn = sqlite3.connect(db_cfg['db'])
-    additional_features = features.retrieve_gene_features(conn, opts, get_entropy=False)
-    conn.close()
-
-    return additional_features
-
-
 def merge_feature_df(count_features,
                      additional_features):
     # merge the features into one data frame
@@ -400,7 +388,7 @@ def main(cli_opts):
     my_db_path = _utils.get_db_config('2020plus')['db']
     conn = sqlite3.connect(my_db_path)
 
-    gene_df = retrieve_gene_features(cli_opts)  # features like gene length, etc
+    gene_df = features.wrapper_retrieve_gene_features(cli_opts)  # features like gene length, etc
 
     # iterate through each sampling rate
     r_result, py_result, nb_result, v_result, v_linear_result = {}, {}, {}, {}, {}

@@ -4,6 +4,7 @@ from src.classify.python.multinomial_nb_clf import MultinomialNaiveBayes
 import src.simulation.python.simulation as sim
 import src.utils.python.util as _utils
 import simulate_performance as sp
+import src.features.python.features as features
 from random_split import RandomSplit
 import pandas as pd
 import scipy.stats as stats
@@ -396,7 +397,7 @@ def main(cli_opts):
     my_db_path = _utils.get_db_config('2020plus')['db']
     conn = sqlite3.connect(my_db_path)
 
-    gene_df = sp.retrieve_gene_features(cli_opts)  # features like gene length, etc
+    gene_df = features.wrapper_retrieve_gene_features(cli_opts)  # features like gene length, etc
 
     r_result, py_result, nb_result = {}, {}, {}
 
