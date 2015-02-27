@@ -1,4 +1,6 @@
 import src.utils.python.util as _utils
+import src.data_analysis.python.feature_matrix as fmat
+import src.data_analysis.python.position_entropy as pentropy
 import numpy as np
 import sqlite3
 import pandas as pd
@@ -8,7 +10,31 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def retrieve_gene_features(conn, opts, get_entropy=True):
+
+def wrapper_retrieve_gene_features(opts):
+    """Wrapper arround the retrieve_gene_features function in the
+    features module.
+
+    Parameters
+    ----------
+    opts : dict
+        command line options
+
+    Returns
+    -------
+    additional_features : pd.DataFrame
+
+    """
+    # get additional features
+    db_cfg = _utils.get_db_config('2020plus')
+    conn = sqlite3.connect(db_cfg['db'])
+    additional_features = retrieve_gene_features(conn, opts, get_entropy=False)
+    conn.close()
+    return additional_features
+
+
+def retrieve_gene_features(conn, opts,
+                           get_entropy=True):
     """Retrieve gene information from the gene_features table.
 
     See the gene_features module to understand the gene_features
@@ -115,11 +141,12 @@ def _filter_rows(df, min_ct=0):
     return filtered_df
 
 
-def process_features(df, min_count):
-    """Process mutation type counts.
+def normalize_mutational_features(df, min_count):
+    """Normalizes mutation type counts and aggregate counts into
+    recurrent vs deleterious.
 
-    **Parameters**
-
+    Parameters
+    ----------
     df : pd.DataFrame
         data frame with gene names and mutation counts for each type
     min_count : int
@@ -138,6 +165,49 @@ def process_features(df, min_count):
     df['total'] = row_sums
     df['gene'] = df.index  # get back the gene column from the index
     return df
+
+
+def process_mutational_features(mydf):
+    """Performs feature processing pipeline.
+
+    Parameters
+    ----------
+    mydf : pd.DataFrame
+        data frame containing the desired raw data for computation of
+        features for classifier
+
+    Returns
+    -------
+    proc_feat_df: pd.DataFrame
+        dataframe consisting of features for classification
+    """
+    # rename process of columns to ensure compatability with previously
+    # written code
+    mydf = mydf.rename(columns={'Protein_Change': 'AminoAcid',
+                                'DNA_Change': 'Nucleotide'})
+
+    # process features
+    feat_list = fmat.generate_feature_matrix(mydf, 2)
+    headers = feat_list.pop(0)  # remove header row
+    feat_df = pd.DataFrame(feat_list, columns=headers)  # convert to data frame
+    proc_feat_df = normalize_mutational_features(feat_df, 0)
+    miss_ent_df = pentropy.missense_position_entropy(mydf[['Gene', 'AminoAcid']])
+    mut_ent_df = pentropy.mutation_position_entropy(mydf[['Gene', 'AminoAcid']])
+
+    # encorporate entropy features
+    proc_feat_df['mutation position entropy'] = mut_ent_df['mutation position entropy']
+    proc_feat_df['pct of uniform mutation entropy'] = mut_ent_df['pct of uniform mutation entropy']
+    #proc_feat_df['missense position entropy'] = miss_ent_df['missense position entropy']
+    #proc_feat_df['pct of uniform missense entropy'] = miss_ent_df['pct of uniform missense entropy']
+    return proc_feat_df
+
+
+def generate_features(mutation_df, opts):
+    covariate_features = wrapper_retrieve_gene_features(opts)
+    mutational_features = process_mutational_features(mutation_df)
+    all_features = pd.merge(mutational_features, covariate_features,
+                            how='left', on='gene')
+    return all_features
 
 
 def randomize(df):
@@ -195,22 +265,32 @@ def main(options):
     # result_opts = _utils.get_input_config('result')
     db_cfg = _utils.get_db_config('2020plus')
 
-    # read in mutation counts generated in data_analysis folder
-    logger.info('Getting count features . . .')
-    count_features = pd.read_csv(_utils.result_dir + count_opts['gene_feature_matrix'],
-                                 sep='\t')
-    count_features = process_features(count_features,
-                                      min_count=options['min_count'])
-    logger.info('Finished getting count features.')
-
-    # get additional features
+    # get mutations
     conn = sqlite3.connect(db_cfg['db'])
-    additional_features = retrieve_gene_features(conn, options)
+    sql = ("SELECT Gene, Protein_Change as AminoAcid, "
+            "       DNA_Change as Nucleotide, "
+            "       Variant_Classification, "
+            "       Tumor_Sample, Tumor_Type "
+            "FROM mutations")
+    mut_df = psql.frame_query(sql, con=conn)
     conn.close()
+    # read in mutation counts generated in data_analysis folder
+    #logger.info('Getting count features . . .')
+    #count_features = pd.read_csv(_utils.result_dir + count_opts['gene_feature_matrix'],
+                                 #sep='\t')
+    #count_features = process_features(count_features,
+                                      #min_count=options['min_count'])
+    #logger.info('Finished getting count features.')
+
+    # get additional covariate features
+    #conn = sqlite3.connect(db_cfg['db'])
+    #additional_features = retrieve_gene_features(conn, options)
+    #conn.close()
 
     # merge the features into one data frame
-    all_features = pd.merge(count_features, additional_features,
-                            how='left', on='gene')
+    #all_features = pd.merge(count_features, additional_features,
+                            #how='left', on='gene')
+    all_features = generate_features(mut_df, options)
 
     # save features to text file
     cols = all_features.columns.tolist()
