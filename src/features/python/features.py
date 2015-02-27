@@ -195,10 +195,10 @@ def process_mutational_features(mydf):
     # mut_ent_df = pentropy.mutation_position_entropy(mydf[['Gene', 'AminoAcid']])
 
     # encorporate entropy features
-    proc_feat_df['mutation position entropy'] = mut_ent_df['mutation position entropy']
-    proc_feat_df['pct of uniform mutation entropy'] = mut_ent_df['pct of uniform mutation entropy']
-    #proc_feat_df['missense position entropy'] = miss_ent_df['missense position entropy']
-    #proc_feat_df['pct of uniform missense entropy'] = miss_ent_df['pct of uniform missense entropy']
+    #proc_feat_df['mutation position entropy'] = mut_ent_df['mutation position entropy']
+    #proc_feat_df['pct of uniform mutation entropy'] = mut_ent_df['pct of uniform mutation entropy']
+    proc_feat_df['missense position entropy'] = miss_ent_df['missense position entropy']
+    proc_feat_df['pct of uniform missense entropy'] = miss_ent_df['pct of uniform missense entropy']
     return proc_feat_df
 
 
@@ -303,8 +303,8 @@ def main(options):
     cols = all_features.columns.tolist()
     new_order = ['gene'] + cols[:cols.index('gene')] + cols[cols.index('gene')+1:]
     all_features = all_features[new_order]  # make the gene name the first column
-    all_features.to_csv(_utils.save_dir + in_opts['gene_feature'],
-                        sep='\t', index=False)
+    out_path = _utils.save_dir + in_opts['gene_features'] if not options['output'] else options['output']
+    all_features.to_csv(out_path, sep='\t', index=False)
 
     # plot mutation histogram for olfactory receptor genes
     plot_data.or_gene_hist(all_features,
