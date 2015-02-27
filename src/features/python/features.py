@@ -192,7 +192,7 @@ def process_mutational_features(mydf):
     feat_df = pd.DataFrame(feat_list, columns=headers)  # convert to data frame
     proc_feat_df = normalize_mutational_features(feat_df, 0)
     miss_ent_df = pentropy.missense_position_entropy(mydf[['Gene', 'AminoAcid']])
-    mut_ent_df = pentropy.mutation_position_entropy(mydf[['Gene', 'AminoAcid']])
+    # mut_ent_df = pentropy.mutation_position_entropy(mydf[['Gene', 'AminoAcid']])
 
     # encorporate entropy features
     proc_feat_df['mutation position entropy'] = mut_ent_df['mutation position entropy']
@@ -202,8 +202,29 @@ def process_mutational_features(mydf):
     return proc_feat_df
 
 
-def generate_features(mutation_df, opts):
-    covariate_features = wrapper_retrieve_gene_features(opts)
+def generate_features(mutation_df, opts,
+                      covariate_features=None):
+    """Main function that generates features.
+
+    Parameters
+    ----------
+    mutation_df : pd.DataFrame
+        data frame containing mutations from maf/sqlitedb
+    opts : dict
+        dictionary containing the command line options.
+        opts is not necessary if covariate_features
+        is specified.
+    covariate_features : pd.DataFrame (Default: None)
+        if covariate data frame already obtained, then utilize
+        that as input. Otherwise, retreive from sqlite database.
+
+    Returns
+    -------
+    all_features : pd.DataFrame
+        features with both mutational type features and covariate features
+    """
+    if type(covariate_features) is not pd.DataFrame:
+        covariate_features = wrapper_retrieve_gene_features(opts)
     mutational_features = process_mutational_features(mutation_df)
     all_features = pd.merge(mutational_features, covariate_features,
                             how='left', on='gene')
