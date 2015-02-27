@@ -70,11 +70,11 @@ def retrieve_gene_features(conn, opts, get_entropy=True):
     if get_entropy:
         entropy_cfg = _utils.get_output_config('position_entropy')
         mutation_pos_entropy = pd.read_csv(_utils.result_dir + entropy_cfg['mutation_pos_entropy'],
-                                        sep='\t', index_col=0)
+                                           sep='\t', index_col=0)
         missense_pos_entropy = pd.read_csv(_utils.result_dir + entropy_cfg['missense_pos_entropy'],
-                                        sep='\t', index_col=0)
-        df['mutation position entropy'] = mutation_pos_entropy['mutation position entropy']
-        df['pct of uniform mutation entropy'] = mutation_pos_entropy['pct of uniform mutation entropy']
+                                           sep='\t', index_col=0)
+        #df['mutation position entropy'] = mutation_pos_entropy['mutation position entropy']
+        #df['pct of uniform mutation entropy'] = mutation_pos_entropy['pct of uniform mutation entropy']
         df['missense position entropy'] = missense_pos_entropy['missense position entropy']
         df['pct of uniform missense entropy'] = missense_pos_entropy['pct of uniform missense entropy']
 
