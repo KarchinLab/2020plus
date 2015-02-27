@@ -274,22 +274,8 @@ def main(options):
             "FROM mutations")
     mut_df = psql.frame_query(sql, con=conn)
     conn.close()
-    # read in mutation counts generated in data_analysis folder
-    #logger.info('Getting count features . . .')
-    #count_features = pd.read_csv(_utils.result_dir + count_opts['gene_feature_matrix'],
-                                 #sep='\t')
-    #count_features = process_features(count_features,
-                                      #min_count=options['min_count'])
-    #logger.info('Finished getting count features.')
 
-    # get additional covariate features
-    #conn = sqlite3.connect(db_cfg['db'])
-    #additional_features = retrieve_gene_features(conn, options)
-    #conn.close()
-
-    # merge the features into one data frame
-    #all_features = pd.merge(count_features, additional_features,
-                            #how='left', on='gene')
+    # get features for classification
     all_features = generate_features(mut_df, options)
 
     # save features to text file
