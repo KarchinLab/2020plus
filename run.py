@@ -419,6 +419,10 @@ if __name__ == '__main__':
                                    default=False,
                                    help='Add gene expression to'
                                    ' features for simulation command')
+    parser_simulation.add_argument('--hic',
+                                   action='store_true',
+                                   default=False,
+                                   help='HiC comparment covariate feature')
     parser_simulation.set_defaults(func=_simulation)
 
     # savedb sub-command
