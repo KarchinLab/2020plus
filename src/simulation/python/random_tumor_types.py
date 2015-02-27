@@ -1,8 +1,6 @@
 import numpy as np
 import pandas as pd
 import pandas.io.sql as psql
-import src.data_analysis.python.feature_matrix as fmat
-import src.data_analysis.python.position_entropy as pentropy
 import src.features.python.features as feat
 import logging
 
@@ -42,18 +40,7 @@ class RandomTumorTypes(object):
             self.current_df = self.df.ix[ixs].copy()
 
             # process features
-            feat_list = fmat.generate_feature_matrix(self.current_tmp_df, 2)
-            headers = feat_list.pop(0)  # remove header row
-            feat_df = pd.DataFrame(feat_list, columns=headers)  # convert to data frame
-            proc_feat_df = feat.process_features(feat_df, 0)
-            miss_ent_df = pentropy.missense_position_entropy(self.current_df[['Gene', 'AminoAcid']])
-            mut_ent_df = pentropy.mutation_position_entropy(self.current_df[['Gene', 'AminoAcid']])
-
-            # encorporate entropy features
-            proc_feat_df['mutation position entropy'] = mut_ent_df['mutation position entropy']
-            proc_feat_df['pct of uniform mutation entropy'] = mut_ent_df['pct of uniform mutation entropy']
-            proc_feat_df['missense position entropy'] = miss_ent_df['missense position entropy']
-            proc_feat_df['pct of uniform missense entropy'] = miss_ent_df['pct of uniform missense entropy']
+            proc_feat_df = feat.process_mutational_features(self.current_df)
 
             logger.info('Finished feature generation: Sub-sample={0}, Iteration={1}'.format(self.sub_sample, i))
             yield proc_feat_df

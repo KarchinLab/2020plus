@@ -60,8 +60,8 @@ class RandomSplit(object):
             # get data frame split
             if not self.with_replacement:
                 # simple sample without replacment case
-                left_feat_df = self._process_features(self._process_samples(left_samples))
-                right_feat_df = self._process_features(self._process_samples(right_samples))
+                left_feat_df = feat.process_mutational_features(self._process_samples(left_samples))
+                right_feat_df = feat.process_mutational_features(self._process_samples(right_samples))
             else:
                 # sample with replacement case
                 # count occurrences of samples
@@ -89,8 +89,8 @@ class RandomSplit(object):
                 right_df[self.COLUMN_NAME] = right_names
 
                 # process features with newly defined tumor samples to use
-                left_feat_df = self._process_features(left_df)
-                right_feat_df = self._process_features(right_df)
+                left_feat_df = feat.process_mutational_features(left_df)
+                right_feat_df = feat.process_mutational_features(right_df)
 
             logger.info('Finished feature generation: Sub-sample rate={0}, Iteration={1}'.format(self.sub_sample, i))
             yield left_feat_df, right_feat_df
@@ -118,35 +118,6 @@ class RandomSplit(object):
         subset_df = self.df.ix[ixs].copy()
 
         return subset_df
-
-    def _process_features(self, mydf):
-        """Performs feature processing pipeline.
-
-        Parameters
-        ----------
-        mydf : pd.DataFrame
-            data frame containing the desired raw data for computation of
-            features for classifier
-
-        Returns
-        -------
-        proc_feat_df: pd.DataFrame
-            dataframe consisting of features for classification
-        """
-        # process features
-        feat_list = fmat.generate_feature_matrix(mydf, 2)
-        headers = feat_list.pop(0)  # remove header row
-        feat_df = pd.DataFrame(feat_list, columns=headers)  # convert to data frame
-        proc_feat_df = feat.process_features(feat_df, 0)
-        miss_ent_df = pentropy.missense_position_entropy(mydf[['Gene', 'AminoAcid']])
-        mut_ent_df = pentropy.mutation_position_entropy(mydf[['Gene', 'AminoAcid']])
-
-        # encorporate entropy features
-        proc_feat_df['mutation position entropy'] = mut_ent_df['mutation position entropy']
-        proc_feat_df['pct of uniform mutation entropy'] = mut_ent_df['pct of uniform mutation entropy']
-        proc_feat_df['missense position entropy'] = miss_ent_df['missense position entropy']
-        proc_feat_df['pct of uniform missense entropy'] = miss_ent_df['pct of uniform missense entropy']
-        return proc_feat_df
 
     def set_sub_sample(self, sub_sample):
         """Set the fraction of the original total mutations to actually sample.
