@@ -155,14 +155,15 @@ def normalize_mutational_features(df, min_count):
     if 'gene' in df.columns:
         df = df.set_index('gene')  # hack to prevent dividing genes by a number
     df = _filter_rows(df, min_ct=min_count)  # drop rows below minimum total mutations
-    recurrent_mutation = df['recurrent missense'] + df['recurrent indel']
+    recurrent_mutation = df['recurrent missense'] # + df['recurrent indel']
     #deleterious_mutation = df['lost stop'] + df['nonsense'] + df['frame shift'] + df['no protein'] + df['splicing mutation']
     deleterious_mutation = df['Nonstop_Mutation+Translation_Start_Site'] + df['Nonsense_Mutation'] + df['Frame_Shift_Indel'] + df['Splice_Site']
+    missense_to_silent = df['Missense_Mutation'] / (df['Silent']+1).astype(float)
     row_sums = df.sum(axis=1).astype(float)
-    df = df.div(row_sums, axis=0)  # normalize each row
+    df = df.div(row_sums-recurrent_mutation, axis=0)  # normalize each row
     df['recurrent count'] = recurrent_mutation
     df['deleterious count'] = deleterious_mutation
-    df['total'] = row_sums
+    #df['total'] = row_sums
     df['gene'] = df.index  # get back the gene column from the index
     return df
 
@@ -307,25 +308,25 @@ def main(options):
     all_features.to_csv(out_path, sep='\t', index=False)
 
     # plot mutation histogram for olfactory receptor genes
-    plot_data.or_gene_hist(all_features,
-                           _utils.feature_plot_dir + out_opts['or_hist'])
+    #plot_data.or_gene_hist(all_features,
+                           #_utils.feature_plot_dir + out_opts['or_hist'])
 
     # scatter plot of correlation between recurrent counts
     # and total mutation counts
-    tmpdf = all_features[(all_features['recurrent count']<300) & (all_features['total']<300)]
-    plot_data.correlation_plot(tmpdf,
-                               'recurrent count', 'total',
-                               save_path=_utils.feature_plot_dir + out_opts['recur_vs_total_cor'],
-                               xlabel='Recurrent Mutations',
-                               ylabel='Total Mutations',
-                               title='Recurrent ($<300$) vs Total ($<300$)mutations')
+    #tmpdf = all_features[(all_features['recurrent count']<300) & (all_features['total']<300)]
+    #plot_data.correlation_plot(tmpdf,
+                               #'recurrent count', 'total',
+                               #save_path=_utils.feature_plot_dir + out_opts['recur_vs_total_cor'],
+                               #xlabel='Recurrent Mutations',
+                               #ylabel='Total Mutations',
+                               #title='Recurrent ($<300$) vs Total ($<300$)mutations')
 
     # scatter plot of correlation between deleterious counts
     # and total mutation counts
-    tmpdf = all_features[(all_features['deleterious count']<300) & (all_features['total']<300)]
-    plot_data.correlation_plot(tmpdf,
-                               'deleterious count', 'total',
-                               save_path=_utils.feature_plot_dir + out_opts['del_vs_total_cor'],
-                               xlabel='Deleterious Mutations',
-                               ylabel='Total Mutations',
-                               title='Deleterious ($<300$) vs Total ($<300$)mutations')
+    #tmpdf = all_features[(all_features['deleterious count']<300) & (all_features['total']<300)]
+    #plot_data.correlation_plot(tmpdf,
+                               #'deleterious count', 'total',
+                               #save_path=_utils.feature_plot_dir + out_opts['del_vs_total_cor'],
+                               #xlabel='Deleterious Mutations',
+                               #ylabel='Total Mutations',
+                               #title='Deleterious ($<300$) vs Total ($<300$)mutations')
