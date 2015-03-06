@@ -452,11 +452,11 @@ def main(cli_opts):
                                  null_dist=null_pvals)
 
     # save a list of oncogenes/tsgs in separate files
-    pred_onco = result_df[result_df['predicted class']==_utils.onco_label].index.to_series()
-    novel_onco = result_df[(result_df['predicted class']==_utils.onco_label) & (result_df['true class']!=_utils.onco_label)].index.to_series()
-    pred_tsg = result_df[result_df['predicted class']==_utils.tsg_label].index.to_series()
-    novel_tsg = result_df[(result_df['predicted class']==_utils.tsg_label) & (result_df['true class']!=_utils.tsg_label)].index.to_series()
-    pred_driver = result_df[result_df['predicted cancer gene']==1].index.to_series()
+    pred_onco = result_df[result_df['majority vote class']==_utils.onco_label].index.to_series()
+    novel_onco = result_df[(result_df['majority vote class']==_utils.onco_label) & (result_df['true class']!=_utils.onco_label)].index.to_series()
+    pred_tsg = result_df[result_df['majority vote class']==_utils.tsg_label].index.to_series()
+    novel_tsg = result_df[(result_df['majority vote class']==_utils.tsg_label) & (result_df['true class']!=_utils.tsg_label)].index.to_series()
+    pred_driver = result_df[result_df['majority vote cancer gene']==1].index.to_series()
     pred_onco.to_csv(_utils.clf_result_dir + cfg_opts['rrf_onco'], sep='\t', index=False, header=None)
     novel_onco.to_csv(_utils.clf_result_dir + cfg_opts['rrf_novel_onco'], sep='\t', index=False, header=None)
     pred_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rrf_tsg'], sep='\t', index=False, header=None)
@@ -514,10 +514,10 @@ def main(cli_opts):
                                  null_dist=null_pvals)
 
     # save a list of oncogenes/tsgs in separate files
-    pred_onco = result_df[result_df['predicted class']==_utils.onco_label].index.to_series()
-    novel_onco = result_df[(result_df['predicted class']==_utils.onco_label) & (result_df['true class']!=_utils.onco_label)].index.to_series()
-    pred_tsg = result_df[result_df['predicted class']==_utils.tsg_label].index.to_series()
-    novel_tsg = result_df[(result_df['predicted class']==_utils.tsg_label) & (result_df['true class']!=_utils.tsg_label)].index.to_series()
+    pred_onco = result_df[result_df['majority vote class']==_utils.onco_label].index.to_series()
+    novel_onco = result_df[(result_df['majority vote class']==_utils.onco_label) & (result_df['true class']!=_utils.onco_label)].index.to_series()
+    pred_tsg = result_df[result_df['majority vote class']==_utils.tsg_label].index.to_series()
+    novel_tsg = result_df[(result_df['majority vote class']==_utils.tsg_label) & (result_df['true class']!=_utils.tsg_label)].index.to_series()
     pred_onco.to_csv(_utils.clf_result_dir + cfg_opts['rf_onco'], sep='\t', index=False, header=None)
     novel_onco.to_csv(_utils.clf_result_dir + cfg_opts['rf_novel_onco'], sep='\t', index=False, header=None)
     pred_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rf_tsg'], sep='\t', index=False, header=None)
