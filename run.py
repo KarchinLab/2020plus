@@ -476,6 +476,9 @@ if __name__ == '__main__':
     parser_features = subparser.add_parser('features',
                                            help=help_string)
     parser_features.set_defaults(func=_features)
+    parser_features.add_argument('-o', '--output',
+                                 type=str, default=None,
+                                 help='Specify the path to save the computed features')
     parser_features.add_argument('-m', '--min-count',
                                  type=int,
                                  action='store',
