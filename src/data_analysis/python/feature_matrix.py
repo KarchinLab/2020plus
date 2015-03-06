@@ -68,18 +68,18 @@ def generate_feature_matrix(df, recurrency_threshold,
                                     ['Nonsense_Mutation', 0]])
                                     #['unknown effect', 0]])
         # count identical indels
-        for i, hgvs in enumerate(tmp_df['AminoAcid']):
-            aa = AminoAcid(hgvs)
-            if aa.mutation_type not in not_used_types:
+        #for i, hgvs in enumerate(tmp_df['AminoAcid']):
+            #aa = AminoAcid(hgvs)
+            #if aa.mutation_type not in not_used_types:
                 # do not use 'missing', 'unkown effect' or 'not valid'
                 # if aa.mutation_type == 'missense':
                     # keep track of missense pos for recurrency
                 #    gene_pos_counter.setdefault(aa.pos, 0)
                 #    gene_pos_counter[aa.pos] += 1
-                if aa.mutation_type == 'In_Frame_Indel' and tmp_df['mut_types'].iloc[i] != 'Splice_Site':
+                #if aa.mutation_type == 'In_Frame_Indel' and tmp_df['mut_types'].iloc[i] != 'Splice_Site':
                     # keep track of missense pos for recurrency
-                    identical_indel.setdefault(aa.hgvs_original, 0)
-                    identical_indel[aa.hgvs_original] += 1
+                    #identical_indel.setdefault(aa.hgvs_original, 0)
+                    #identical_indel[aa.hgvs_original] += 1
 
         # count mutation types
         for mt in tmp_df['mut_types']:
@@ -97,15 +97,15 @@ def generate_feature_matrix(df, recurrency_threshold,
 
         # needs to have at least one count
         if sum(mut_type_ctr.values()):
-            mut_type_ctr['missense'] = missense_ct
+            #mut_type_ctr['missense'] = missense_ct
             #recurrent_cts = sum([cts for cts in gene_pos_counter.values()
             #                     if cts >= recurrency_threshold])
             identical_cts = sum([cts for cts in identical_indel.values()
                                  if cts >= recurrency_threshold])
             #mut_type_ctr['missense'] -= recurrent_cts  # subtract off the recurrent missense
-            mut_type_ctr['In_Frame_Indel'] -= identical_cts  # subtract off the recurrent missense
-            design_matrix.append([gene, recur_ct, identical_cts] + list(mut_type_ctr.values()))
-    header = [['gene', 'recurrent missense', 'recurrent indel'] + list(mut_type_ctr)]
+            # mut_type_ctr['In_Frame_Indel'] -= identical_cts  # subtract off the recurrent missense
+            design_matrix.append([gene, recur_ct] + list(mut_type_ctr.values()))
+    header = [['gene', 'recurrent missense'] + list(mut_type_ctr)]
     logger.info('Finished creating feature matrix.')
     return header + design_matrix
 
