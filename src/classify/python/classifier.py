@@ -452,19 +452,35 @@ def main(cli_opts):
                                  null_dist=null_pvals)
 
     # save a list of oncogenes/tsgs in separate files
-    pred_onco = result_df[result_df['majority vote class']==_utils.onco_label].index.to_series()
-    novel_onco = result_df[(result_df['majority vote class']==_utils.onco_label) & (result_df['training list class']!=_utils.onco_label)].index.to_series()
-    pred_tsg = result_df[result_df['majority vote class']==_utils.tsg_label].index.to_series()
-    novel_tsg = result_df[(result_df['majority vote class']==_utils.tsg_label) & (result_df['training list class']!=_utils.tsg_label)].index.to_series()
-    pred_driver = result_df[result_df['majority vote cancer gene']==1].index.to_series()
-    pred_onco.to_csv(_utils.clf_result_dir + cfg_opts['rrf_onco'], sep='\t', index=False, header=None)
-    novel_onco.to_csv(_utils.clf_result_dir + cfg_opts['rrf_novel_onco'], sep='\t', index=False, header=None)
-    pred_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rrf_tsg'], sep='\t', index=False, header=None)
-    novel_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rrf_novel_tsg'], sep='\t', index=False, header=None)
-    log_str = ('R Random forest: {0} ({1} novel) oncogenes, '
-               '{2} ({3} novel) tsg'.format(len(pred_onco), len(novel_onco),
-                                            len(pred_tsg), len(novel_tsg)))
-    logger.info(log_str)
+    if not null_pvals:
+        pred_onco = result_df[result_df['majority vote class']==_utils.onco_label].index.to_series()
+        novel_onco = result_df[(result_df['majority vote class']==_utils.onco_label) & (result_df['training list class']!=_utils.onco_label)].index.to_series()
+        pred_tsg = result_df[result_df['majority vote class']==_utils.tsg_label].index.to_series()
+        novel_tsg = result_df[(result_df['majority vote class']==_utils.tsg_label) & (result_df['training list class']!=_utils.tsg_label)].index.to_series()
+        pred_driver = result_df[result_df['majority vote cancer gene']==1].index.to_series()
+        pred_onco.to_csv(_utils.clf_result_dir + cfg_opts['rrf_onco'], sep='\t', index=False, header=None)
+        novel_onco.to_csv(_utils.clf_result_dir + cfg_opts['rrf_novel_onco'], sep='\t', index=False, header=None)
+        pred_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rrf_tsg'], sep='\t', index=False, header=None)
+        novel_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rrf_novel_tsg'], sep='\t', index=False, header=None)
+        log_str = ('Majority vote R Random forest: {0} ({1} novel) oncogenes, '
+                   '{2} ({3} novel) tsg'.format(len(pred_onco), len(novel_onco),
+                                                len(pred_tsg), len(novel_tsg)))
+        logger.info(log_str)
+    else:
+        pred_onco = result_df[result_df['oncogene q-value']<=.1].index.to_series()
+        novel_onco = result_df[(result_df['oncogene q-value']<=.1) & (result_df['training list class']!=_utils.onco_label)].index.to_series()
+        pred_tsg = result_df[result_df['tsg q-value']<=.1].index.to_series()
+        novel_tsg = result_df[(result_df['tsg q-value']<=.1) & (result_df['training list class']!=_utils.tsg_label)].index.to_series()
+        pred_driver = result_df[result_df['driver q-value']<=.1].index.to_series()
+        pred_onco.to_csv(_utils.clf_result_dir + cfg_opts['rrf_onco'], sep='\t', index=False, header=None)
+        novel_onco.to_csv(_utils.clf_result_dir + cfg_opts['rrf_novel_onco'], sep='\t', index=False, header=None)
+        pred_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rrf_tsg'], sep='\t', index=False, header=None)
+        novel_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rrf_novel_tsg'], sep='\t', index=False, header=None)
+        log_str = ('R Random forest significance test: {0} ({1} novel) oncogenes, '
+                   '{2} ({3} novel) tsg'.format(len(pred_onco), len(novel_onco),
+                                                len(pred_tsg), len(novel_tsg)))
+        logger.info(log_str)
+
 
     # plot r random forest results
     plot_data.prob_scatter(result_df,
@@ -478,16 +494,6 @@ def main(cli_opts):
                        col_name='tsg score',
                        save_path=_utils.clf_plot_dir + cfg_opts['tsg_kde_rrand_forest'],
                        title='Distribution of TSG Scores (sub-sampled random forest)')
-    #result_df['driver gene probability'] = result_df['oncogene probability'] + result_df['tsg probability']
-    plot_data.prob_kde(result_df,
-                       col_name='driver score',
-                       save_path='results/classify/plots/r_random_forest_driver_prob.kde.png',
-                       title='Distribution of Driver Gene Score (sub-sampled random forest)')
-    #plot_data.sample_boxplot(pred_onco,
-                             #pred_tsg,
-                             #pred_driver,
-                             #save_path_type=_utils.clf_plot_dir + cfg_opts['rrf_sample_pct_type_boxplot'],
-                             #save_path_driver=_utils.clf_plot_dir + cfg_opts['rrf_sample_pct_driver_boxplot'])
     logger.info('Finished running sub-sampled Random Forest')
 
     # scikit learns' random forest
@@ -514,18 +520,32 @@ def main(cli_opts):
                                  null_dist=null_pvals)
 
     # save a list of oncogenes/tsgs in separate files
-    pred_onco = result_df[result_df['majority vote class']==_utils.onco_label].index.to_series()
-    novel_onco = result_df[(result_df['majority vote class']==_utils.onco_label) & (result_df['training list class']!=_utils.onco_label)].index.to_series()
-    pred_tsg = result_df[result_df['majority vote class']==_utils.tsg_label].index.to_series()
-    novel_tsg = result_df[(result_df['majority vote class']==_utils.tsg_label) & (result_df['training list class']!=_utils.tsg_label)].index.to_series()
-    pred_onco.to_csv(_utils.clf_result_dir + cfg_opts['rf_onco'], sep='\t', index=False, header=None)
-    novel_onco.to_csv(_utils.clf_result_dir + cfg_opts['rf_novel_onco'], sep='\t', index=False, header=None)
-    pred_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rf_tsg'], sep='\t', index=False, header=None)
-    novel_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rf_novel_tsg'], sep='\t', index=False, header=None)
-    log_str = ('Random forest: {0} ({1} novel) oncogenes, '
-               '{2} ({3} novel) tsg'.format(len(pred_onco), len(novel_onco),
-                                            len(pred_tsg), len(novel_tsg)))
-    logger.info(log_str)
+    if not null_pvals:
+        pred_onco = result_df[result_df['majority vote class']==_utils.onco_label].index.to_series()
+        novel_onco = result_df[(result_df['majority vote class']==_utils.onco_label) & (result_df['training list class']!=_utils.onco_label)].index.to_series()
+        pred_tsg = result_df[result_df['majority vote class']==_utils.tsg_label].index.to_series()
+        novel_tsg = result_df[(result_df['majority vote class']==_utils.tsg_label) & (result_df['training list class']!=_utils.tsg_label)].index.to_series()
+        pred_onco.to_csv(_utils.clf_result_dir + cfg_opts['rf_onco'], sep='\t', index=False, header=None)
+        novel_onco.to_csv(_utils.clf_result_dir + cfg_opts['rf_novel_onco'], sep='\t', index=False, header=None)
+        pred_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rf_tsg'], sep='\t', index=False, header=None)
+        novel_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rf_novel_tsg'], sep='\t', index=False, header=None)
+        log_str = ('Majority Vote Random forest: {0} ({1} novel) oncogenes, '
+                   '{2} ({3} novel) tsg'.format(len(pred_onco), len(novel_onco),
+                                                len(pred_tsg), len(novel_tsg)))
+        logger.info(log_str)
+    else:
+        pred_onco = result_df[result_df['oncogene q-value']<=.1].index.to_series()
+        novel_onco = result_df[(result_df['oncogene q-value']<=.1) & (result_df['training list class']!=_utils.onco_label)].index.to_series()
+        pred_tsg = result_df[result_df['tsg q-value']<=.1].index.to_series()
+        novel_tsg = result_df[(result_df['tsg q-value']<=.1) & (result_df['training list class']!=_utils.tsg_label)].index.to_series()
+        pred_onco.to_csv(_utils.clf_result_dir + cfg_opts['rf_onco'], sep='\t', index=False, header=None)
+        novel_onco.to_csv(_utils.clf_result_dir + cfg_opts['rf_novel_onco'], sep='\t', index=False, header=None)
+        pred_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rf_tsg'], sep='\t', index=False, header=None)
+        novel_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rf_novel_tsg'], sep='\t', index=False, header=None)
+        log_str = ('Random forest significance test: {0} ({1} novel) oncogenes, '
+                   '{2} ({3} novel) tsg'.format(len(pred_onco), len(novel_onco),
+                                                len(pred_tsg), len(novel_tsg)))
+        logger.info(log_str)
 
     # plot random forest result
     plot_data.prob_scatter(result_df,
@@ -539,11 +559,6 @@ def main(cli_opts):
                        col_name='tsg score',
                        save_path=_utils.clf_plot_dir + cfg_opts['tsg_kde_rand_forest'],
                        title='Distribution of TSG Score (random forest)')
-    # result_df['driver gene probability'] = result_df['oncogene probability'] + result_df['tsg probability']
-    plot_data.prob_kde(result_df,
-                       col_name='driver score',
-                       save_path='results/classify/plots/random_forest_driver_prob.kde.png',
-                       title='Distribution of Driver Gene Scores (random forest)')
     logger.info('Finished running Random Forest')
 
     # multinomial naive bayes
