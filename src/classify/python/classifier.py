@@ -420,7 +420,7 @@ def main(cli_opts):
     #plot_data.vogelstein_score_scatter(df.copy(),
                                        #minimum_ct,
                                        #_utils.clf_plot_dir + cfg_opts['2020_score_plot'])
-    logger.info('Finished plotting results of 20/20 rule.')
+    #logger.info('Finished plotting results of 20/20 rule.')
 
     # R's random forest
     logger.info('Running R\'s Random forest . . .')
