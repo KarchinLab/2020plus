@@ -121,10 +121,10 @@ def main(opts):
 
     # add covariate feature columns
     covar_cols = ['gene',
-                  #'expression_CCLE',
-                  #'replication_time',
-                  'noncoding_mutation_rate',
-                  #'HiC_compartment',
+                  'expression_CCLE',
+                  'replication_time',
+                  #'noncoding_mutation_rate',
+                  'HiC_compartment',
                   ]
     covar_df = covar_df[covar_cols].rename(columns={'gene': 'Gene'})
     feature_df = pd.merge(feature_df, covar_df,
