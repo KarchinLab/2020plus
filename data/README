@@ -7,3 +7,4 @@ data folder
 * gene_lists/ -- contains list of genes defined as TSG or oncogenes in vogelstein's
                  science paper. In addition, contains gene information from the
                  MutSigCV paper.
+* reference_genome_set - download from HGNC website to convert gene names
