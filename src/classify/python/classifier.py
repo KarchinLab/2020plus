@@ -139,17 +139,33 @@ def generate_2020_result(onco_pct, tsg_pct, min_ct):
     return df
 
 
-def compute_p_value(scores, empirical_p_values):
+def compute_p_value(scores, null_p_values):
     """Get the p-value for each score by examining the list null distribution
     where scores are obtained by a certain probability.
     """
     num_scores = len(scores)
     pvals = pd.Series(np.zeros(num_scores))
-    emp_p_val_scores = list(reversed(empirical_p_values.index.tolist()))
-    num_emp_p_val_scores = len(emp_p_val_scores)
-    score2pval = lambda x: empirical_p_values.iloc[num_emp_p_val_scores-max(bisect.bisect_right(emp_p_val_scores, x), 1)]
-    pvals = scores.apply(score2pval)
+    null_p_val_scores = list(reversed(null_p_values.index.tolist()))
+    null_p_values = null_p_values[null_p_val_scores]
+    # num_null_p_val_scores = len(null_p_val_scores)
+    # score2pval = lambda x: empirical_p_values.iloc[num_emp_p_val_scores-max(bisect.bisect_right(emp_p_val_scores, x), 1)]
+    #pvals = scores.apply(score2pval)
+    pvals = scores.apply(lambda x: score2pval(x, null_p_val_scores, null_p_values))
     return pvals
+
+def score2pval(score, null_scores, null_pvals):
+    """NOTE: null_scores and null_pvals should be sorted in ascending order.
+    """
+    # find position in simulated null distribution
+    pos = bisect.bisect_right(null_scores, score)
+
+    # if the score is beyond any simulated values, then report
+    # a p-value of zero
+    if pos == null_pvals.size and score > null_scores[-1]:
+        return 0
+    # normal case, just report the corresponding p-val from simulations
+    else:
+        return null_pvals.iloc[pos]
 
 
 def rand_forest_pred(clf, data, result_path, null_dist=None):
