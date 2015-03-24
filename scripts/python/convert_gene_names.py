@@ -85,11 +85,12 @@ def main(opts):
                 tmp = convert_genes(line_split[col_num],
                                     approved_hugos,
                                     symbols2hugo, synonyms2hugo)
+                # add to output
                 if tmp == line_split[col_num]:
-                    line_split[col_num] == tmp
+                    line_split[col_num] = tmp
                     output.append(line_split)
                 elif line_split[col_num] == already_converted[tmp]:
-                    line_split[col_num] == tmp
+                    line_split[col_num] = tmp
                     output.append(line_split)
 
         # write output
