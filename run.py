@@ -502,6 +502,9 @@ if __name__ == '__main__':
                          log_level=log_level,
                          verbose=args.verbose)  # start logging
 
+    # log user entered command
+    logging.info('Command: {0}'.format(' '.join(sys.argv)))
+
     # import all the modules for 20/20+
     import src.data_analysis.python.stats
     import src.classify.python.classifier
