@@ -153,6 +153,7 @@ def compute_p_value(scores, null_p_values):
     pvals = scores.apply(lambda x: score2pval(x, null_p_val_scores, null_p_values))
     return pvals
 
+
 def score2pval(score, null_scores, null_pvals):
     """NOTE: null_scores and null_pvals should be sorted in ascending order.
     """
@@ -163,6 +164,10 @@ def score2pval(score, null_scores, null_pvals):
     # a p-value of zero
     if pos == null_pvals.size and score > null_scores[-1]:
         return 0
+    # condition needed to prevent an error
+    # simply get last value, if it equals the last value
+    elif pos == null_pvals.size:
+        return null_pvals.iloc[pos-1]
     # normal case, just report the corresponding p-val from simulations
     else:
         return null_pvals.iloc[pos]
