@@ -7,6 +7,7 @@ import pandas as pd
 import pandas.io.sql as psql
 import plot_data
 import logging
+import IPython
 
 logger = logging.getLogger(__name__)
 
@@ -275,7 +276,8 @@ def random_sort(df):
     random_indices = prng.choice(df.index.values,  # sample from 'genes'
                                  len(df),  # number of samples
                                  replace=False)  # sample without replacement
-    random_df = df.reindex(random_indices)  # change order of df
+    # random_df = df.reindex(random_indices)  # change order of df
+    random_df = df.ix[random_indices].copy()
     return random_df
 
 
