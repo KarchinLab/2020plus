@@ -44,19 +44,24 @@ def process_features(df, non_silent_df=None):
                         'missense', 'lost start']
         total_cts = non_silent_df[non_sil_cols].sum(axis=1)
         mycounts = non_silent_df[non_sil_cols]
-        miss_to_silent = (non_silent_df['missense']+1).astype(float)/(non_silent_df['silent']+1)
+        nonsil_to_silent = (df['non-silent snv']+df['inframe indel']+df['frameshift indel']).astype(float)/(df['silent']+1)
+        miss_to_silent = (non_silent_df['missense']).astype(float)/(non_silent_df['silent']+1)
         norm_cts = mycounts.div(total_cts.astype(float), axis=0)
         norm_cts = norm_cts.fillna(0.0)
         lost_start_stop = norm_cts['lost stop'] + norm_cts['lost start']
         norm_cts = norm_cts.drop(['lost start', 'lost stop'], axis=1)
-        norm_cts['lost start/stop'] = lost_start_stop
+        norm_cts['lost start and stop'] = lost_start_stop
         norm_cts['missense to silent'] = miss_to_silent
+        norm_cts['non-silent to silent'] = nonsil_to_silent
         feature_means = norm_cts.mean()
         feature_stdev = norm_cts.std()
 
     # rename column headers
     rename_dict = {'silent snv': 'silent'}
     df = df.rename(columns=rename_dict)
+
+    # get nonsilent/silent
+    nonsilent_to_silent = (df['non-silent snv']+df['inframe indel']+df['frameshift indel']).astype(float)/(df['silent']+1)
 
     # drop id col
     df = df.drop(['ID', 'non-silent snv'], axis=1)
@@ -68,7 +73,7 @@ def process_features(df, non_silent_df=None):
     df['missense'] -= df['recurrent missense']
 
     # calculate features
-    miss_to_silent = (df['missense']+df['recurrent missense']+1).astype(float)/(df['silent']+1)
+    miss_to_silent = (df['missense']+df['recurrent missense']).astype(float)/(df['silent']+1)
 
     # normalize out of total mutations
     total_cts = df[count_cols].sum(axis=1)
@@ -83,12 +88,14 @@ def process_features(df, non_silent_df=None):
     count_cols.pop(2)
 
     df[count_cols] = norm_cts
-    df['lost start/stop'] = lost_start_stop
+    df['lost start and stop'] = lost_start_stop
     df['missense to silent'] = miss_to_silent
+    df['non-silent to silent'] = nonsilent_to_silent
 
     # normalize
     if non_silent_df is not None:
-        cols = ['nonsense', 'silent', 'splice site', 'lost start/stop', 'missense', 'missense to silent']
+        cols = ['nonsense', 'silent', 'splice site', 'lost start and stop',
+                'missense', 'missense to silent', 'non-silent to silent']
         normed = (df[cols] - feature_means) #/ feature_stdev.astype(float)
         df[normed.columns] = normed
 
