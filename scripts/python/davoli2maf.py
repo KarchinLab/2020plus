@@ -63,7 +63,11 @@ def main(opts):
                      'De_novo_Start_InFrame': 'Translation_Start_Site',
                      'Nonstop Extension': 'Nonstop_Mutation',
                      'Complex Nonsense': 'Nonsense_Mutation',
-                     'Indel Nonsense': 'Nonsense_Mutation'
+                     'Indel Nonsense': 'Nonsense_Mutation',
+                     "5'UTR": "5'UTR",
+                     "3'UTR": "3'UTR",
+                     'Intron': 'Intron',
+                     'Promoter': 'Promoter'
                      }
     davoli_df['Mutation_Type'] = davoli_df['Mutation_Type'].apply(lambda x: type2varClass[x])
     davoli_df['Tumor_Sample'] = davoli_df['Tumor_Sample'].apply(parse_tumor_sample)
