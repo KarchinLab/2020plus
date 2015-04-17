@@ -141,8 +141,7 @@ def main(opts):
                    'ref_allele': 'Reference_Allele',
                    'newbase': 'Tumor_Allele',
                    'pos': 'Start_Position'}
-    broad_df.rename(columns=rename_cols,
-                    inplace=True)
+    broad_df = broad_df.rename(columns=rename_cols)
 
     # add end position column
     broad_df['End_Position'] = broad_df['Start_Position'] + broad_df['Tumor_Allele'].apply(lambda x: len(x) - 1)
@@ -164,7 +163,7 @@ def main(opts):
                         'Protein_Change']
 
     if opts['non_coding'] is not None:
-        non_coding_df.rename(columns=rename_cols, inplace=True)
+        non_coding_df = non_coding_df.rename(columns=rename_cols)
 
         # add end position column
         non_coding_df['End_Position'] = non_coding_df['Start_Position'] + non_coding_df['Tumor_Allele'].apply(lambda x: len(x) - 1)
