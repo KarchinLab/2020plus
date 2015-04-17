@@ -32,9 +32,9 @@ def fix_tumor_sample(tsample):
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
-    help_str = 'Data set from Davoli et al found at Elledge lab website'
+    help_str = 'Cravat output (optional), filters on mappability'
     parser.add_argument('-c', '--cravat',
-                        type=str, required=True,
+                        type=str, default=None,
                         help=help_str)
     help_str = 'Path to MAF file from davoli2maf.py script'
     parser.add_argument('-m', '--maf',
@@ -49,17 +49,18 @@ def parse_arguments():
 
 
 def main(opts):
-    cravat_df = pd.read_csv(opts['cravat'], sep='\t')
     davoli_df = pd.read_csv(opts['maf'], sep='\t')
 
     # filter list based on mappability warning from cravat
-    prev_len = len(davoli_df)
-    passed_qc = cravat_df[cravat_df['Mappability Warning'].isnull()]['ID']
-    davoli_df = davoli_df.ix[passed_qc]
-    after_len = len(davoli_df)
-    print('Before mappability filtering: {0} lines'.format(prev_len))
-    print('After mappability filtering: {0} lines'.format(after_len))
-    print('Line difference: {0}'.format(prev_len-after_len))
+    if opts['cravat']:
+        cravat_df = pd.read_csv(opts['cravat'], sep='\t')
+        prev_len = len(davoli_df)
+        passed_qc = cravat_df[cravat_df['Mappability Warning'].isnull()]['ID']
+        davoli_df = davoli_df.ix[passed_qc]
+        after_len = len(davoli_df)
+        print('Before mappability filtering: {0} lines'.format(prev_len))
+        print('After mappability filtering: {0} lines'.format(after_len))
+        print('Line difference: {0}'.format(prev_len-after_len))
 
     # fix tumor names
     davoli_df['Tumor_Type'] = davoli_df['Tumor_Type'].apply(fix_tumor_type)
