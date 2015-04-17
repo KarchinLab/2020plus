@@ -37,6 +37,10 @@ def parse_arguments():
 def process_features(df, non_silent_df=None):
     """Processes mutation consequence types from probabilistic 20/20.
     """
+    # rename column headers
+    rename_dict = {'silent snv': 'silent'}
+    df = df.rename(columns=rename_dict)
+
     # calculate the mean/std for the entire cohort
     if non_silent_df is not None:
         non_silent_df = non_silent_df.rename(columns=lambda x: x.replace(' count', ''))
@@ -55,10 +59,6 @@ def process_features(df, non_silent_df=None):
         norm_cts['non-silent to silent'] = nonsil_to_silent
         feature_means = norm_cts.mean()
         feature_stdev = norm_cts.std()
-
-    # rename column headers
-    rename_dict = {'silent snv': 'silent'}
-    df = df.rename(columns=rename_dict)
 
     # get nonsilent/silent
     nonsilent_to_silent = (df['non-silent snv']+df['inframe indel']+df['frameshift indel']).astype(float)/(df['silent']+1)
