@@ -1,5 +1,7 @@
 import argparse
 import pandas as pd
+import numpy as np
+import IPython
 
 
 def parse_arguments():
@@ -63,6 +65,26 @@ def process_features(df, non_silent_df=None):
     # get nonsilent/silent
     nonsilent_to_silent = (df['non-silent snv']+df['inframe indel']+df['frameshift indel']).astype(float)/(df['silent']+1)
 
+    # process score information
+    if 'Total Missense MGAEntropy' in df.columns:
+        num_mis = df['missense'].copy()
+        #num_mis[num_mis==0] = 1
+        df['Mean Missense MGAEntropy'] = np.nan
+        df.loc[num_mis!=0, 'Mean Missense MGAEntropy'] = df['Total Missense MGAEntropy'][num_mis!=0] / num_mis[num_mis!=0]
+        df['Mean Missense MGAEntropy'] = df['Mean Missense MGAEntropy'].fillna(df['Mean Missense MGAEntropy'].max())
+        del df['Total Missense MGAEntropy']
+    if 'Total Missense VEST Score' in df.columns:
+        sum_cols = ['Total Missense VEST Score', 'lost stop',
+                    'lost start', 'splice site', 'frameshift indel', 'inframe indel',
+                    'nonsense']
+        all_muts = ['non-silent snv', 'silent', 'inframe indel', 'frameshift indel']
+        tot_vest_score = df[sum_cols].sum(axis=1).astype(float)
+        num_muts = df[all_muts].sum(axis=1).astype(float)
+        df['Mean VEST Score'] = tot_vest_score / num_muts
+        #df['Missense VEST Score'] = df['Total Missense VEST Score'] / num_muts
+        #df['VEST normalized missense position entropy'] = df['normalized missense position entropy'] * (1.-df['Missense VEST Score'])
+        del df['Total Missense VEST Score']
+
     # drop id col
     df = df.drop(['ID', 'non-silent snv'], axis=1)
 
@@ -119,10 +141,10 @@ def main(opts):
 
     # make feature matrix
     feature_df = process_features(count_df, non_sil_df)
-    tsg_test_cols = ['Gene', 'deleterious p-value']
+    tsg_test_cols = ['Gene', 'inactivating p-value']
     feature_df = pd.merge(feature_df, tsg_test_df[tsg_test_cols],
                           how='left', on='Gene')
-    og_test_cols = ['Gene', 'entropy p-value']
+    og_test_cols = ['Gene', 'entropy p-value', 'vest p-value', 'combined p-value']
     feature_df = pd.merge(feature_df, og_test_df[og_test_cols],
                           how='left', on='Gene')
 
