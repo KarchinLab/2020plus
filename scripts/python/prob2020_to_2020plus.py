@@ -1,7 +1,6 @@
 import argparse
 import pandas as pd
 import numpy as np
-import IPython
 
 
 def parse_arguments():
@@ -27,6 +26,14 @@ def parse_arguments():
     help_str = 'Mutsigcv covariate features'
     parser.add_argument('-c', '--covariates',
                         type=str, required=True,
+                        help=help_str)
+    help_str = 'BioGrid interaction network statistics'
+    parser.add_argument('-b', '--biogrid',
+                        type=str, default=None,
+                        help=help_str)
+    help_str = 'Randomly permute biogrid features for null distribution'
+    parser.add_argument('-p', '--permute-biogrid',
+                        action='store_true', default=False,
                         help=help_str)
     help_str = 'Output feature file for 20/20+'
     parser.add_argument('-o', '--output',
@@ -158,6 +165,25 @@ def main(opts):
     covar_df = covar_df[covar_cols].rename(columns={'gene': 'Gene'})
     feature_df = pd.merge(feature_df, covar_df,
                           how='left', on='Gene')
+
+    # add biogrid features if present
+    if opts['biogrid'] is not None:
+        # read in biogrid data
+        biogrid_df = pd.read_csv(opts['biogrid'], sep='\t')
+        biogrid_df = biogrid_df.rename(columns={'gene': 'Gene'})
+
+        # permute feature if toggled
+        if opts['permute_biogrid']:
+            bg_feats = ['gene_degree', 'gene_betweeness']
+            permute_order = np.random.choice(len(biogrid_df),
+                                             size=len(biogrid_df),
+                                             replace=False)
+            biogrid_df.loc[:,bg_feats] = biogrid_df[bg_feats].loc[permute_order]
+
+        # merge in biogrid features
+        feature_df = pd.merge(feature_df, biogrid_df, how='left', on='Gene')
+        feature_df['gene_degree'] = feature_df['gene_degree'].fillna(0)
+        feature_df['gene_betweeness'] = feature_df['gene_betweeness'].fillna(0)
 
     # fill na values
     rename_dict = {'Gene': 'gene'}
