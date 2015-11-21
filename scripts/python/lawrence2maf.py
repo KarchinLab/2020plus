@@ -144,7 +144,14 @@ def main(opts):
     broad_df = broad_df.rename(columns=rename_cols)
 
     # add end position column
-    broad_df['End_Position'] = broad_df['Start_Position'] + broad_df['Tumor_Allele'].apply(lambda x: len(x) - 1)
+    #broad_df['End_Position'] = broad_df['Start_Position'] + broad_df['Tumor_Allele'].apply(lambda x: len(x) - 1)
+    broad_df['End_Position'] = broad_df['Start_Position']
+    del_variants = ['In_Frame_Del', 'Frame_Shift_Del',]
+    is_del = broad_df['Variant_Classification'].isin(del_variants)
+    broad_df['End_Position'][is_del] = broad_df['End_Position'][is_del] + broad_df['Reference_Allele'][is_del].apply(lambda x: len(x) - 1)
+    ins_variants = ['In_Frame_Ins', 'Frame_Shift_Ins',]
+    is_ins = broad_df['Variant_Classification'].isin(ins_variants)
+    broad_df['End_Position'][is_ins] = broad_df['End_Position'][is_ins] + 1
 
     # fix variant classigfication column
     broad_df['Variant_Classification'] = broad_df['Variant_Classification'].apply(fix_variant_type)
@@ -166,7 +173,12 @@ def main(opts):
         non_coding_df = non_coding_df.rename(columns=rename_cols)
 
         # add end position column
-        non_coding_df['End_Position'] = non_coding_df['Start_Position'] + non_coding_df['Tumor_Allele'].apply(lambda x: len(x) - 1)
+        # non_coding_df['End_Position'] = non_coding_df['Start_Position'] + non_coding_df['Tumor_Allele'].apply(lambda x: len(x) - 1)
+        non_coding_df['End_Position'] = non_coding_df['Start_Position']
+        is_del = non_coding_df['Tumor_Allele'] == '-'
+        non_coding_df['End_Position'][is_del] += non_coding_df['Reference_Allele'][is_del].apply(lambda x: len(x) - 1)
+        is_ins = non_coding_df['Reference_Allele'] == '-'
+        non_coding_df['End_Position'][is_ins] += 1
 
         # fix variant classigfication column
         non_coding_df['Variant_Classification'] = non_coding_df['Variant_Classification'].apply(fix_variant_type)
