@@ -31,12 +31,12 @@ def main(opts):
     G.add_edges_from(map(tuple, interact_genes))
     gene_betweeness = nx.betweenness_centrality(G)
     gene_degree = G.degree()
+
     result = [[key, gene_betweeness[key], gene_degree[key]]
               for key in gene_degree]
     result = [['gene', 'gene_betweeness', 'gene_degree']] + result
     with open(opts['output'], 'wb') as handle:
         csv.writer(handle, delimiter='\t').writerows(result)
-    # gene_communicability = nx.communicability_centrality(G)
 
 
 if __name__ == "__main__":
