@@ -11,6 +11,8 @@ import src.utils.python
 import numpy as np
 import src.utils.python.plot as myplt
 import src.utils.python.util as _utils
+import matplotlib
+matplotlib.use('agg')
 from matplotlib.mlab import PCA
 import matplotlib.pyplot as plt
 import logging

@@ -1,5 +1,7 @@
 import src.utils.python.plot as myplt
 import src.utils.python.util as _utils
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 import logging

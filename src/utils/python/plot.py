@@ -4,6 +4,8 @@ Essentially, plot.py encapsulates all the minor tweaks needed in matplotlib
 to make a reasonable looking plot.
 """
 
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as stats
