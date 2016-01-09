@@ -584,6 +584,15 @@ def main(cli_opts):
     plot_data.precision_recall_curve(df, save_path, line_style,
                                      title='Driver Precision-Recall Curve')
 
+    # save performance metrics of ROC and PR AUC
+    save_path = _utils.clf_result_dir + cfg_opts['performance']
+    logger.info('Saving performance metrics ({0}) . . .'.format(save_path))
+    metrics = [['TSG', rrclf_tsg_mean_roc_auc, rrclf_tsg_mean_pr_auc],
+               ['OG', rrclf_onco_mean_roc_auc, rrclf_onco_mean_pr_auc],
+               ['Driver', rrclf_driver_mean_roc_auc, rrclf_driver_mean_pr_auc]]
+    perf_df = pd.DataFrame(metrics, columns=['Type', 'ROC AUC', 'PR AUC'])
+    perf_df.to_csv(save_path, sep='\t', index=False)
+
 
 if __name__ == "__main__":
     main()
