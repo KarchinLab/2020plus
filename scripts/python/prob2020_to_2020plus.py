@@ -190,6 +190,14 @@ def main(opts):
     feature_df = feature_df.rename(columns=rename_dict)
     feature_df = feature_df.fillna(feature_df.mean())
 
+    # setup output cols reflecting feature selection
+    #out_cols = [
+        #'gene', 'combined p-value', 'entropy p-value', 'expression_CCLE',
+        #'gene_degree', 'gene length', 'inactivating p-value',
+        #'inframe indel', 'lost start and stop', 'Mean Missense MGAEntropy',
+        #'Mean VEST Score', 'non-silent to silent', 'normalized missense position entropy',
+        #'normalized mutation entropy', 'silent', 'vest p-value'
+    #]
     feature_df.to_csv(opts['output'], sep='\t', index=False)
 
 
