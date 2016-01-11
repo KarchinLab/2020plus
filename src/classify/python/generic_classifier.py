@@ -262,8 +262,7 @@ class GenericClassifier(object):
 
             # set up stratified kfold iterator
             k_fold = cross_validation.StratifiedKFold(self.y,
-                                                      n_folds=k,
-                                                      indices=True)
+                                                      n_folds=k)
 
             # evaluate k-fold cross validation
             for train_ix, test_ix in k_fold:
@@ -331,8 +330,7 @@ class GenericClassifier(object):
                                   #index_col=0, sep='\t')
         # generate indices for kfold cross validation
         k_fold = cross_validation.KFold(n=len(self.x),  # len of df
-                                        n_folds=k,  # k fold
-                                        indices=True)  # return indices
+                                        n_folds=k)
         self.num_pred = 0  # number of predictions
         self.x, self.y = features.randomize(self.x)  # randomize data
         #ns_ttype_df = ns_ttype_df.reindex(index=self.x.index)  # match indices
