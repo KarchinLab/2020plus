@@ -431,7 +431,7 @@ def main(cli_opts):
                                  null_dist=null_pvals)
 
     # save a list of oncogenes/tsgs in separate files
-    if not null_pvals:
+    if null_pvals is None:
         pred_onco = result_df[result_df['majority vote class']==_utils.onco_label].index.to_series()
         novel_onco = result_df[(result_df['majority vote class']==_utils.onco_label) & (result_df['training list class']!=_utils.onco_label)].index.to_series()
         pred_tsg = result_df[result_df['majority vote class']==_utils.tsg_label].index.to_series()
