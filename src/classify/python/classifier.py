@@ -146,7 +146,7 @@ def compute_p_value(scores, null_p_values):
     num_scores = len(scores)
     pvals = pd.Series(np.zeros(num_scores))
     null_p_val_scores = list(reversed(null_p_values.index.tolist()))
-    null_p_values = null_p_values[null_p_val_scores]
+    null_p_values = null_p_values.ix[null_p_val_scores].copy()
     # num_null_p_val_scores = len(null_p_val_scores)
     # score2pval = lambda x: empirical_p_values.iloc[num_emp_p_val_scores-max(bisect.bisect_right(emp_p_val_scores, x), 1)]
     #pvals = scores.apply(score2pval)
@@ -223,7 +223,9 @@ def rand_forest_pred(clf, data, result_path, null_dist=None):
         tmp_df['tsg q-value'] = _utils.bh_fdr(tmp_df['tsg p-value'])
 
         # add driver p-values
-        tmp_df['driver p-value'] = compute_p_value(tmp_df['driver score'],
+        driver_score = tmp_df['driver score'].copy()
+        driver_score.sort(ascending=False)
+        tmp_df['driver p-value'] = compute_p_value(driver_score,
                                                    null_dist['driver p-value'].dropna())
         tmp_df['driver q-value'] = _utils.bh_fdr(tmp_df['driver p-value'])
 
