@@ -367,41 +367,7 @@ def main(cli_opts):
         logger.info('Finished classification.')
         return
 
-    # get oncogene info
-    #onco_count_df, onco_pct_df, tsg_ct, tsg_pct = num_pred_by_pct_threshold(minimum_ct)
-    #onco_count_df = onco_count_df.sort_index()  # sort df by recurrent mutation cts
-    #onco_pct_df = onco_pct_df.sort_index()  # sort df by recurrent mutation cts
-
-    # save results
-    #onco_count_df.to_csv(_utils.clf_result_dir + cfg_opts['oncogene_parameters_ct'], sep='\t')
-    #onco_pct_df.to_csv(_utils.clf_result_dir + cfg_opts['oncogene_parameters_pct'], sep='\t')
-
-    # get the "normal" results from the 20/20 rule, based on
-    # gene_feature_matrix.txt (aka last settings for data_analysis command)
-    #logger.info('Generating 20/20 rule predictions . . .')
-    #result_df = generate_2020_result(.2, .2, minimum_ct)
-    # save result
-    #result_df.to_csv(_utils.clf_result_dir + cfg_opts['vogelstein_predictions'], sep='\t')
-    # plot results
-    #result_df['true class'] = result_df['true class'].apply(lambda x: _utils.class_to_label[x])
-    #plot_data.prob_kde(result_df, 'oncogene score',
-                       #_utils.clf_plot_dir + cfg_opts['onco_score_kde'],
-                       #title='Distribution of Oncogene Scores',
-                       #xlabel='Oncogene Score')
-    #plot_data.prob_kde(result_df, 'tsg score',
-                       #_utils.clf_plot_dir + cfg_opts['tsg_score_kde'],
-                       #title='Distribution of TSG Scores',
-                       #xlabel='TSG Score')
-    #logger.info('Finished generating 20/20 rule predictions.')
-
-
     df = pd.read_csv(feature_path, sep='\t', index_col=0)
-
-    # plot the 20/20 rule scores
-    #plot_data.vogelstein_score_scatter(df.copy(),
-                                       #minimum_ct,
-                                       #_utils.clf_plot_dir + cfg_opts['2020_score_plot'])
-    #logger.info('Finished plotting results of 20/20 rule.')
 
     # R's random forest
     logger.info('Running R\'s Random forest . . .')
@@ -462,7 +428,6 @@ def main(cli_opts):
                                                 len(pred_tsg), len(novel_tsg)))
         logger.info(log_str)
 
-
     # plot r random forest results
     plot_data.prob_scatter(result_df,
                            plot_path=_utils.clf_plot_dir + cfg_opts['rrand_forest_plot'],
@@ -476,8 +441,6 @@ def main(cli_opts):
                        save_path=_utils.clf_plot_dir + cfg_opts['tsg_kde_rrand_forest'],
                        title='Distribution of TSG Scores (sub-sampled random forest)')
     logger.info('Finished running sub-sampled Random Forest')
-
-
 
     # dummy classifier, predict most frequent
     logger.info('Running Dummy Classifier. . .')
