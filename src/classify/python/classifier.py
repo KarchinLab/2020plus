@@ -146,10 +146,8 @@ def compute_p_value(scores, null_p_values):
     num_scores = len(scores)
     pvals = pd.Series(np.zeros(num_scores))
     null_p_val_scores = list(reversed(null_p_values.index.tolist()))
-    null_p_values = null_p_values.ix[null_p_val_scores].copy()
-    # num_null_p_val_scores = len(null_p_val_scores)
-    # score2pval = lambda x: empirical_p_values.iloc[num_emp_p_val_scores-max(bisect.bisect_right(emp_p_val_scores, x), 1)]
-    #pvals = scores.apply(score2pval)
+    #null_p_values = null_p_values.ix[null_p_val_scores].copy()
+    null_p_values.sort(ascending=False)
     pvals = scores.apply(lambda x: score2pval(x, null_p_val_scores, null_p_values))
     return pvals
 
