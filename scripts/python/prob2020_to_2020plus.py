@@ -72,7 +72,10 @@ def process_features(df, non_silent_df=None):
     # get nonsilent/silent
     nonsilent_to_silent = (df['non-silent snv']+df['inframe indel']+df['frameshift indel']).astype(float)/(df['silent']+1)
 
+    ###
     # process score information
+    ###
+    # process conservation info for missense mutations
     if 'Total Missense MGAEntropy' in df.columns:
         num_mis = df['missense'].copy()
         #num_mis[num_mis==0] = 1
@@ -80,6 +83,7 @@ def process_features(df, non_silent_df=None):
         df.loc[num_mis!=0, 'Mean Missense MGAEntropy'] = df['Total Missense MGAEntropy'][num_mis!=0] / num_mis[num_mis!=0]
         df['Mean Missense MGAEntropy'] = df['Mean Missense MGAEntropy'].fillna(df['Mean Missense MGAEntropy'].max())
         del df['Total Missense MGAEntropy']
+    # calculate the mean VEST score
     if 'Total Missense VEST Score' in df.columns:
         sum_cols = ['Total Missense VEST Score', 'lost stop',
                     'lost start', 'splice site', 'frameshift indel', 'inframe indel',

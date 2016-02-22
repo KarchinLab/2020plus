@@ -308,27 +308,3 @@ def main(options):
     all_features = all_features[new_order]  # make the gene name the first column
     out_path = _utils.save_dir + in_opts['gene_features'] if not options['output'] else options['output']
     all_features.to_csv(out_path, sep='\t', index=False)
-
-    # plot mutation histogram for olfactory receptor genes
-    #plot_data.or_gene_hist(all_features,
-                           #_utils.feature_plot_dir + out_opts['or_hist'])
-
-    # scatter plot of correlation between recurrent counts
-    # and total mutation counts
-    #tmpdf = all_features[(all_features['recurrent count']<300) & (all_features['total']<300)]
-    #plot_data.correlation_plot(tmpdf,
-                               #'recurrent count', 'total',
-                               #save_path=_utils.feature_plot_dir + out_opts['recur_vs_total_cor'],
-                               #xlabel='Recurrent Mutations',
-                               #ylabel='Total Mutations',
-                               #title='Recurrent ($<300$) vs Total ($<300$)mutations')
-
-    # scatter plot of correlation between deleterious counts
-    # and total mutation counts
-    #tmpdf = all_features[(all_features['deleterious count']<300) & (all_features['total']<300)]
-    #plot_data.correlation_plot(tmpdf,
-                               #'deleterious count', 'total',
-                               #save_path=_utils.feature_plot_dir + out_opts['del_vs_total_cor'],
-                               #xlabel='Deleterious Mutations',
-                               #ylabel='Total Mutations',
-                               #title='Deleterious ($<300$) vs Total ($<300$)mutations')
