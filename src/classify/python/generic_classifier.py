@@ -3,7 +3,7 @@ of the classifier predictions."""
 
 import src.utils.python.util as _utils
 import src.utils.python.math as mymath
-import src.features.python.features as features
+import src.features.python.feature_utils as futils
 import numpy as np
 from numpy import interp
 from sklearn import cross_validation
@@ -218,7 +218,7 @@ class GenericClassifier(object):
 
     def train(self):
         """Train classifier on entire data set provided."""
-        self.x, self.y = features.randomize(self.x)
+        self.x, self.y = futils.randomize(self.x)
         self.clf.fit(self.x, self.y)
 
     def predict(self):
@@ -252,7 +252,7 @@ class GenericClassifier(object):
 
         for i in range(self.total_iter):
             # randomize for another round
-            self.x, self.y = features.randomize(self.x, self.prng)
+            self.x, self.y = futils.randomize(self.x, self.prng)
 
             # initialize predicted results variables
             num_genes = len(self.y)
@@ -321,7 +321,7 @@ class GenericClassifier(object):
         #k_fold = cross_validation.KFold(n=len(self.x),  # len of df
                                         #n_folds=k)
         self.num_pred = 0  # number of predictions
-        #self.x, self.y = features.randomize(self.x)  # randomize data
+        #self.x, self.y = futils.randomize(self.x)  # randomize data
 
         prediction = pd.Series(index=self.y.index)  # predicted class
         onco_prob = pd.Series(index=self.y.index).fillna(0)
@@ -329,7 +329,7 @@ class GenericClassifier(object):
 
         for i in range(self.total_iter):
             # randomize for another round
-            self.x, self.y = features.randomize(self.x, self.prng)
+            self.x, self.y = futils.randomize(self.x, self.prng)
 
             # set up stratified kfold iterator
             k_fold = cross_validation.StratifiedKFold(self.y,

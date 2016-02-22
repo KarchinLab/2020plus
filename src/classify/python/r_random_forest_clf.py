@@ -4,7 +4,7 @@ import rpy2.robjects as ro
 import pandas.rpy.common as com
 import pandas as pd
 from generic_classifier import GenericClassifier
-import src.features.python.features as features
+import src.features.python.feature_utils as futils
 import os
 import logging
 
@@ -196,7 +196,7 @@ class RRandomForest(GenericClassifier):
         df = df.fillna(df.mean())
 
         # randomization is mostly done in prediciton methods
-        self.x, self.y = features.randomize(df, self.prng)
+        self.x, self.y = futils.randomize(df, self.prng)
 
         # use the MyClassifier wrapper class around R
         self.clf = MyClassifier(ntrees=ntrees,
