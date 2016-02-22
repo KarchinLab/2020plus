@@ -323,7 +323,7 @@ def main(cli_opts):
                               other_sample_ratio=cli_opts['other_ratio'],
                               driver_sample=cli_opts['driver_rate'],
                               ntrees=cli_opts['ntrees'],
-                              min_ct=minimum_ct)
+                              seed=cli_opts['random_seed'])
         rrclf.clf.load(cli_opts['trained_classifier'])
 
         # do classification
@@ -374,7 +374,7 @@ def main(cli_opts):
                           other_sample_ratio=cli_opts['other_ratio'],
                           driver_sample=cli_opts['driver_rate'],
                           ntrees=cli_opts['ntrees'],
-                          min_ct=minimum_ct)
+                          seed=cli_opts['random_seed'])
 
     # analyze classification metrics
     rrclf.kfold_validation()
