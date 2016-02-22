@@ -8,6 +8,73 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
+def process_features(df):
+    """Processes mutation consequence types from probabilistic 20/20.
+    """
+    # rename column headers
+    rename_dict = {'silent snv': 'silent'}
+    df = df.rename(columns=rename_dict)
+
+    # get nonsilent/silent
+    nonsilent_to_silent = (df['non-silent snv']+df['inframe indel']+df['frameshift indel']).astype(float)/(df['silent']+1)
+
+    ###
+    # process score information
+    ###
+    # process conservation info for missense mutations
+    if 'Total Missense MGAEntropy' in df.columns:
+        num_mis = df['missense'].copy()
+        #num_mis[num_mis==0] = 1
+        df['Mean Missense MGAEntropy'] = np.nan
+        df.loc[num_mis!=0, 'Mean Missense MGAEntropy'] = df['Total Missense MGAEntropy'][num_mis!=0] / num_mis[num_mis!=0]
+        df['Mean Missense MGAEntropy'] = df['Mean Missense MGAEntropy'].fillna(df['Mean Missense MGAEntropy'].max())
+        del df['Total Missense MGAEntropy']
+    # calculate the mean VEST score
+    if 'Total Missense VEST Score' in df.columns:
+        sum_cols = ['Total Missense VEST Score', 'lost stop',
+                    'lost start', 'splice site', 'frameshift indel', 'inframe indel',
+                    'nonsense']
+        all_muts = ['non-silent snv', 'silent', 'inframe indel', 'frameshift indel']
+        tot_vest_score = df[sum_cols].sum(axis=1).astype(float)
+        num_muts = df[all_muts].sum(axis=1).astype(float)
+        df['Mean VEST Score'] = tot_vest_score / num_muts
+        #df['Missense VEST Score'] = df['Total Missense VEST Score'] / num_muts
+        #df['VEST normalized missense position entropy'] = df['normalized missense position entropy'] * (1.-df['Missense VEST Score'])
+        del df['Total Missense VEST Score']
+
+    # drop id col
+    df = df.drop(['ID', 'non-silent snv'], axis=1)
+
+    # handle mutation counts
+    count_cols = ['silent', 'nonsense', 'lost stop', 'lost start', 'missense',
+                  'recurrent missense', 'splice site', 'inframe indel', 'frameshift indel']
+    mycounts = df[count_cols]
+    df['missense'] -= df['recurrent missense']
+
+    # calculate features
+    miss_to_silent = (df['missense']+df['recurrent missense']).astype(float)/(df['silent']+1)
+
+    # normalize out of total mutations
+    total_cts = df[count_cols].sum(axis=1)
+    norm_cts = mycounts.div(total_cts.astype(float), axis=0)
+    norm_cts = norm_cts.fillna(0.0)
+
+    # combine lost stop and lost start
+    lost_start_stop = norm_cts['lost stop'] + norm_cts['lost start']
+    df = df.drop(['lost start', 'lost stop'], axis=1)
+    norm_cts = norm_cts.drop(['lost start', 'lost stop'], axis=1)
+    count_cols.pop(3)
+    count_cols.pop(2)
+
+    df[count_cols] = norm_cts
+    df['lost start and stop'] = lost_start_stop
+    df['missense to silent'] = miss_to_silent
+    df['non-silent to silent'] = nonsilent_to_silent
+
+    return df
+
+
 def label_gene(gene,
                oncogene=True,
                tsg=True,
@@ -33,6 +100,7 @@ def label_gene(gene,
             return smg_num
         else:
             return other_num
+
 
 def randomize(df, prng=None):
     """Randomly shuffles the features and labels the "true" classes.

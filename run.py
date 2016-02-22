@@ -450,49 +450,34 @@ if __name__ == '__main__':
     parser_features = subparser.add_parser('features',
                                            help=help_string)
     parser_features.set_defaults(func=_features)
+    help_str = 'simmulate_summary output'
+    parser_features.add_argument('-s', '--summary',
+                        type=str, required=True,
+                        help=help_str)
+    help_str = 'TSG output from probabilistic 20/20'
+    parser_features.add_argument('-tsg-test', '--tsg-test',
+                        type=str, required=True,
+                        help=help_str)
+    help_str = 'Oncogene output from probabilistic 20/20'
+    parser_features.add_argument('-og-test', '--og-test',
+                        type=str, required=True,
+                        help=help_str)
+    help_str = 'Mutsigcv covariate features (defaults to config file)'
+    parser_features.add_argument('-c', '--covariates',
+                        type=str, default=None,
+                        help=help_str)
+    help_str = 'BioGrid interaction network statistics (defaults to config file)'
+    parser_features.add_argument('-b', '--biogrid',
+                        type=str, default=None,
+                        help=help_str)
+    help_str = 'Randomly permute biogrid features (use for null distribution only)'
+    parser_features.add_argument('-p', '--permute-biogrid',
+                        action='store_true', default=False,
+                        help=help_str)
+    help_str = 'Output feature file for 20/20+'
     parser_features.add_argument('-o', '--output',
-                                 type=str, default=None,
-                                 help='Specify the path to save the computed features')
-    parser_features.add_argument('-m', '--min-count',
-                                 type=int,
-                                 action='store',
-                                 default=0,
-                                 help='Minimum number of mutations in a gene '
-                                 'for the gene to be in the saved feature file.'
-                                 ' (default: 0)')
-    parser_features.add_argument('--betweeness',
-                                 action='store_true',
-                                 default=False,
-                                 help='Gene betweeness from Biogrid.')
-    parser_features.add_argument('--degree',
-                                 action='store_true',
-                                 default=False,
-                                 help='Gene edge degree.')
-    parser_features.add_argument('--gene-length',
-                                 action='store_true',
-                                 default=False,
-                                 help='Add gene length to features for '
-                                 'classify command')
-    parser_features.add_argument('--mutation-rate',
-                                 action='store_true',
-                                 default=False,
-                                 help='Add noncoding mutation rate to'
-                                 ' features for classify command')
-    parser_features.add_argument('--replication-time',
-                                 action='store_true',
-                                 default=False,
-                                 help='Add replication time to'
-                                 ' features for classify command')
-    parser_features.add_argument('--expression',
-                                 action='store_true',
-                                 default=False,
-                                 help='Add gene expression to'
-                                 ' features for classify command')
-    parser_features.add_argument('--hic',
-                                 action='store_true',
-                                 default=False,
-                                 help='HiC comparment covariate feature')
-
+                        type=str, required=True,
+                        help=help_str)
     parser.set_defaults(database='genes')  # by default work on sqlite db
     args = parser.parse_args()  # parse the command line options
 
