@@ -8,6 +8,7 @@ import pandas.io.sql as psql
 import ConfigParser
 import logging
 import os
+import sys
 import datetime
 from functools import wraps
 
