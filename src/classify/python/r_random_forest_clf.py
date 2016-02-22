@@ -195,8 +195,8 @@ class RRandomForest(GenericClassifier):
             df = df.drop('total', axis=1)
         df = df.fillna(df.mean())
 
-        # randomization is done in prediciton methods
-        #self.x, self.y = features.randomize(df)
+        # randomization is mostly done in prediciton methods
+        self.x, self.y = features.randomize(df, self.prng)
 
         # use the MyClassifier wrapper class around R
         self.clf = MyClassifier(ntrees=ntrees,
