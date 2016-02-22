@@ -5,7 +5,7 @@ to make a reasonable looking plot.
 """
 
 import matplotlib
-matplotlib.use('agg')
+matplotlib.use('agg', warn=False)
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as stats
