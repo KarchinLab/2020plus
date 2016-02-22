@@ -280,12 +280,13 @@ class GenericClassifier(object):
                     sample_weight[other_ix] = 1. / len(other_ix)
 
                     # do training
-                    self.clf.fit(self.x.iloc[train_ix],
-                                 self.y.iloc[train_ix],
+                    self.clf.fit(self.x.iloc[train_ix].copy(),
+                                 self.y.iloc[train_ix].copy(),
                                  sample_weight=sample_weight)
                 else:
                     # do training without sample weights
-                    self.clf.fit(self.x.iloc[train_ix], self.y.iloc[train_ix])
+                    self.clf.fit(self.x.iloc[train_ix].copy(),
+                                 self.y.iloc[train_ix].copy())
 
                 # do prediction
                 y_pred = self.clf.predict(self.x.iloc[test_ix])
@@ -352,12 +353,13 @@ class GenericClassifier(object):
                     sample_weight[other_ix] = 1. / len(other_ix)
 
                     # do training with sample weighting
-                    self.clf.fit(self.x.ix[tmp_train_ix],
-                                 self.y.ix[tmp_train_ix],
+                    self.clf.fit(self.x.ix[tmp_train_ix].copy(),
+                                 self.y.ix[tmp_train_ix].copy(),
                                  sample_weight=sample_weight)
                 else:
                     # do training without weighting
-                    self.clf.fit(self.x.ix[tmp_train_ix], self.y.ix[tmp_train_ix])
+                    self.clf.fit(self.x.ix[tmp_train_ix].copy(),
+                                 self.y.ix[tmp_train_ix].copy())
 
                 # predict test data in kfold validation
                 tmp_prob = self.clf.predict_proba(self.x.ix[tmp_test_ix])
