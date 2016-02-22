@@ -233,7 +233,7 @@ def generate_features(mutation_df, opts,
     return all_features
 
 
-def randomize(df):
+def randomize(df, prng=None):
     """Randomly shuffles the features and labels the "true" classes.
 
     Calls random_sort to do the random shuffling.
@@ -250,12 +250,12 @@ def randomize(df):
     y : pd.Series
         true class labels
     """
-    x = random_sort(df)  # randomly sort data
+    x = random_sort(df, prng)  # randomly sort data
     y = x.index.to_series().apply(label_gene)  # get gene labels
     return x, y
 
 
-def random_sort(df):
+def random_sort(df, prng=None):
     """Randomly shuffle a DataFrame.
 
     NOTE: if the training data is not randomly shuffled, then
@@ -272,12 +272,18 @@ def random_sort(df):
     df : pd.DataFrame
         Randomly shuffled data frame
     """
-    prng = np.random.RandomState()  # get new random state
+    # get new random state if not specified
+    if prng is None:
+        prng = np.random.RandomState()
+
+    # get random order
     random_indices = prng.choice(df.index.values,  # sample from 'genes'
                                  len(df),  # number of samples
                                  replace=False)  # sample without replacement
-    # random_df = df.reindex(random_indices)  # change order of df
+
+    # change order of df
     random_df = df.ix[random_indices].copy()
+
     return random_df
 
 
