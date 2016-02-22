@@ -1,6 +1,6 @@
 from sklearn.dummy import DummyClassifier
 from generic_classifier import GenericClassifier
-import src.features.python.features as features
+import src.features.python.feature_utils as futils
 import logging
 
 
@@ -18,7 +18,7 @@ class DummyClf(GenericClassifier):
         # process data
         #df = self._filter_rows(df)  # filter out low count rows
         df = df.fillna(df.mean())
-        self.x, self.y = features.randomize(df)
+        self.x, self.y = futils.randomize(df)
 
         # setup classifier
         self.clf = DummyClassifier(strategy=strategy)
