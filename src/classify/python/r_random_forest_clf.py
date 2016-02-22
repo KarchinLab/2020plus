@@ -137,6 +137,10 @@ class MyClassifier(object):
             self.onco_num = 1 if oncogene else 0
             self.tsg_num = 1 if tsg else 0
 
+    def set_seed(self, seed):
+        if seed is not None:
+            ro.r('set.seed({0})'.format(seed))
+
     def predict(self, xtest):
         """Predicts class via majority vote.
 
@@ -174,29 +178,32 @@ class RRandomForest(GenericClassifier):
     def __init__(self, df,
                  total_iter=5,
                  weight=False,
-                 min_ct=5,
                  ntrees=200,
                  other_sample_ratio=3.,
-                 driver_sample=.7):
+                 driver_sample=.7,
+                 seed=None):
         self.logger = logging.getLogger(__name__)
         onco_flag, tsg_flag = True, True  # classes to actually classify
         super(RRandomForest, self).__init__(total_iter,
                                             classify_oncogene=onco_flag,
-                                            classify_tsg=tsg_flag)  # call base constructor
-        # self.set_min_count(min_ct)
+                                            classify_tsg=tsg_flag,
+                                            rseed=seed)  # call base constructor
         self.is_weighted_sample = weight
 
         if 'total' in df.columns:
+            # hack to get rid of total mutation count column
             df = df.drop('total', axis=1)
         df = df.fillna(df.mean())
 
-        self.x, self.y = features.randomize(df)
+        # randomization is done in prediciton methods
+        #self.x, self.y = features.randomize(df)
 
         # use the MyClassifier wrapper class around R
         self.clf = MyClassifier(ntrees=ntrees,
                                 driver_sample=driver_sample,
                                 other_sample_ratio=other_sample_ratio)
         self.clf.set_classes(onco_flag, tsg_flag)
+        self.clf.set_seed(seed)
 
     def _update_metrics(self, y_true, y_pred, onco_prob, tsg_prob):
         super(RRandomForest, self)._update_metrics(y_true, y_pred, onco_prob, tsg_prob)

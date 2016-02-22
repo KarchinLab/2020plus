@@ -100,7 +100,7 @@ if __name__ == '__main__':
     sys.excepthook = handle_uncaught_exceptions  # handle exceptions
 
     # parse command line arguments
-    parser = argparse.ArgumentParser(description='Run scripts')
+    parser = argparse.ArgumentParser(description='Run 20/20+ pipeline')
     parser.add_argument('--out-dir',
                         type=str,
                         action='store',
@@ -177,7 +177,7 @@ if __name__ == '__main__':
                                  type=str,
                                  action='store',
                                  default=None,
-                                 help='Path to file containing features in tab'
+                                 help='Path to file containing features in tab '
                                  'separated format. Defaults to path specified '
                                  'in config.')
     parser_classify.add_argument('-nd', '--null-distribution',
@@ -218,6 +218,10 @@ if __name__ == '__main__':
                                  default=200,
                                  help='Number of decision trees for random forests. '
                                  '(default: 200)')
+    parser_classify.add_argument('-rs', '--random-seed',
+                                 type=int, action='store',
+                                 default=None,
+                                 help='Random seed (default: auto)')
     parser_classify.set_defaults(func=_classify)
 
     # train sub-command
@@ -227,9 +231,9 @@ if __name__ == '__main__':
                               type=str,
                               action='store',
                               default=None,
-                              help='Path to file containing features in tab'
-                                 'separated format. Defaults to path specified '
-                                 'in config.')
+                              help='Path to file containing features in tab '
+                              'separated format. Defaults to path specified '
+                              'in config.')
     parser_train.add_argument('-m', '--min-count',
                               type=int,
                               action='store',
@@ -255,6 +259,10 @@ if __name__ == '__main__':
                               default=200,
                               help='Number of decision trees for random forests. '
                               '(default: 200)')
+    parser_train.add_argument('-rs', '--random-seed',
+                              type=int, action='store',
+                              default=None,
+                              help='Random seed (default: auto)')
     parser_train.add_argument('-r', '--output',
                               type=str, required=True,
                               help="Store the .Rdata file containing the trained"

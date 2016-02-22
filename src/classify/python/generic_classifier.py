@@ -16,8 +16,13 @@ class GenericClassifier(object):
     def __init__(self,
                  total_iterations=5,
                  classify_oncogene=True,
-                 classify_tsg=True):
+                 classify_tsg=True,
+                 rseed=None):
         self.min_count = 0  # min mutations for a gene
+
+        # set the the state of the prng
+        self.prng = np.random.RandomState(rseed)
+        self.rseed = rseed
 
         # set integer codes for classes
         self.set_classes(oncogene=classify_oncogene, tsg=classify_tsg)
@@ -244,13 +249,10 @@ class GenericClassifier(object):
 
     def kfold_validation(self, k=10):
         self.num_pred = 0  # number of predictions
-        cfg = _utils.get_output_config('tumor_type')
-        #ns_ttype_df = pd.read_csv(_utils.result_dir + cfg['gene_ns_ttype'],
-                                  #index_col=0, sep='\t')
 
         for i in range(self.total_iter):
-            self.x, self.y = features.randomize(self.x)  # randomize for another round
-            #ns_ttype_df = ns_ttype_df.reindex(index=self.x.index)  # match indices
+            # randomize for another round
+            self.x, self.y = features.randomize(self.x, self.prng)
 
             # initialize predicted results variables
             num_genes = len(self.y)
@@ -266,17 +268,6 @@ class GenericClassifier(object):
 
             # evaluate k-fold cross validation
             for train_ix, test_ix in k_fold:
-                # add js distance
-                #tmp = ns_ttype_df.iloc[train_ix]
-                #tmp = tmp.div(tmp.sum(axis=1), axis=0)
-                # ttype_df = ns_ttype_df.iloc[train_ix].sum()
-                #ttype_df = tmp.sum()
-                #pct_ttype_df = ttype_df / float(ttype_df.sum())
-                #myjs_dist = ns_ttype_df.apply(mymath.js_distance,
-                                              #args=(pct_ttype_df,),
-                                              #axis=1)
-                #self.x['Tumor Type JS distance'] = myjs_dist
-
                 if self.is_weighted_sample:
                     # weight classes by using sample weights
                     num_train = len(train_ix)
@@ -325,41 +316,32 @@ class GenericClassifier(object):
         self._on_finish()  # update info for kfold cross-validation
 
     def kfold_prediction(self, k=10):
-        cfg = _utils.get_output_config('tumor_type')
-        #ns_ttype_df = pd.read_csv(_utils.result_dir + cfg['gene_ns_ttype'],
-                                  #index_col=0, sep='\t')
         # generate indices for kfold cross validation
-        k_fold = cross_validation.KFold(n=len(self.x),  # len of df
-                                        n_folds=k)
+        #k_fold = cross_validation.KFold(n=len(self.x),  # len of df
+                                        #n_folds=k)
         self.num_pred = 0  # number of predictions
-        self.x, self.y = features.randomize(self.x)  # randomize data
-        #ns_ttype_df = ns_ttype_df.reindex(index=self.x.index)  # match indices
+        #self.x, self.y = features.randomize(self.x)  # randomize data
 
         prediction = pd.Series(index=self.y.index)  # predicted class
         onco_prob = pd.Series(index=self.y.index).fillna(0)
         tsg_prob = pd.Series(index=self.y.index).fillna(0)
 
         for i in range(self.total_iter):
-            self.x, self.y = features.randomize(self.x)  # randomize for another round
-            #ns_ttype_df = ns_ttype_df.reindex(index=self.x.index)  # match indices
+            # randomize for another round
+            self.x, self.y = features.randomize(self.x, self.prng)
+
+            # set up stratified kfold iterator
+            k_fold = cross_validation.StratifiedKFold(self.y,
+                                                      n_folds=k)
+
             # obtain predictions from single round of kfold validation
             for train_ix, test_ix in k_fold:
-                # add js distance
-                #tmp = ns_ttype_df.iloc[train_ix]
-                #tmp = tmp.div(tmp.sum(axis=1), axis=0)
-                # ttype_df = ns_ttype_df.iloc[train_ix].sum()
-                #ttype_df = tmp.sum()
-                #pct_ttype_df = ttype_df / float(ttype_df.sum())
-                #myjs_dist = ns_ttype_df.apply(mymath.js_distance,
-                                              #args=(pct_ttype_df,),
-                                              #axis=1)
-                #self.x['Tumor Type JS distance'] = myjs_dist
-
                 # retreive indices from pandas dataframe using row number
                 tmp_train_ix = self.x.iloc[train_ix].index
                 tmp_test_ix = self.x.iloc[test_ix].index
 
                 if self.is_weighted_sample:
+                    # figure out sample weights
                     num_train = len(train_ix)
                     sample_weight = np.zeros(num_train)
                     onco_ix = np.nonzero(self.y.ix[tmp_train_ix]==self.onco_num)[0]
@@ -383,6 +365,8 @@ class GenericClassifier(object):
                 tsg_prob.ix[tmp_test_ix] += tmp_prob[:, self.tsg_num]
 
             self.num_pred += 1
+
+        # convert number of trees to fraction of trees
         onco_prob /= self.num_pred
         tsg_prob /= self.num_pred
         other_prob = 1 - (onco_prob + tsg_prob)
