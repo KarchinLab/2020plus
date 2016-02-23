@@ -25,7 +25,7 @@ def main(cli_opts):
                           other_sample_ratio=cli_opts['other_ratio'],
                           driver_sample=cli_opts['driver_rate'],
                           ntrees=cli_opts['ntrees'],
-                          min_ct=minimum_ct)
+                          seed=cli_opts['random_seed'])
     rrclf.train()  # train on entire data
     logger.info('Finished training.')
     logger.info('Saving classifier to . . .')
