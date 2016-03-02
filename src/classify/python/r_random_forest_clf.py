@@ -1,6 +1,7 @@
 """Random Forest classifier using R's randomForest library.
 RPy2 is used to interface with R."""
 import rpy2.robjects as ro
+from rpy2.robjects import pandas2ri
 import pandas.rpy.common as com
 import pandas as pd
 from generic_classifier import GenericClassifier
@@ -106,9 +107,11 @@ class MyClassifier(object):
         ytrain.index = xtrain.index  # ensure indexes match
         xtrain['true_class'] = ytrain
         r_xtrain = com.convert_to_r_dataframe(xtrain)
+        #r_xtrain = pandas2ri.py2ri(xtrain)
         self.rf = self.rf_fit(r_xtrain, self.ntrees, self.sample_size)
         r_imp = self.rf_imp(self.rf)  # importance dataframe in R
         self.feature_importances_ = com.convert_robj(r_imp)
+        #self.feature_importances_ = pandas2ri.ri2py(r_imp)
 
     def save(self, path):
         ro.r('''save(rf_clf, rf_pred_prob, rf_pred,
@@ -150,8 +153,10 @@ class MyClassifier(object):
             features for test set
         """
         r_xtest = com.convert_to_r_dataframe(xtest)
+        #r_xtest = pandas2ri.py2ri(xtest)
         pred = self.rf_pred(self.rf, r_xtest)
         py_pred = com.convert_robj(pred)
+        #py_pred = pandas2ri.ri2py(pred)
         genes, pred_class = zip(*py_pred.items())
         tmp_df = pd.DataFrame({'pred_class': pred_class},
                               index=genes)
@@ -168,8 +173,10 @@ class MyClassifier(object):
             features for test set
         """
         r_xtest = com.convert_to_r_dataframe(xtest)
+        #r_xtest = pandas2ri.ri2py(xtest)
         pred_prob = self.rf_pred_prob(self.rf, r_xtest)
         py_pred_prob = com.convert_robj(pred_prob)
+        #py_pred_prob = pandas2ri.ri2py(pred_prob)
         return py_pred_prob.values
 
 
