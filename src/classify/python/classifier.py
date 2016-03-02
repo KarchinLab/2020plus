@@ -147,7 +147,7 @@ def compute_p_value(scores, null_p_values):
     pvals = pd.Series(np.zeros(num_scores))
     null_p_val_scores = list(reversed(null_p_values.index.tolist()))
     #null_p_values = null_p_values.ix[null_p_val_scores].copy()
-    null_p_values.sort(ascending=False)
+    null_p_values.sort_values(inplace=True, ascending=False)
     pvals = scores.apply(lambda x: score2pval(x, null_p_val_scores, null_p_values))
     return pvals
 
@@ -203,26 +203,26 @@ def rand_forest_pred(clf, data, result_path, null_dist=None):
     tmp_df['majority vote cancer gene'] = (tmp_df['driver score'] > .5).astype(int)
     tmp_df['training list class'] = true_class
     tmp_df = tmp_df.fillna(0)
-    tmp_df = tmp_df.sort(['driver score',], ascending=False)
+    tmp_df = tmp_df.sort_values(by=['driver score',], ascending=False)
 
     if null_dist is not None:
         # add oncogene p-value
         onco_score = tmp_df['oncogene score'].copy()
-        onco_score.sort(ascending=False)
+        onco_score.sort_values(inplace=True, ascending=False)
         tmp_df['oncogene p-value'] = compute_p_value(onco_score,
                                                      null_dist['oncogene p-value'].dropna())
         tmp_df['oncogene q-value'] = _utils.bh_fdr(tmp_df['oncogene p-value'])
 
         # add tsg p-value
         tsg_score = tmp_df['tsg score'].copy()
-        tsg_score.sort(ascending=False)
+        tsg_score.sort_values(inplace=True, ascending=False)
         tmp_df['tsg p-value'] = compute_p_value(tsg_score,
                                                 null_dist['tsg p-value'].dropna())
         tmp_df['tsg q-value'] = _utils.bh_fdr(tmp_df['tsg p-value'])
 
         # add driver p-values
         driver_score = tmp_df['driver score'].copy()
-        driver_score.sort(ascending=False)
+        driver_score.sort_values(inplace=True, ascending=False)
         tmp_df['driver p-value'] = compute_p_value(driver_score,
                                                    null_dist['driver p-value'].dropna())
         tmp_df['driver q-value'] = _utils.bh_fdr(tmp_df['driver p-value'])
@@ -265,25 +265,26 @@ def trained_rand_forest_pred(clf, data, result_path, null_dist=None):
     tmp_df['majority vote cancer gene'] = (tmp_df['driver score'] > .5).astype(int)
     tmp_df['training list class'] = true_class
     tmp_df = tmp_df.fillna(0)
-    tmp_df = tmp_df.sort(['driver score',], ascending=False)
+    tmp_df = tmp_df.sort_values(by=['driver score',], ascending=False)
 
     if null_dist is not None:
         # add oncogene p-value
         onco_score = tmp_df['oncogene score'].copy()
-        onco_score.sort(ascending=False)
+        onco_score.sort_values(inplace=True, ascending=False)
         tmp_df['oncogene p-value'] = compute_p_value(onco_score,
                                                      null_dist['oncogene p-value'].dropna())
         tmp_df['oncogene q-value'] = _utils.bh_fdr(tmp_df['oncogene p-value'])
 
         # add tsg p-value
         tsg_score = tmp_df['tsg score'].copy()
-        tsg_score.sort(ascending=False)
+        tsg_score.sort_values(inplace=True, ascending=False)
         tmp_df['tsg p-value'] = compute_p_value(tsg_score,
                                                 null_dist['tsg p-value'].dropna())
         tmp_df['tsg q-value'] = _utils.bh_fdr(tmp_df['tsg p-value'])
 
         # add driver p-value
         driver_score = tmp_df['driver score'].copy()
+        driver_score.sort_values(inplace=True, ascending=False)
         tmp_df['driver p-value'] = compute_p_value(driver_score,
                                                    null_dist['driver p-value'].dropna())
         tmp_df['driver q-value'] = _utils.bh_fdr(tmp_df['driver p-value'])
