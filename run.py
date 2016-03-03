@@ -448,25 +448,26 @@ if __name__ == '__main__':
                    ' This command should be ran before "classify".'
                    ' Features are saved as a text file.')
     parser_features = subparser.add_parser('features',
-                                           help=help_string)
+                                           help=help_string,
+                                           description=help_string)
     parser_features.set_defaults(func=_features)
-    help_str = 'simmulate_summary output'
+    help_str = 'mutation annotate output from probabilistic 20/20'
     parser_features.add_argument('-s', '--summary',
                         type=str, required=True,
                         help=help_str)
-    help_str = 'TSG output from probabilistic 20/20'
+    help_str = 'TSG output from probabilistic 20/20 ("probabilistic2020 tsg")'
     parser_features.add_argument('-tsg-test', '--tsg-test',
                         type=str, required=True,
                         help=help_str)
-    help_str = 'Oncogene output from probabilistic 20/20'
+    help_str = 'Oncogene output from probabilistic 20/20 ("probabilistic2020 oncogene")'
     parser_features.add_argument('-og-test', '--og-test',
                         type=str, required=True,
                         help=help_str)
-    help_str = 'Mutsigcv covariate features (defaults to config file)'
+    help_str = 'Mutsigcv covariate features (Default: use config file)'
     parser_features.add_argument('-c', '--covariates',
                         type=str, default=None,
                         help=help_str)
-    help_str = 'BioGrid interaction network statistics (defaults to config file)'
+    help_str = 'BioGrid interaction network statistics (Default: use config file)'
     parser_features.add_argument('-b', '--biogrid',
                         type=str, default=None,
                         help=help_str)
