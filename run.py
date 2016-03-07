@@ -60,15 +60,6 @@ def _train():
     src.train.python.train.main(opts)  # run code
 
 
-def _simulation():
-    """Wrapper function to call scripts in the classify folder."""
-    opts = vars(args)  # create a dictionary for CLI options
-    if not opts['random_half_split']:
-        src.simulation.python.simulate_performance.main(opts)
-    else:
-        src.simulation.python.simulate_consistency.main(opts)
-
-
 def _savedb():
     """Wrapper function to call gene_tsv/gene_features main function.
 
@@ -269,136 +260,6 @@ if __name__ == '__main__':
                               " random forest classifier")
     parser_train.set_defaults(func=_train)
 
-    # simulation sub-command
-    parser_simulation = subparser.add_parser('simulation',
-                                             help='Run simulation scripts'
-                                             ' in the simulation folder')
-    group = parser_simulation.add_mutually_exclusive_group(required=True)
-    group.add_argument('-b', '--bootstrap',
-                       action='store_true',
-                       default=False,
-                       help='Perform bootstrap (sample with replacement) on mutations')
-    group.add_argument('-rs', '--random-samples',
-                       action='store_true',
-                       default=False,
-                       help='Perform sample with out replacement on samples/tumors')
-    group.add_argument('-rt', '--random-tumor-type',
-                       action='store_true',
-                       default=False,
-                       help='Perform sample with out replacement based on tumor types')
-    group.add_argument('-rhs', '--random-half-split',
-                       action='store_true',
-                       default=False,
-                       help='Perform a stratified half-split of tumor samples by tumor type')
-    help_str = ('If -rhs specified, use with replacement sampling if greater than zero.'
-                'Else if zero, then use sampling without replacement.')
-    parser_simulation.add_argument('-with-replacement', '--with-replacement',
-                                   type=float,  default=0.0,
-                                   help=help_str)
-    parser_simulation.add_argument('-p', '--processes',
-                                   type=int,
-                                   action='store',
-                                   default=1,
-                                   help='Number of processes to use '
-                                   ' for simulation (more==faster)')
-    parser_simulation.add_argument('-l', '--lower-sample-rate',
-                                   type=float,
-                                   action='store',
-                                   default=0.1,
-                                   help='Lower end of sample rate interval for simulations. (Default: .1)')
-    parser_simulation.add_argument('-u', '--upper-sample-rate',
-                                   type=float,
-                                   action='store',
-                                   default=3.1,
-                                   help='Upper end of sample rate interval for simulations. (Default: 3.1)')
-    parser_simulation.add_argument('-num', '--num-sample-rate',
-                                   type=int,
-                                   action='store',
-                                   default=7,
-                                   help='Number of sampling rates to simulate between '
-                                   'LOWER_SAMPLE_RATE and UPPER_SAMPLE_RATE. (Default: 7)')
-    help_str = ('Step size for progessing further down list of top genes. Only '
-                'used when random half split flag is specified')
-    parser_simulation.add_argument('-step', '--step-size',
-                                   type=int,
-                                   default=50,
-                                   help=help_str)
-    help_str = ('Weight factor for ranked biased consistency measure. Only used '
-                'when random half split flag is specified.')
-    parser_simulation.add_argument('-weight', '--weight',
-                                   type=float,
-                                   default=.1,
-                                   help=help_str)
-    help_str = ('Maximum depth of genes from top of list to consider for consistency. '
-                'Only used when random half split flag is specified.')
-    parser_simulation.add_argument('-depth', '--depth',
-                                   type=int,
-                                   default=200,
-                                   help=help_str)
-    parser_simulation.add_argument('-m', '--min-count',
-                                   type=int,
-                                   action='store',
-                                   default=0,
-                                   help='Minimum number of mutations in a gene '
-                                   'for the gene to be considered in classification.'
-                                   ' (default: 0)')
-    parser_simulation.add_argument('-d', '--driver-rate',
-                                   type=float,
-                                   action='store',
-                                   default=.7,
-                                   help='Sample rate for R\'s random forest for '
-                                   'oncogenes and TSGs. (default: .7)')
-    parser_simulation.add_argument('-o', '--other-ratio',
-                                   type=float,
-                                   action='store',
-                                   default=3.,
-                                   help='Ratio of sample size for R\'s random forest for '
-                                   '"other" genes. (default: 3.0)')
-    parser_simulation.add_argument('-n', '--ntrees',
-                                   type=int,
-                                   action='store',
-                                   default=500,
-                                   help='Number of decision trees for random forests. '
-                                   '(default: 500)')
-    parser_simulation.add_argument('-s', '--samples',
-                                   type=int,
-                                   action='store',
-                                   default=10,
-                                   help='Number of samples for each simulation.')
-    parser_simulation.add_argument('--betweeness',
-                                   action='store_true',
-                                   default=False,
-                                   help='Gene betweeness from Biogrid.')
-    parser_simulation.add_argument('--degree',
-                                   action='store_true',
-                                   default=False,
-                                   help='Gene edge degree.')
-    parser_simulation.add_argument('--gene-length',
-                                   action='store_true',
-                                   default=False,
-                                   help='Add gene length to features for '
-                                   'simulation command')
-    parser_simulation.add_argument('--mutation-rate',
-                                   action='store_true',
-                                   default=False,
-                                   help='Add noncoding mutation rate to'
-                                   ' features for simulation command')
-    parser_simulation.add_argument('--replication-time',
-                                   action='store_true',
-                                   default=False,
-                                   help='Add replication time to'
-                                   ' features for simulation command')
-    parser_simulation.add_argument('--expression',
-                                   action='store_true',
-                                   default=False,
-                                   help='Add gene expression to'
-                                   ' features for simulation command')
-    parser_simulation.add_argument('--hic',
-                                   action='store_true',
-                                   default=False,
-                                   help='HiC comparment covariate feature')
-    parser_simulation.set_defaults(func=_simulation)
-
     # savedb sub-command
     help_string = ('Concatenate tab delim gene files found in /databases/COSMIC '
                    'and then save them to a sqlite database for further use. '
@@ -502,8 +363,6 @@ if __name__ == '__main__':
     # import all the modules for 20/20+
     import src.data_analysis.python.stats
     import src.classify.python.classifier
-    import src.simulation.python.simulate_performance
-    import src.simulation.python.simulate_consistency
     import src.features.python.features
     import src.savedb.python.gene_tsv
     import src.savedb.python.gene_features
@@ -520,15 +379,11 @@ if __name__ == '__main__':
         _utils.clf_plot_dir = os.path.join(save_dir, _opts['clf_plot_dir'])
         _utils.clf_result_dir = os.path.join(save_dir, _opts['clf_result_dir'])
         _utils.feature_plot_dir = os.path.join(save_dir, _opts['feature_plot_dir'])
-        _utils.sim_plot_dir = os.path.join(save_dir, _opts['sim_plot_dir'])
-        _utils.sim_result_dir = os.path.join(save_dir, _opts['sim_result_dir'])
         if not os.path.exists(_utils.plot_dir): os.makedirs(_utils.plot_dir)
         if not os.path.exists(_utils.result_dir): os.makedirs(_utils.result_dir)
         if not os.path.exists(_utils.clf_plot_dir): os.makedirs(_utils.clf_plot_dir)
         if not os.path.exists(_utils.clf_result_dir): os.makedirs(_utils.clf_result_dir)
         if not os.path.exists(_utils.feature_plot_dir): os.makedirs(_utils.feature_plot_dir)
-        if not os.path.exists(_utils.sim_plot_dir): os.makedirs(_utils.sim_plot_dir)
-        if not os.path.exists(_utils.sim_result_dir): os.makedirs(_utils.sim_result_dir)
 
     args.func()  # run function corresponding to user's command
     logging.info('FINISHED SUCCESSFULLY!')
