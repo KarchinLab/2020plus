@@ -38,8 +38,6 @@ result_dir = save_dir + _opts['result_dir']
 clf_plot_dir = save_dir + _opts['clf_plot_dir']
 clf_result_dir = save_dir + _opts['clf_result_dir']
 feature_plot_dir = save_dir + _opts['feature_plot_dir']
-sim_plot_dir = save_dir + _opts['sim_plot_dir']
-sim_result_dir = save_dir + _opts['sim_result_dir']
 
 def start_logging(log_file='', log_level='INFO', verbose=False):
     """Start logging information into the log directory.
