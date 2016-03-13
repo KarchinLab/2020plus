@@ -65,7 +65,7 @@ def main(opts):
             permute_order = np.random.choice(len(biogrid_df),
                                              size=len(biogrid_df),
                                              replace=False)
-            biogrid_df.loc[:,bg_feats] = biogrid_df[bg_feats].loc[permute_order]
+            biogrid_df.loc[:,bg_feats] = biogrid_df[bg_feats].loc[permute_order].values
 
         # merge in biogrid features
         feature_df = pd.merge(feature_df, biogrid_df, how='left', on='Gene')
