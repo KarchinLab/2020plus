@@ -61,10 +61,11 @@ def main(opts):
 
         # permute feature if toggled
         if opts['permute_biogrid']:
+            prng = np.random.RandomState(opts['random_seed'])
             bg_feats = ['gene_degree', 'gene_betweeness']
-            permute_order = np.random.choice(len(biogrid_df),
-                                             size=len(biogrid_df),
-                                             replace=False)
+            permute_order = prng.choice(len(biogrid_df),
+                                        size=len(biogrid_df),
+                                        replace=False)
             biogrid_df.loc[:,bg_feats] = biogrid_df[bg_feats].loc[permute_order].values
 
         # merge in biogrid features

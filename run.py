@@ -336,6 +336,10 @@ if __name__ == '__main__':
     parser_features.add_argument('-p', '--permute-biogrid',
                         action='store_true', default=False,
                         help=help_str)
+    parser_features.add_argument('-rs', '--random-seed',
+                                 type=int, action='store',
+                                 default=None,
+                                 help='Random seed for permute biogrid option (default: auto)')
     help_str = 'Output feature file for 20/20+'
     parser_features.add_argument('-o', '--output',
                         type=str, required=True,
