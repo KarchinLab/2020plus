@@ -33,8 +33,6 @@ def get_input_config(section):
 # setup directory paths
 _opts = get_input_config('result')
 save_dir = os.path.join(proj_dir, _opts['save_dir'])
-plot_dir = save_dir + _opts['plot_dir']
-result_dir = save_dir + _opts['result_dir']
 clf_plot_dir = save_dir + _opts['clf_plot_dir']
 clf_result_dir = save_dir + _opts['clf_result_dir']
 feature_plot_dir = save_dir + _opts['feature_plot_dir']
