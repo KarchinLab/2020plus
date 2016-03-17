@@ -2,8 +2,6 @@ import pandas.io.sql as psql
 import src.utils.python.util as _utils
 import numpy as np
 import pandas as pd
-import src.data_analysis.python.feature_matrix as fmat
-import src.data_analysis.python.position_entropy as pentropy
 import logging
 
 logger = logging.getLogger(__name__)
@@ -162,6 +160,8 @@ def random_sort(df, prng=None):
 ############################################
 # Old feature processing functions
 ############################################
+#import src.data_analysis.python.feature_matrix as fmat
+#import src.data_analysis.python.position_entropy as pentropy
 
 def retrieve_gene_features(conn, opts,
                            get_entropy=True):
