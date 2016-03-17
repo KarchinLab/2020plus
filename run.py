@@ -211,8 +211,8 @@ if __name__ == '__main__':
                                  '(default: 200)')
     parser_classify.add_argument('-rs', '--random-seed',
                                  type=int, action='store',
-                                 default=None,
-                                 help='Random seed (default: auto)')
+                                 default=71,
+                                 help='Random seed (default: 71)')
     parser_classify.set_defaults(func=_classify)
 
     # train sub-command
@@ -252,8 +252,8 @@ if __name__ == '__main__':
                               '(default: 200)')
     parser_train.add_argument('-rs', '--random-seed',
                               type=int, action='store',
-                              default=None,
-                              help='Random seed (default: auto)')
+                              default=71,
+                              help='Random seed (default: 71)')
     parser_train.add_argument('-r', '--output',
                               type=str, required=True,
                               help="Store the .Rdata file containing the trained"
@@ -338,8 +338,8 @@ if __name__ == '__main__':
                         help=help_str)
     parser_features.add_argument('-rs', '--random-seed',
                                  type=int, action='store',
-                                 default=None,
-                                 help='Random seed for permute biogrid option (default: auto)')
+                                 default=71,
+                                 help='Random seed for permute biogrid option (default: 71)')
     help_str = 'Output feature file for 20/20+'
     parser_features.add_argument('-o', '--output',
                         type=str, required=True,
