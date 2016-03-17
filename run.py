@@ -29,25 +29,6 @@ def handle_uncaught_exceptions(t, ex, tb):
     sys.exit(EXCEPTION_EXIT_STATUS)
 
 
-def _data_analysis():
-    """Wrapper function to call scripts in the data_analysis folder."""
-    if args.database == 'cosmic_nuc':
-        # change output dir for COSMIC_nuc
-        # _utils.plot_dir = 'data_analysis/plots/cosmic_nuc/'
-        # _utils.result_dir = 'data_analysis/results/cosmic_nuc/'
-        pass
-    elif args.database == 'genes':
-        # change output dir for data/genes.db
-        # _utils.plot_dir = 'data_analysis/plots/genes/'
-        #_utils.result_dir = 'data_analysis/results/genes/'
-        pass
-
-    src.data_analysis.python.stats.main(args.recurrent,
-                                        args.recurrent_max,
-                                        args.database,
-                                        args.classify_only)  # run code
-
-
 def _classify():
     """Wrapper function to call scripts in the classify folder."""
     opts = vars(args)  # create a dictionary for CLI options
@@ -114,42 +95,6 @@ if __name__ == '__main__':
                         default=False,
                         help='Flag for more verbose log output')
     subparser = parser.add_subparsers(help='sub-command help')
-
-    # data analysis sub-command
-    parser_data_analysis = subparser.add_parser('data_analysis',
-                                                help='Run scripts in the data'
-                                                ' analysis folder')
-    parser_data_analysis.set_defaults(func=_data_analysis)
-    parser_data_analysis.add_argument('--classify-only',
-                                      action='store_true',
-                                      default=False,
-                                      help='Only update information that is '
-                                      'pertinent to the classify commands')
-    parser_data_analysis.add_argument('-r', '--recurrent',
-                                      type=int,
-                                      action='store',
-                                      default=2,
-                                      help='Minimum number of mutations at a '
-                                      'recurrent position. (default: 2)')
-    parser_data_analysis.add_argument('-rm', '--recurrent-max',
-                                      type=int,
-                                      action='store',
-                                      default=float('inf'),
-                                      help='Maximum number of mutations at a '
-                                      'recurrent position. (Defualt: infinity)')
-    parser_data_analysis_grouper = parser_data_analysis.add_mutually_exclusive_group()
-    parser_data_analysis_grouper.add_argument('-c', '--cosmic_nuc',
-                                              dest='database',
-                                              action='store_const',
-                                              const='cosmic_nuc',
-                                              help='Generate data analysis stats'
-                                              ' on COSMIC_nuc database')
-    parser_data_analysis_grouper.add_argument('-g', '--genes',
-                                              dest='database',
-                                              action='store_const',
-                                              const='genes',
-                                              help='Generate data analysis stats'
-                                              ' on data/genes.db. (Default)')
 
     # classify sub-command
     parser_classify = subparser.add_parser('classify',
@@ -365,7 +310,6 @@ if __name__ == '__main__':
     logging.info('Command: {0}'.format(' '.join(sys.argv)))
 
     # import all the modules for 20/20+
-    import src.data_analysis.python.stats
     import src.classify.python.classifier
     import src.features.python.features
     import src.savedb.python.gene_tsv
@@ -378,13 +322,9 @@ if __name__ == '__main__':
     save_dir = args.out_dir
     if save_dir is not None:
         _opts = _utils.get_input_config('result')
-        _utils.plot_dir = os.path.join(save_dir, _opts['plot_dir'])
-        _utils.result_dir = os.path.join(save_dir, _opts['result_dir'])
         _utils.clf_plot_dir = os.path.join(save_dir, _opts['clf_plot_dir'])
         _utils.clf_result_dir = os.path.join(save_dir, _opts['clf_result_dir'])
         _utils.feature_plot_dir = os.path.join(save_dir, _opts['feature_plot_dir'])
-        if not os.path.exists(_utils.plot_dir): os.makedirs(_utils.plot_dir)
-        if not os.path.exists(_utils.result_dir): os.makedirs(_utils.result_dir)
         if not os.path.exists(_utils.clf_plot_dir): os.makedirs(_utils.clf_plot_dir)
         if not os.path.exists(_utils.clf_result_dir): os.makedirs(_utils.clf_result_dir)
         if not os.path.exists(_utils.feature_plot_dir): os.makedirs(_utils.feature_plot_dir)
