@@ -96,115 +96,6 @@ if __name__ == '__main__':
                         help='Flag for more verbose log output')
     subparser = parser.add_subparsers(help='sub-command help')
 
-    # classify sub-command
-    parser_classify = subparser.add_parser('classify',
-                                           help='Runs classification either with '
-                                           'a provided trained classifier (using '
-                                           'train) or evaluates classifier performance '
-                                           'using k-fold cross-validation.')
-    parser_classify.add_argument('-t', '--trained-classifier',
-                                 type=str,
-                                 action='store',
-                                 default=None,
-                                 help='If provided, use trained classifier from '
-                                 'the train sub-command. Otherwise, perform '
-                                 'cross-validation within the data set (default: None)')
-    parser_classify.add_argument('-f', '--features',
-                                 type=str,
-                                 action='store',
-                                 default=None,
-                                 help='Path to file containing features in tab '
-                                 'separated format. Defaults to path specified '
-                                 'in config.')
-    parser_classify.add_argument('-nd', '--null-distribution',
-                                 type=str,
-                                 action='store',
-                                 default=None,
-                                 help='Path to file outputing null distiribution for p-values '
-                                 'if provided input represents simulated data. '
-                                 '(Default: None)')
-    parser_classify.add_argument('-s', '--simulated',
-                                 action='store_true',
-                                 default=False,
-                                 help='Flag indicating if input features were simulated. '
-                                 'Simulated data is used to construct a null distribution. '
-                                 '(Default: False)')
-    parser_classify.add_argument('-m', '--min-count',
-                                 type=int,
-                                 action='store',
-                                 default=0,
-                                 help='Minimum number of mutations in a gene '
-                                 'for the gene to be considered in classification.'
-                                 ' (default: 0)')
-    parser_classify.add_argument('-d', '--driver-rate',
-                                 type=float,
-                                 action='store',
-                                 default=.7,
-                                 help='Sample rate for R\'s random forest for '
-                                 'oncogenes and TSGs. (default: .7)')
-    parser_classify.add_argument('-o', '--other-ratio',
-                                 type=float,
-                                 action='store',
-                                 default=3.,
-                                 help='Ratio of sample size for R\'s random forest for '
-                                 '"other" genes. (default: 3.0)')
-    parser_classify.add_argument('-n', '--ntrees',
-                                 type=int,
-                                 action='store',
-                                 default=200,
-                                 help='Number of decision trees for random forests. '
-                                 '(default: 200)')
-    parser_classify.add_argument('-rs', '--random-seed',
-                                 type=int, action='store',
-                                 default=71,
-                                 help='Random seed (default: 71)')
-    parser_classify.set_defaults(func=_classify)
-
-    # train sub-command
-    parser_train = subparser.add_parser('train',
-                                        help='Train random forest classifier')
-    parser_train.add_argument('-f', '--features',
-                              type=str,
-                              action='store',
-                              default=None,
-                              help='Path to file containing features in tab '
-                              'separated format. Defaults to path specified '
-                              'in config.')
-    parser_train.add_argument('-m', '--min-count',
-                              type=int,
-                              action='store',
-                              default=0,
-                              help='Minimum number of mutations in a gene '
-                              'for the gene to be considered in classification.'
-                              ' (default: 0)')
-    parser_train.add_argument('-d', '--driver-rate',
-                              type=float,
-                              action='store',
-                              default=.7,
-                              help='Sample rate for R\'s random forest for '
-                              'oncogenes and TSGs. (default: .7)')
-    parser_train.add_argument('-o', '--other-ratio',
-                              type=float,
-                              action='store',
-                              default=3.,
-                              help='Ratio of sample size for R\'s random forest for '
-                              '"other" genes. (default: 3.0)')
-    parser_train.add_argument('-n', '--ntrees',
-                              type=int,
-                              action='store',
-                              default=200,
-                              help='Number of decision trees for random forests. '
-                              '(default: 200)')
-    parser_train.add_argument('-rs', '--random-seed',
-                              type=int, action='store',
-                              default=71,
-                              help='Random seed (default: 71)')
-    parser_train.add_argument('-r', '--output',
-                              type=str, required=True,
-                              help="Store the .Rdata file containing the trained"
-                              " random forest classifier")
-    parser_train.set_defaults(func=_train)
-
     # savedb sub-command
     help_string = ('Concatenate tab delim gene files found in /databases/COSMIC '
                    'and then save them to a sqlite database for further use. '
@@ -289,6 +180,116 @@ if __name__ == '__main__':
     parser_features.add_argument('-o', '--output',
                         type=str, required=True,
                         help=help_str)
+
+    # train sub-command
+    parser_train = subparser.add_parser('train',
+                                        help='Train random forest classifier')
+    parser_train.add_argument('-f', '--features',
+                              type=str,
+                              action='store',
+                              default=None,
+                              help='Path to file containing features in tab '
+                              'separated format. Defaults to path specified '
+                              'in config.')
+    parser_train.add_argument('-m', '--min-count',
+                              type=int,
+                              action='store',
+                              default=0,
+                              help='Minimum number of mutations in a gene '
+                              'for the gene to be considered in classification.'
+                              ' (default: 0)')
+    parser_train.add_argument('-d', '--driver-rate',
+                              type=float,
+                              action='store',
+                              default=.7,
+                              help='Sample rate for R\'s random forest for '
+                              'oncogenes and TSGs. (default: .7)')
+    parser_train.add_argument('-o', '--other-ratio',
+                              type=float,
+                              action='store',
+                              default=1.,
+                              help='Ratio of sample size for R\'s random forest for '
+                              '"other" genes. (default: 1.0)')
+    parser_train.add_argument('-n', '--ntrees',
+                              type=int,
+                              action='store',
+                              default=200,
+                              help='Number of decision trees for random forests. '
+                              '(default: 200)')
+    parser_train.add_argument('-rs', '--random-seed',
+                              type=int, action='store',
+                              default=71,
+                              help='Random seed (default: 71)')
+    parser_train.add_argument('-r', '--output',
+                              type=str, required=True,
+                              help="Store the .Rdata file containing the trained"
+                              " random forest classifier")
+    parser_train.set_defaults(func=_train)
+
+    # classify sub-command
+    parser_classify = subparser.add_parser('classify',
+                                           help='Runs classification either with '
+                                           'a provided trained classifier (using '
+                                           'train) or '
+                                           'using k-fold cross-validation (no train command needed).')
+    parser_classify.add_argument('-t', '--trained-classifier',
+                                 type=str,
+                                 action='store',
+                                 default=None,
+                                 help='If provided, use trained classifier from '
+                                 'the train sub-command. Otherwise, perform '
+                                 'cross-validation within the data set (default: None)')
+    parser_classify.add_argument('-f', '--features',
+                                 type=str,
+                                 action='store',
+                                 default=None,
+                                 help='Path to file containing features in tab '
+                                 'separated format. Defaults to path specified '
+                                 'in config.')
+    parser_classify.add_argument('-nd', '--null-distribution',
+                                 type=str,
+                                 action='store',
+                                 default=None,
+                                 help='Path to file outputing null distiribution for p-values '
+                                 'if provided input represents simulated data. '
+                                 '(Default: None)')
+    parser_classify.add_argument('-s', '--simulated',
+                                 action='store_true',
+                                 default=False,
+                                 help='Flag indicating if input features were simulated. '
+                                 'Simulated data is used to construct a null distribution. '
+                                 '(Default: False)')
+    parser_classify.add_argument('-m', '--min-count',
+                                 type=int,
+                                 action='store',
+                                 default=0,
+                                 help='Minimum number of mutations in a gene '
+                                 'for the gene to be considered in classification.'
+                                 ' (default: 0)')
+    parser_classify.add_argument('-d', '--driver-rate',
+                                 type=float,
+                                 action='store',
+                                 default=.7,
+                                 help='Sample rate for R\'s random forest for '
+                                 'oncogenes and TSGs. (default: .7)')
+    parser_classify.add_argument('-o', '--other-ratio',
+                                 type=float,
+                                 action='store',
+                                 default=1.,
+                                 help='Ratio of sample size for R\'s random forest for '
+                                 '"other" genes. (default: 1.0)')
+    parser_classify.add_argument('-n', '--ntrees',
+                                 type=int,
+                                 action='store',
+                                 default=200,
+                                 help='Number of decision trees for random forests. '
+                                 '(default: 200)')
+    parser_classify.add_argument('-rs', '--random-seed',
+                                 type=int, action='store',
+                                 default=71,
+                                 help='Random seed (default: 71)')
+    parser_classify.set_defaults(func=_classify)
+
     parser.set_defaults(database='genes')  # by default work on sqlite db
     args = parser.parse_args()  # parse the command line options
 
