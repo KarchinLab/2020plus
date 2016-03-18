@@ -12,6 +12,9 @@ import datetime
 import traceback
 import argparse
 
+# import print function for printing to stderr
+from __future__ import print_function
+
 # define exit status
 EXCEPTION_EXIT_STATUS = 1
 BAD_ARG_EXIT_STATUS = 2
@@ -20,9 +23,9 @@ BAD_ARG_EXIT_STATUS = 2
 def handle_uncaught_exceptions(t, ex, tb):
     """Handle any uncaught exceptions."""
     traceback_contents = ''.join(traceback.format_list(traceback.extract_tb(tb)))
-    print('*'*40)
-    print('AN ERROR HAS OCCURRED: check the log file')
-    print('*'*40)
+    print('*'*40, file=sys.stderr)
+    print('AN ERROR HAS OCCURRED: check the log file', file=sys.stderr)
+    print('*'*40, file=sys.stderr)
     logging.error('Type: ' + str(t))
     logging.error('Exception: ' + str(ex))
     logging.error('Traceback:\n ' + traceback_contents)
