@@ -499,5 +499,5 @@ tsg_set = set(tsg_list)
 #cgc_set = set(cgc_list)
 
 # olfactory receptors from mutsigcv
-olfactory_list = read_olfactory_receptors()
-olfactory_set = set(olfactory_list)
+#olfactory_list = read_olfactory_receptors()
+#olfactory_set = set(olfactory_list)
