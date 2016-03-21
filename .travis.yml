@@ -12,8 +12,9 @@ addons:
     - r-packages-precise
     packages:
     - r-base
-r_packages:
-  - randomForest
+    - randomForest
+#r_packages:
+  #- randomForest
 # Setup anaconda
 install: 
   # - sudo apt-get update
