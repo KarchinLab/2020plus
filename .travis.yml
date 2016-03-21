@@ -17,10 +17,6 @@ addons:
 # Setup anaconda
 install: 
   # - sudo apt-get update
-  # install randomForest package from source
-  - export R_LIB="."
-  - wget https://cran.r-project.org/src/contrib/randomForest_4.6-12.tar.gz
-  - R CMD INSTALL -l . randomForest_4.6-12.tar.gz
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
@@ -38,4 +34,8 @@ install:
   - conda create -q -n test-environment atlas numpy scipy nose pandas scikit-learn matplotlib
   - source activate test-environment
   - pip install rpy2
+  # install randomForest package from source
+  - export R_LIB="."
+  - wget https://cran.r-project.org/src/contrib/randomForest_4.6-12.tar.gz
+  - R CMD INSTALL -l . randomForest_4.6-12.tar.gz
 script: "nosetests tests"
