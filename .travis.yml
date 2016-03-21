@@ -1,3 +1,5 @@
+sudo: required
+dist: trusty
 language: python
 R:
   - "3.2.4"
@@ -14,6 +16,7 @@ addons:
     - r-base
     - r-base-core
     - r-base-dev
+    - r-cran-randomforest
 #r_packages:
   #- randomForest
 # Setup anaconda
@@ -37,7 +40,7 @@ install:
   - source activate test-environment
   - pip install rpy2
   # install randomForest package from source
-  - export R_LIBS="~/"
-  - wget https://cran.r-project.org/src/contrib/randomForest_4.6-12.tar.gz
-  - R CMD INSTALL -l ~/ randomForest_4.6-12.tar.gz
+  #- export R_LIBS="~/"
+  #- wget https://cran.r-project.org/src/contrib/randomForest_4.6-12.tar.gz
+  #- R CMD INSTALL -l ~/ randomForest_4.6-12.tar.gz
 script: "nosetests tests"
