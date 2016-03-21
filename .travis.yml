@@ -12,7 +12,7 @@ addons:
     - r-packages-precise
     packages:
     - r-base
-    - randomForest
+    - r-cran-randomforest
 #r_packages:
   #- randomForest
 # Setup anaconda
