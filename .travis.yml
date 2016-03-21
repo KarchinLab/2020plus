@@ -18,8 +18,9 @@ addons:
 install: 
   # - sudo apt-get update
   # install randomForest package from source
+  - export R_LIB="."
   - wget https://cran.r-project.org/src/contrib/randomForest_4.6-12.tar.gz
-  - R CMD INSTALL randomForest_4.6-12.tar.gz
+  - R CMD INSTALL -l . randomForest_4.6-12.tar.gz
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
