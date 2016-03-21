@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 from amino_acid import AminoAcid
 from nucleotide import Nucleotide
-from cosmic_db import get_cosmic_db
 import sqlite3
 import pandas.io.sql as psql
 import ConfigParser
@@ -414,9 +413,10 @@ def drop_table(tbl_name,
             sql = "DROP TABLE IF EXISTS %s" % tbl_name
             cur.execute(sql)
     elif kind == 'mysql':
-        with get_cosmic_db() as cur:
-            sql = "DROP TABLE IF EXISTS %s" % tbl_name
-            cur.execute(sql)
+        raise NotImplementedError('MySQL is not currently supported')
+        #with get_cosmic_db() as cur:
+            #sql = "DROP TABLE IF EXISTS %s" % tbl_name
+            #cur.execute(sql)
 
 
 def create_empty_table(tbl_name, db_path, colnames, coltypes):
