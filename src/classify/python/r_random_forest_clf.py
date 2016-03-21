@@ -1,5 +1,6 @@
 """Random Forest classifier using R's randomForest library.
 RPy2 is used to interface with R."""
+import readline  # hopefully fix libreadline error
 import rpy2.robjects as ro
 from rpy2.robjects import pandas2ri
 import pandas.rpy.common as com
