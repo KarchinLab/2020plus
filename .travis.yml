@@ -11,8 +11,9 @@ addons:
     sources:
     - r-packages-precise
     packages:
-    - gfortran
     - r-base
+    - r-base-core
+    - r-base-dev
 #r_packages:
   #- randomForest
 # Setup anaconda
