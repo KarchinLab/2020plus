@@ -31,7 +31,7 @@ install:
   - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
-  - conda create -q -n test-environment atlas numpy scipy nose cython pandas scikit-learn
+  - conda create -q -n test-environment atlas numpy scipy nose pandas scikit-learn matplotlib
   - source activate test-environment
   - pip install rpy2
 script: "nosetests tests"
