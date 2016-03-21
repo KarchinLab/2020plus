@@ -15,7 +15,7 @@ addons:
 #r_packages:
   #- randomForest
 before_install:
-  - sudo apt-get install gfortran
+  - apt-get install gfortran
 # Setup anaconda
 install: 
   # - sudo apt-get update
