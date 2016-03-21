@@ -11,11 +11,10 @@ addons:
     sources:
     - r-packages-precise
     packages:
+    - gfortran
     - r-base
 #r_packages:
   #- randomForest
-before_install:
-  - apt-get install gfortran
 # Setup anaconda
 install: 
   # - sudo apt-get update
