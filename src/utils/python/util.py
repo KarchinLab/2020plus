@@ -10,6 +10,7 @@ import os
 import sys
 import datetime
 from functools import wraps
+import warnings
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +54,10 @@ def start_logging(log_file='', log_level='INFO', verbose=False):
 
     # logger options
     lvl = logging.DEBUG if log_level.upper() == 'DEBUG' else logging.INFO
+
+    # ignore warnings if not in debug
+    if log_level.upper() != 'DEBUG':
+        warnings.filterwarnings('ignore')
 
     # define logging format
     if verbose:
