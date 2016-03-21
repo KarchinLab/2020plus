@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# import print function for printing to stderr
+from __future__ import print_function
 # force project root directory to be in path. Otherwise
 # package imports will fail if run.py is ran from another
 # directory.
@@ -11,9 +13,6 @@ import logging
 import datetime
 import traceback
 import argparse
-
-# import print function for printing to stderr
-from __future__ import print_function
 
 # define exit status
 EXCEPTION_EXIT_STATUS = 1
