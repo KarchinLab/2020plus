@@ -14,8 +14,8 @@ addons:
     - r-packages-precise
     packages:
     - r-base
-    - r-base-core
-    - r-base-dev
+    #- r-base-core
+    #- r-base-dev
     - r-cran-randomforest
 #r_packages:
   #- randomForest
