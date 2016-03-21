@@ -36,7 +36,7 @@ install:
   - source activate test-environment
   - pip install rpy2
   # install randomForest package from source
-  - export R_LIB="."
+  - export R_LIBS="."
   - wget https://cran.r-project.org/src/contrib/randomForest_4.6-12.tar.gz
   - R CMD INSTALL -l . randomForest_4.6-12.tar.gz
 script: "nosetests tests"
