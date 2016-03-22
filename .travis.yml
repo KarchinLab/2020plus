@@ -21,6 +21,9 @@ addons:
     #- r-cran-randomforest
 #r_packages:
   #- randomForest
+cache:
+  directories: 
+    - ~/Rlib
 # Setup anaconda
 install: 
   # - sudo apt-get update
@@ -38,7 +41,8 @@ install:
   - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
-  - conda create -q -n test-environment atlas numpy scipy nose pandas scikit-learn matplotlib
+  #- conda create -q -n test-environment atlas numpy scipy nose pandas scikit-learn matplotlib
+  - conda create -q -n test-environment numpy scipy nose pandas scikit-learn matplotlib
   - source activate test-environment
   # install randomForest package from source
   #- export R_LIBS="~/"
@@ -48,7 +52,7 @@ install:
   - echo 'R_LIBS=~/Rlib' > .Renviron
   - echo 'options(repos = "http://cran.rstudio.com")' > .Rprofile
   - echo '.travis.yml' > .Rbuildignore
-  - Rscript -e 'if(!"devtools" %in% rownames(installed.packages())) { install.packages("devtools", dependencies = TRUE) }'
+  #- Rscript -e 'if(!"devtools" %in% rownames(installed.packages())) { install.packages("devtools", dependencies = TRUE) }'
   - Rscript -e 'if(!"covr" %in% rownames(installed.packages())) { install.packages("covr", dependencies = TRUE) }'
   - Rscript -e 'if(!"randomForest" %in% rownames(installed.packages())) { install.packages("randomForest", dependencies = TRUE) }'
   - Rscript -e 'update.packages(ask = FALSE, instlib = "~/Rlib")'
