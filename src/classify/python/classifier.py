@@ -288,8 +288,8 @@ def trained_rand_forest_pred(clf, data, result_path, null_dist=None):
         tmp_df['driver p-value'] = compute_p_value(driver_score,
                                                    null_dist['driver p-value'].dropna())
         tmp_df['driver q-value'] = _utils.bh_fdr(tmp_df['driver p-value'])
-
-    tmp_df.to_csv(result_path, sep='\t')
+    else:
+        tmp_df.to_csv(result_path, sep='\t')
 
     return tmp_df
 
@@ -327,13 +327,10 @@ def main(cli_opts):
                               seed=cli_opts['random_seed'])
         rrclf.clf.load(cli_opts['trained_classifier'])
 
-        # do classification
-        pred_results_path = _utils.clf_result_dir + cfg_opts['rrand_forest_pred']
-        logger.info('Saving results to {0}'.format(pred_results_path))
-
-        result_df = trained_rand_forest_pred(rrclf, df, pred_results_path, null_pvals)
-
         if cli_opts['simulated']:
+            # do classification
+            result_df = trained_rand_forest_pred(rrclf, df, None, null_pvals)
+
             # driver scores
             driver_score_cts = result_df['driver score'].value_counts()
             driver_score_cts = driver_score_cts.sort_index(ascending=False)
@@ -362,6 +359,11 @@ def main(cli_opts):
 
             score_pvals.to_csv(cli_opts['null_distribution'], sep='\t',
                                index_label='score')
+        else:
+            # do classification
+            pred_results_path = _utils.clf_result_dir + cfg_opts['rrand_forest_pred']
+            logger.info('Saving results to {0}'.format(pred_results_path))
+            result_df = trained_rand_forest_pred(rrclf, df, pred_results_path, null_pvals)
 
         logger.info('Finished classification.')
         return
