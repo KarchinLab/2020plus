@@ -1,6 +1,6 @@
-sudo: required
-dist: trusty
-language: python
+#sudo: required
+#dist: trusty
+language: R
 R:
   - "3.2.4"
 python:
@@ -8,27 +8,28 @@ python:
 branches:
   only:
     - dev
-addons:
-  apt:
-    sources:
-    - r-packages-precise
-    packages:
-    - r-base
+#addons:
+  #apt:
+    #sources:
+    #- r-packages-precise
+    #packages:
+    #- r-base
     #- r-base-core
     #- r-base-dev
-    - r-cran-randomforest
-#r_packages:
-  #- randomForest
+    #- r-cran-randomforest
+r_packages:
+  - randomForest
 # Setup anaconda
 install: 
   # - sudo apt-get update
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
-    else
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi
+  #- if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      #wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
+    #else
+      #wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    #fi
+  - wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
