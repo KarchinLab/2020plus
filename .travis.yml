@@ -8,14 +8,14 @@ python:
 branches:
   only:
     - dev
-#addons:
-  #apt:
-    #sources:
-    #- r-packages-precise
-    #packages:
+addons:
+  apt:
+    sources:
+    - r-packages-precise
+    packages:
     #- r-base
     #- r-base-core
-    #- r-base-dev
+    - r-base-dev
     #- r-cran-randomforest
 r_packages:
   - randomForest
