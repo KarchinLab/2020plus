@@ -18,6 +18,7 @@ addons:
     - r-base-dev
     - r-recommended
     - pandoc
+    - python-rpy2
     #- r-cran-randomforest
 #r_packages:
   #- randomForest
@@ -56,5 +57,5 @@ install:
   - Rscript -e 'if(!"covr" %in% rownames(installed.packages())) { install.packages("covr", dependencies = TRUE) }'
   - Rscript -e 'if(!"randomForest" %in% rownames(installed.packages())) { install.packages("randomForest", dependencies = TRUE) }'
   - Rscript -e 'update.packages(ask = FALSE, instlib = "~/Rlib")'
-  - pip install rpy2
+  #- pip install rpy2
 script: "nosetests tests"
