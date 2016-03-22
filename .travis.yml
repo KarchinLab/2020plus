@@ -1,6 +1,6 @@
 #sudo: required
 #dist: trusty
-language: R
+language: python 
 R:
   - "3.2.4"
 python:
@@ -16,20 +16,21 @@ addons:
     #- r-base
     #- r-base-core
     - r-base-dev
+    - r-recommended
+    - pandoc
     #- r-cran-randomforest
-r_packages:
-  - randomForest
+#r_packages:
+  #- randomForest
 # Setup anaconda
 install: 
   # - sudo apt-get update
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
-  #- if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      #wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
-    #else
-      #wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    #fi
-  - wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
+    else
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
@@ -39,9 +40,17 @@ install:
   - conda info -a
   - conda create -q -n test-environment atlas numpy scipy nose pandas scikit-learn matplotlib
   - source activate test-environment
-  - pip install rpy2
   # install randomForest package from source
   #- export R_LIBS="~/"
   #- wget https://cran.r-project.org/src/contrib/randomForest_4.6-12.tar.gz
   #- R CMD INSTALL -l ~/ randomForest_4.6-12.tar.gz
+  - mkdir -p ~/Rlib
+  - echo 'R_LIBS=~/Rlib' > .Renviron
+  - echo 'options(repos = "http://cran.rstudio.com")' > .Rprofile
+  - echo '.travis.yml' > .Rbuildignore
+  - Rscript -e 'if(!"devtools" %in% rownames(installed.packages())) { install.packages("devtools", dependencies = TRUE) }'
+  - Rscript -e 'if(!"covr" %in% rownames(installed.packages())) { install.packages("covr", dependencies = TRUE) }'
+  - Rscript -e 'if(!"randomForest" %in% rownames(installed.packages())) { install.packages("randomForest", dependencies = TRUE) }'
+  - Rscript -e 'update.packages(ask = FALSE, instlib = "~/Rlib")'
+  - pip install rpy2
 script: "nosetests tests"
