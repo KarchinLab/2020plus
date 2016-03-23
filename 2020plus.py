@@ -323,14 +323,7 @@ if __name__ == '__main__':
 
     # make output directory if specified by user
     save_dir = args.out_dir
-    if save_dir is not None:
-        _opts = _utils.get_input_config('result')
-        _utils.clf_plot_dir = os.path.join(save_dir, _opts['clf_plot_dir'])
-        _utils.clf_result_dir = os.path.join(save_dir, _opts['clf_result_dir'])
-        _utils.feature_plot_dir = os.path.join(save_dir, _opts['feature_plot_dir'])
-        if not os.path.exists(_utils.clf_plot_dir): os.makedirs(_utils.clf_plot_dir)
-        if not os.path.exists(_utils.clf_result_dir): os.makedirs(_utils.clf_result_dir)
-        if not os.path.exists(_utils.feature_plot_dir): os.makedirs(_utils.feature_plot_dir)
+    _utils.make_result_dir(save_dir)
 
     args.func()  # run function corresponding to user's command
     logging.info('FINISHED SUCCESSFULLY!')

@@ -37,6 +37,18 @@ clf_plot_dir = save_dir + _opts['clf_plot_dir']
 clf_result_dir = save_dir + _opts['clf_result_dir']
 feature_plot_dir = save_dir + _opts['feature_plot_dir']
 
+def make_result_dir(save_dir):
+    global clf_plot_dir, clf_result_dir, feature_plot_dir
+    if save_dir is not None:
+        _opts = get_input_config('result')
+        clf_plot_dir = os.path.join(save_dir, _opts['clf_plot_dir'])
+        clf_result_dir = os.path.join(save_dir, _opts['clf_result_dir'])
+        feature_plot_dir = os.path.join(save_dir, _opts['feature_plot_dir'])
+        if not os.path.exists(clf_plot_dir): os.makedirs(clf_plot_dir)
+        if not os.path.exists(clf_result_dir): os.makedirs(clf_result_dir)
+        if not os.path.exists(feature_plot_dir): os.makedirs(feature_plot_dir)
+
+
 def start_logging(log_file='', log_level='INFO', verbose=False):
     """Start logging information into the log directory.
 
