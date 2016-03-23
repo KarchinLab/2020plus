@@ -127,12 +127,6 @@ def vogelstein_score_scatter(df, min_count, save_path):
 def prob_kde(df, col_name, save_path,
              title,
              xlabel='Probability'):
-    df['olfactory flag'] = [1 if gene in _utils.olfactory_set
-                            else 0 for gene in df.index]
-    try:
-        df[df['olfactory flag']==1][col_name].plot(kind='kde', label='Olfactory Receptors')
-    except:
-        pass
     df[df['training list class']==_utils.tsg_label][col_name].plot(kind='kde', label='TSG')
     df[df['training list class']==_utils.onco_label][col_name].plot(kind='kde', label='Oncogenes')
     df[df['training list class']==_utils.other_label][col_name].plot(kind='kde', label='Other genes')
