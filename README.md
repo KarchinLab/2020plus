@@ -1,15 +1,7 @@
 20/20+ Classifier
 -----------------
 
-20/20+ integrates many features indicative of positive selection to predict oncogenes and tumor suppressor genes. Features capture several broad categories:
-
-* muttaion type (nonsense, missense, etc.)
-* clustering of missense mutations
-* vertebrate conservation of missense residues
-* in silico pathogenicity score
-* covariates of mutation rate (replication timing, etc.)
-* centrality in gene interaction network
-
+20/20+ integrates many features indicative of positive selection to predict oncogenes and tumor suppressor genes. 
 
 Installation
 ------------
