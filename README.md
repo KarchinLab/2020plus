@@ -1,23 +1,45 @@
 20/20+ Classifier
 -----------------
 
+20/20+ integrates many features indicative of positive selection to predict oncogenes and tumor suppressor genes. Features capture several broad categories:
+
+* muttaion type (nonsense, missense, etc.)
+* clustering of missense mutations
+* vertebrate conservation of missense residues
+* in silico pathogenicity score
+* covariates of mutation rate (replication timing, etc.)
+* centrality in gene interaction network
 
 
+Installation
+------------
 
-Usage
------
+[![Build Status](https://travis-ci.com/ctokheim/2020plusClassifier.svg?token=KhnctpTdxNuuZ9Z1kcsg&branch=master)](https://travis-ci.com/ctokheim/2020plusClassifier)
 
-This project has only been tested on python 2.7.5
+Because 20/20+ internally uses the random forest package in R, you will both need [R](https://www.r-project.org/) and the randomForest library installed. Once R is installed, you can install the random forest package:
 
-The requirements.txt file lists the python dependencies I used for developing
-the package.
+```R
+> install.packages("randomForest")
+```
 
-run.py is the single command line interface for this project.
-Type python run.py --help for details.
+If you do not have permission to install `randomFroest` on the system wide R, you can install in your local user directory by creating an `~/.Renviron` file as the following:
 
-NOTE: Run run.py while in the same directory. Because of package imports,
-running from a different directory may cause an import error.
+```
+R_LIBS=~/Rlibs
+```
 
-The matplotlibrc file is the configuration for plotting styles. If you prefer
-a different plot style then just replace the config file from the styles directory.
+Where, in this case, the R libraries will be installed in the `~/Rlibs` directory.
 
+20/20+ also requires the following python packages:
+
+* numpy
+* scipy
+* pandas
+* scikit-learn
+* rpy2
+
+To install these packages via `pip` you can use the following command:
+
+```bash
+$ pip install -r requirements.txt
+```
