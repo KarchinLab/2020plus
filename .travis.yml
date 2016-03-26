@@ -2,10 +2,10 @@ language: python
 R:
   - "3.2.4"
 python:
-  - "2.7"
+  - "3.5"
 branches:
   only:
-    - master
+    - dev
 addons:
   apt:
     sources:
