@@ -5,7 +5,7 @@ import rpy2.robjects as ro
 from rpy2.robjects import pandas2ri
 import pandas.rpy.common as com
 import pandas as pd
-from generic_classifier import GenericClassifier
+from src.classify.python.generic_classifier import GenericClassifier
 import src.features.python.feature_utils as futils
 import os
 import logging
