@@ -1,5 +1,5 @@
 from sklearn.naive_bayes import MultinomialNB
-from generic_classifier import GenericClassifier
+from src.classify.python.generic_classifier import GenericClassifier
 import src.features.python.features as features
 import logging
 

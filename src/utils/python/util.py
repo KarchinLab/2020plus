@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-from amino_acid import AminoAcid
-from nucleotide import Nucleotide
+from src.utils.python.amino_acid import AminoAcid
+from src.utils.python.nucleotide import Nucleotide
 import sqlite3
 import pandas.io.sql as psql
 import ConfigParser
@@ -109,7 +109,7 @@ def log_error_decorator(f):
             return result
         except KeyboardInterrupt:
             logger.info('Ctrl-C stopped a process.')
-        except Exception, e:
+        except Exception as e:
             logger.exception(e)
             raise
     return wrapper
