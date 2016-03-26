@@ -4,13 +4,17 @@ from src.utils.python.amino_acid import AminoAcid
 from src.utils.python.nucleotide import Nucleotide
 import sqlite3
 import pandas.io.sql as psql
-import ConfigParser
 import logging
 import os
 import sys
 import datetime
 from functools import wraps
 import warnings
+
+try:
+    import ConfigParser
+except Exception as e:
+    import configparser as ConfigParser
 
 logger = logging.getLogger(__name__)
 
