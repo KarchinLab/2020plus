@@ -15,6 +15,7 @@ Contents:
    :maxdepth: 3
 
    installation
+   quickstart
    faq
 
 Indices and tables

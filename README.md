@@ -2,7 +2,7 @@
 -----------------
 
 20/20+ integrates many features indicative of positive selection to predict oncogenes and tumor suppressor genes. 
-The features capture mutation clustering typical of oncogenes, conservation, *in silico* pathogenicity scores, mutation types (small somatic variants), gene interaction network centrality, and other covariates (like replication timing).
+The features capture mutation clustering, conservation, *in silico* pathogenicity scores, mutation types (small somatic variants), gene interaction network centrality, and other covariates (e.g. replication timing).
 
 
 Installation
