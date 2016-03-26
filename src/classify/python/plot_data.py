@@ -46,7 +46,7 @@ def feature_importance_barplot(mean_df,
     mean_df.rename(rename_dict, inplace=True)
     std_df.rename(rename_dict, inplace=True)
 
-    mean_df.sort(ascending=True)  # sort with most important features first
+    mean_df.sort_values(inplace=True, ascending=True)  # sort with most important features first
     std_df = std_df.ix[mean_df.index]  # match ordering in bar plot
     myplt.barplot(mean_df,
                   save_path,
