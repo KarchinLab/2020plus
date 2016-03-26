@@ -1,11 +1,10 @@
 from __future__ import division
-from vogelstein_classifier import VogelsteinClassifier
-from random_forest_clf import RandomForest
-from multinomial_nb_clf import MultinomialNaiveBayes
-from dummy_clf import DummyClf
-from r_random_forest_clf import RRandomForest
+from src.classify.python.vogelstein_classifier import VogelsteinClassifier
+from src.classify.python.multinomial_nb_clf import MultinomialNaiveBayes
+from src.classify.python.dummy_clf import DummyClf
+from src.classify.python.r_random_forest_clf import RRandomForest
 import src.utils.python.util as _utils
-import plot_data
+import src.classify.python.plot_data as plot_data
 import pandas as pd
 import numpy as np
 import glob
