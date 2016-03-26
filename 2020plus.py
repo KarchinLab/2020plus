@@ -185,7 +185,7 @@ if __name__ == '__main__':
 
     # train sub-command
     parser_train = subparser.add_parser('train',
-                                        help='Train random forest classifier')
+                                        help='Train random forest classifier (only used for null distribution)')
     parser_train.add_argument('-f', '--features',
                               type=str,
                               action='store',
