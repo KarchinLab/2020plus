@@ -185,21 +185,14 @@ if __name__ == '__main__':
 
     # train sub-command
     parser_train = subparser.add_parser('train',
-                                        help='Train random forest classifier (only used for null distribution)')
+                                        help='Train random forest classifier (only used for null distribution)',
+                                        description='Train random forest classifier (only used for null distribution)')
     parser_train.add_argument('-f', '--features',
                               type=str,
-                              action='store',
-                              default=None,
+                              action='store', required=True,
                               help='Path to file containing features in tab '
                               'separated format. Defaults to path specified '
                               'in config.')
-    parser_train.add_argument('-m', '--min-count',
-                              type=int,
-                              action='store',
-                              default=0,
-                              help='Minimum number of mutations in a gene '
-                              'for the gene to be considered in classification.'
-                              ' (default: 0)')
     parser_train.add_argument('-d', '--driver-rate',
                               type=float,
                               action='store',
@@ -218,6 +211,13 @@ if __name__ == '__main__':
                               default=500,
                               help='Number of decision trees for random forests. '
                               '(default: 500)')
+    parser_train.add_argument('-m', '--min-count',
+                              type=int,
+                              action='store',
+                              default=0,
+                              help='Minimum number of mutations in a gene '
+                              'for the gene to be considered in classification.'
+                              ' (default: 0)')
     parser_train.add_argument('-rs', '--random-seed',
                               type=int, action='store',
                               default=71,
