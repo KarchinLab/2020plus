@@ -215,9 +215,9 @@ if __name__ == '__main__':
     parser_train.add_argument('-n', '--ntrees',
                               type=int,
                               action='store',
-                              default=200,
+                              default=500,
                               help='Number of decision trees for random forests. '
-                              '(default: 200)')
+                              '(default: 500)')
     parser_train.add_argument('-rs', '--random-seed',
                               type=int, action='store',
                               default=71,
