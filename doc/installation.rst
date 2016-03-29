@@ -1,8 +1,6 @@
 Installation
 ------------
 
-[![Build Status](https://travis-ci.com/ctokheim/2020plusClassifier.svg?token=KhnctpTdxNuuZ9Z1kcsg&branch=master)](https://travis-ci.com/ctokheim/2020plusClassifier)
-
 Because 20/20+ internally uses the random forest package in R, you will both need [R](https://www.r-project.org/) and the randomForest library installed. Once R is installed, you can install the random forest package:
 
 ```R
@@ -30,3 +28,5 @@ To install these packages via `pip` you can use the following command:
 ```bash
 $ pip install -r requirements.txt
 ```
+
+For generating your own input features for 20/20+ please install the `probabilistic2020 <https://github.com/KarchinLab/probabilistic2020>`_ python package.

@@ -37,3 +37,5 @@ To install these packages via `pip` you can use the following command:
 ```bash
 $ pip install -r requirements.txt
 ```
+
+For generating your own input features for 20/20+ please install the [probabilistic2020](https://github.com/KarchinLab/probabilistic2020) python package.
