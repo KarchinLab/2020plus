@@ -38,8 +38,9 @@ Prediction
 ----------
 
 The first step is to obtain the empirical null distribution for
-the random forest scores. You can obtain an already computed
-file for this example.
+the random forest scores. The **empricial null distribution** 
+relates the classifier score to a p-value.
+You can obtain an already computed file for this example.
 
 .. code-block:: bash
 
