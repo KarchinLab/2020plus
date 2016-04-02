@@ -363,6 +363,7 @@ def main(cli_opts):
             pred_results_path = _utils.clf_result_dir + cfg_opts['rrand_forest_pred']
             logger.info('Saving results to {0}'.format(pred_results_path))
             result_df = trained_rand_forest_pred(rrclf, df, pred_results_path, null_pvals)
+            result_df.to_csv(pred_results_path, sep='\t')
 
         logger.info('Finished classification.')
         return
