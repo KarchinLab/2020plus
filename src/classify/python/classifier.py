@@ -11,6 +11,12 @@ import re
 import bisect
 import logging
 
+# skip plotting if they don't have matplotlib
+try:
+    import src.classify.python.plot_data as plot_data
+except ImportError:
+    pass
+
 logger = logging.getLogger(__name__)
 
 def calc_class_info(df, onco_pct, tsg_pct, min_ct, tsg_min=None, kind='oncogene'):
@@ -387,11 +393,15 @@ def main(cli_opts):
     rrclf_driver_precision, rrclf_driver_recall, rrclf_driver_mean_pr_auc = rrclf.get_driver_pr_metrics()
     rrclf_driver_tpr, rrclf_driver_fpr, rrclf_driver_mean_roc_auc = rrclf.get_driver_roc_metrics()
 
-    # plot feature importance
-    mean_df = rrclf.mean_importance
-    std_df = rrclf.std_importance
-    feat_path = _utils.clf_plot_dir + cfg_opts['r_feature_importance_plot']
-    plot_data.feature_importance_barplot(mean_df, std_df, feat_path)
+    # skip if no matplotlib
+    try:
+        # plot feature importance
+        mean_df = rrclf.mean_importance
+        std_df = rrclf.std_importance
+        feat_path = _utils.clf_plot_dir + cfg_opts['r_feature_importance_plot']
+        plot_data.feature_importance_barplot(mean_df, std_df, feat_path)
+    except:
+        pass
 
     # run predictions using R's random forest
     pred_results_path = _utils.clf_result_dir + cfg_opts['rrand_forest_pred']
@@ -428,141 +438,139 @@ def main(cli_opts):
                                                 len(pred_tsg), len(novel_tsg)))
         logger.info(log_str)
 
-    # skip plotting if they don't have matplotlib
+    # only plot if matplotlib
     try:
-        import src.classify.python.plot_data as plot_data
-    except ImportError:
-        return
+        # plot r random forest results
+        plot_data.prob_scatter(result_df,
+                            plot_path=_utils.clf_plot_dir + cfg_opts['rrand_forest_plot'],
+                            title='Sub-sampled Random Forest Predictions')
+        plot_data.prob_kde(result_df,
+                        col_name='oncogene score',
+                        save_path=_utils.clf_plot_dir + cfg_opts['onco_kde_rrand_forest'],
+                        title='Distribution of Oncogene Scores (sub-sampled random forest)')
+        plot_data.prob_kde(result_df,
+                        col_name='tsg score',
+                        save_path=_utils.clf_plot_dir + cfg_opts['tsg_kde_rrand_forest'],
+                        title='Distribution of TSG Scores (sub-sampled random forest)')
+        logger.info('Finished running sub-sampled Random Forest')
 
-    # plot r random forest results
-    plot_data.prob_scatter(result_df,
-                           plot_path=_utils.clf_plot_dir + cfg_opts['rrand_forest_plot'],
-                           title='Sub-sampled Random Forest Predictions')
-    plot_data.prob_kde(result_df,
-                       col_name='oncogene score',
-                       save_path=_utils.clf_plot_dir + cfg_opts['onco_kde_rrand_forest'],
-                       title='Distribution of Oncogene Scores (sub-sampled random forest)')
-    plot_data.prob_kde(result_df,
-                       col_name='tsg score',
-                       save_path=_utils.clf_plot_dir + cfg_opts['tsg_kde_rrand_forest'],
-                       title='Distribution of TSG Scores (sub-sampled random forest)')
-    logger.info('Finished running sub-sampled Random Forest')
+        # dummy classifier, predict most frequent
+        logger.info('Running Dummy Classifier. . .')
+        dclf = DummyClf(df,
+                        strategy='most_frequent',
+                        min_ct=minimum_ct,
+                        weight=False)
+        dclf.kfold_validation()
+        dclf_onco_tpr, dclf_onco_fpr, dclf_onco_mean_roc_auc = dclf.get_onco_roc_metrics()
+        dclf_onco_precision, dclf_onco_recall, dclf_onco_mean_pr_auc = dclf.get_onco_pr_metrics()
+        dclf_tsg_tpr, dclf_tsg_fpr, dclf_tsg_mean_roc_auc = dclf.get_tsg_roc_metrics()
+        dclf_tsg_precision, dclf_tsg_recall, dclf_tsg_mean_pr_auc = dclf.get_tsg_pr_metrics()
+        dclf_driver_tpr, dclf_driver_fpr, dclf_driver_mean_roc_auc = dclf.get_driver_roc_metrics()
+        logger.info('Finished dummy classifier.')
 
-    # dummy classifier, predict most frequent
-    logger.info('Running Dummy Classifier. . .')
-    dclf = DummyClf(df,
-                    strategy='most_frequent',
-                    min_ct=minimum_ct,
-                    weight=False)
-    dclf.kfold_validation()
-    dclf_onco_tpr, dclf_onco_fpr, dclf_onco_mean_roc_auc = dclf.get_onco_roc_metrics()
-    dclf_onco_precision, dclf_onco_recall, dclf_onco_mean_pr_auc = dclf.get_onco_pr_metrics()
-    dclf_tsg_tpr, dclf_tsg_fpr, dclf_tsg_mean_roc_auc = dclf.get_tsg_roc_metrics()
-    dclf_tsg_precision, dclf_tsg_recall, dclf_tsg_mean_pr_auc = dclf.get_tsg_pr_metrics()
-    dclf_driver_tpr, dclf_driver_fpr, dclf_driver_mean_roc_auc = dclf.get_driver_roc_metrics()
-    logger.info('Finished dummy classifier.')
+        # plot oncogene roc figure
+        rrandom_forest_str = '20/20+ Classifier (AUC = %0.3f)' % rrclf_onco_mean_roc_auc
+        dummy_str = 'dummy (AUC = %0.3f)' % dclf_onco_mean_roc_auc
+        rrclf_onco_mean_tpr = np.mean(rrclf_onco_tpr, axis=0)
+        dclf_onco_mean_tpr = np.mean(dclf_onco_tpr, axis=0)
+        df = pd.DataFrame({
+                        rrandom_forest_str: rrclf_onco_mean_tpr,
+                        dummy_str: dclf_onco_mean_tpr},
+                        index=rrclf_onco_fpr)
+        line_style = {dummy_str: '--',
+                    rrandom_forest_str: '-',
+                    }
+        save_path = _utils.clf_plot_dir + cfg_opts['roc_plot_oncogene']
+        plot_data.receiver_operator_curve(df, save_path, line_style)
 
-    # plot oncogene roc figure
-    rrandom_forest_str = '20/20+ Classifier (AUC = %0.3f)' % rrclf_onco_mean_roc_auc
-    dummy_str = 'dummy (AUC = %0.3f)' % dclf_onco_mean_roc_auc
-    rrclf_onco_mean_tpr = np.mean(rrclf_onco_tpr, axis=0)
-    dclf_onco_mean_tpr = np.mean(dclf_onco_tpr, axis=0)
-    df = pd.DataFrame({
-                       rrandom_forest_str: rrclf_onco_mean_tpr,
-                       dummy_str: dclf_onco_mean_tpr},
-                      index=rrclf_onco_fpr)
-    line_style = {dummy_str: '--',
-                  rrandom_forest_str: '-',
-                  }
-    save_path = _utils.clf_plot_dir + cfg_opts['roc_plot_oncogene']
-    plot_data.receiver_operator_curve(df, save_path, line_style)
+        # plot tsg roc figure
+        r_random_forest_str = '20/20+ Classifier (AUC = %0.3f)' % rrclf_tsg_mean_roc_auc
+        dummy_str = 'dummy (AUC = %0.3f)' % dclf_tsg_mean_roc_auc
+        rrclf_tsg_mean_tpr = np.mean(rrclf_tsg_tpr, axis=0)
+        dclf_tsg_mean_tpr = np.mean(dclf_tsg_tpr, axis=0)
+        df = pd.DataFrame({
+                        r_random_forest_str: rrclf_tsg_mean_tpr,
+                        dummy_str: dclf_tsg_mean_tpr},
+                        index=rrclf_tsg_fpr)
+        line_style = {dummy_str: '--',
+                    r_random_forest_str: '-',
+                    }
+        save_path = _utils.clf_plot_dir + cfg_opts['roc_plot_tsg']
+        plot_data.receiver_operator_curve(df, save_path, line_style)
 
-    # plot tsg roc figure
-    r_random_forest_str = '20/20+ Classifier (AUC = %0.3f)' % rrclf_tsg_mean_roc_auc
-    dummy_str = 'dummy (AUC = %0.3f)' % dclf_tsg_mean_roc_auc
-    rrclf_tsg_mean_tpr = np.mean(rrclf_tsg_tpr, axis=0)
-    dclf_tsg_mean_tpr = np.mean(dclf_tsg_tpr, axis=0)
-    df = pd.DataFrame({
-                       r_random_forest_str: rrclf_tsg_mean_tpr,
-                       dummy_str: dclf_tsg_mean_tpr},
-                      index=rrclf_tsg_fpr)
-    line_style = {dummy_str: '--',
-                  r_random_forest_str: '-',
-                  }
-    save_path = _utils.clf_plot_dir + cfg_opts['roc_plot_tsg']
-    plot_data.receiver_operator_curve(df, save_path, line_style)
+        # plot driver roc figure
+        r_random_forest_str = '20/20+ Classifier (AUC = %0.3f)' % rrclf_driver_mean_roc_auc
+        dummy_str = 'dummy (AUC = %0.3f)' % dclf_driver_mean_roc_auc
+        rrclf_driver_mean_tpr = np.mean(rrclf_driver_tpr, axis=0)
+        dclf_driver_mean_tpr = np.mean(dclf_driver_tpr, axis=0)
+        df = pd.DataFrame({
+                        r_random_forest_str: rrclf_driver_mean_tpr,
+                        dummy_str: dclf_driver_mean_tpr},
+                        index=rrclf_driver_fpr)
+        line_style = {dummy_str: '--',
+                    r_random_forest_str: '-',
+                    }
+        save_path = _utils.clf_plot_dir + cfg_opts['roc_plot_driver']
+        plot_data.receiver_operator_curve(df, save_path, line_style)
 
-    # plot driver roc figure
-    r_random_forest_str = '20/20+ Classifier (AUC = %0.3f)' % rrclf_driver_mean_roc_auc
-    dummy_str = 'dummy (AUC = %0.3f)' % dclf_driver_mean_roc_auc
-    rrclf_driver_mean_tpr = np.mean(rrclf_driver_tpr, axis=0)
-    dclf_driver_mean_tpr = np.mean(dclf_driver_tpr, axis=0)
-    df = pd.DataFrame({
-                       r_random_forest_str: rrclf_driver_mean_tpr,
-                       dummy_str: dclf_driver_mean_tpr},
-                      index=rrclf_driver_fpr)
-    line_style = {dummy_str: '--',
-                  r_random_forest_str: '-',
-                  }
-    save_path = _utils.clf_plot_dir + cfg_opts['roc_plot_driver']
-    plot_data.receiver_operator_curve(df, save_path, line_style)
+        # plot oncogene pr figure
+        rrandom_forest_str = '20/20+ Classifier (AUC = %0.3f)' % rrclf_onco_mean_pr_auc
+        dummy_str = 'dummy (AUC = %0.3f)' % dclf_onco_mean_pr_auc
+        rrclf_onco_mean_precision = np.mean(rrclf_onco_precision, axis=0)
+        dclf_onco_mean_precision = np.mean(dclf_onco_precision, axis=0)
+        df = pd.DataFrame({
+                        rrandom_forest_str: rrclf_onco_mean_precision,
+                        },
+                        index=rrclf_onco_recall)
+        line_style = {dummy_str: '--',
+                    rrandom_forest_str: '-',
+                    }
+        save_path = _utils.clf_plot_dir + cfg_opts['pr_plot_oncogene']
+        plot_data.precision_recall_curve(df, save_path, line_style,
+                                        #sem_df,
+                                        title='Oncogene Precision-Recall Curve')
 
-    # plot oncogene pr figure
-    rrandom_forest_str = '20/20+ Classifier (AUC = %0.3f)' % rrclf_onco_mean_pr_auc
-    dummy_str = 'dummy (AUC = %0.3f)' % dclf_onco_mean_pr_auc
-    rrclf_onco_mean_precision = np.mean(rrclf_onco_precision, axis=0)
-    dclf_onco_mean_precision = np.mean(dclf_onco_precision, axis=0)
-    df = pd.DataFrame({
-                       rrandom_forest_str: rrclf_onco_mean_precision,
-                       },
-                      index=rrclf_onco_recall)
-    line_style = {dummy_str: '--',
-                  rrandom_forest_str: '-',
-                  }
-    save_path = _utils.clf_plot_dir + cfg_opts['pr_plot_oncogene']
-    plot_data.precision_recall_curve(df, save_path, line_style,
-                                     #sem_df,
-                                     title='Oncogene Precision-Recall Curve')
-
-    # plot tsg pr figure
-    r_random_forest_str = '20/20+ Classifier (AUC = %0.3f)' % rrclf_tsg_mean_pr_auc
-    dummy_str = 'dummy (AUC = %0.3f)' % dclf_tsg_mean_pr_auc
-    rrclf_tsg_mean_precision = np.mean(rrclf_tsg_precision, axis=0)
-    dclf_tsg_mean_precision = np.mean(dclf_tsg_precision, axis=0)
-    df = pd.DataFrame({
-                       r_random_forest_str: rrclf_tsg_mean_precision,
-                       },
-                      index=rrclf_tsg_recall)
-    line_style = {dummy_str: '--',
-                  r_random_forest_str: '-',
-                  }
-    save_path = _utils.clf_plot_dir + cfg_opts['pr_plot_tsg']
-    plot_data.precision_recall_curve(df, save_path, line_style,
-                                     title='TSG Precision-Recall Curve')
+        # plot tsg pr figure
+        r_random_forest_str = '20/20+ Classifier (AUC = %0.3f)' % rrclf_tsg_mean_pr_auc
+        dummy_str = 'dummy (AUC = %0.3f)' % dclf_tsg_mean_pr_auc
+        rrclf_tsg_mean_precision = np.mean(rrclf_tsg_precision, axis=0)
+        dclf_tsg_mean_precision = np.mean(dclf_tsg_precision, axis=0)
+        df = pd.DataFrame({
+                        r_random_forest_str: rrclf_tsg_mean_precision,
+                        },
+                        index=rrclf_tsg_recall)
+        line_style = {dummy_str: '--',
+                    r_random_forest_str: '-',
+                    }
+        save_path = _utils.clf_plot_dir + cfg_opts['pr_plot_tsg']
+        plot_data.precision_recall_curve(df, save_path, line_style,
+                                        title='TSG Precision-Recall Curve')
 
 
-    # plot driver gene pr figure
-    r_random_forest_str = '20/20+ Classifier (AUC = %0.3f)' % rrclf_driver_mean_pr_auc
-    rrclf_driver_mean_precision = np.mean(rrclf_driver_precision, axis=0)
-    df = pd.DataFrame({
-                       r_random_forest_str: rrclf_driver_mean_precision,
-                       },
-                      index=rrclf_driver_recall)
-    line_style = {dummy_str: '--',
-                  r_random_forest_str: '-',
-                  }
-    save_path = _utils.clf_plot_dir + cfg_opts['pr_plot_driver']
-    plot_data.precision_recall_curve(df, save_path, line_style,
-                                     title='Driver Precision-Recall Curve')
+        # plot driver gene pr figure
+        r_random_forest_str = '20/20+ Classifier (AUC = %0.3f)' % rrclf_driver_mean_pr_auc
+        rrclf_driver_mean_precision = np.mean(rrclf_driver_precision, axis=0)
+        df = pd.DataFrame({
+                        r_random_forest_str: rrclf_driver_mean_precision,
+                        },
+                        index=rrclf_driver_recall)
+        line_style = {dummy_str: '--',
+                    r_random_forest_str: '-',
+                    }
+        save_path = _utils.clf_plot_dir + cfg_opts['pr_plot_driver']
+        plot_data.precision_recall_curve(df, save_path, line_style,
+                                        title='Driver Precision-Recall Curve')
 
-    # save performance metrics of ROC and PR AUC
-    save_path = _utils.clf_result_dir + cfg_opts['performance']
-    logger.info('Saving performance metrics ({0}) . . .'.format(save_path))
-    metrics = [['TSG', rrclf_tsg_mean_roc_auc, rrclf_tsg_mean_pr_auc],
-               ['OG', rrclf_onco_mean_roc_auc, rrclf_onco_mean_pr_auc],
-               ['Driver', rrclf_driver_mean_roc_auc, rrclf_driver_mean_pr_auc]]
-    perf_df = pd.DataFrame(metrics, columns=['Type', 'ROC AUC', 'PR AUC'])
-    perf_df.to_csv(save_path, sep='\t', index=False)
+        # save performance metrics of ROC and PR AUC
+        save_path = _utils.clf_result_dir + cfg_opts['performance']
+        logger.info('Saving performance metrics ({0}) . . .'.format(save_path))
+        metrics = [['TSG', rrclf_tsg_mean_roc_auc, rrclf_tsg_mean_pr_auc],
+                ['OG', rrclf_onco_mean_roc_auc, rrclf_onco_mean_pr_auc],
+                ['Driver', rrclf_driver_mean_roc_auc, rrclf_driver_mean_pr_auc]]
+        perf_df = pd.DataFrame(metrics, columns=['Type', 'ROC AUC', 'PR AUC'])
+        perf_df.to_csv(save_path, sep='\t', index=False)
+    except:
+        pass
 
 
 if __name__ == "__main__":
