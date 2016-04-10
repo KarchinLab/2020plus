@@ -1,6 +1,5 @@
 numpy
 scipy
-matplotlib
 pandas>=0.17.0
 scikit-learn
 rpy2

@@ -36,7 +36,7 @@ install:
   - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
-  - conda create -q -n test-environment numpy scipy nose pandas scikit-learn matplotlib
+  - conda create -q -n test-environment numpy scipy nose pandas scikit-learn 
   - source activate test-environment
   - mkdir -p ~/Rlib
   - echo 'R_LIBS=~/Rlib' > .Renviron

@@ -28,7 +28,6 @@ Where, in this case, the R libraries will be installed in the `~/Rlibs` director
 
 * numpy
 * scipy
-* matplotlib
 * pandas>=0.17.0
 * scikit-learn
 * rpy2

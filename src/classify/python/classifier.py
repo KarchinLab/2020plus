@@ -4,7 +4,6 @@ from src.classify.python.multinomial_nb_clf import MultinomialNaiveBayes
 from src.classify.python.dummy_clf import DummyClf
 from src.classify.python.r_random_forest_clf import RRandomForest
 import src.utils.python.util as _utils
-import src.classify.python.plot_data as plot_data
 import pandas as pd
 import numpy as np
 import glob
@@ -428,6 +427,12 @@ def main(cli_opts):
                    '{2} ({3} novel) tsg'.format(len(pred_onco), len(novel_onco),
                                                 len(pred_tsg), len(novel_tsg)))
         logger.info(log_str)
+
+    # skip plotting if they don't have matplotlib
+    try:
+        import src.classify.python.plot_data as plot_data
+    except ImportError:
+        return
 
     # plot r random forest results
     plot_data.prob_scatter(result_df,
