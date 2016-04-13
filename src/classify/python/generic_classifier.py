@@ -218,7 +218,7 @@ class GenericClassifier(object):
 
     def train(self):
         """Train classifier on entire data set provided."""
-        self.x, self.y = futils.randomize(self.x)
+        self.x, self.y = futils.randomize(self.x, self.prng)
         self.clf.fit(self.x, self.y)
 
     def predict(self):
