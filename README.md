@@ -1,8 +1,8 @@
 20/20+ Classifier
 -----------------
 
-20/20+ integrates many features indicative of positive selection to predict oncogenes and tumor suppressor genes. 
-The features capture mutation clustering, conservation, *in silico* pathogenicity scores, mutation types (small somatic variants), gene interaction network centrality, and other covariates (e.g. replication timing).
+20/20+ integrates many features indicative of positive selection to predict oncogenes and tumor suppressor genes from small somatic variants. 
+The features capture mutation clustering, conservation, *in silico* pathogenicity scores, mutation types, gene interaction network centrality, and other covariates (e.g. replication timing).
 
 
 Installation
