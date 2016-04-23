@@ -95,7 +95,7 @@ def main(opts):
 
         # write output
         with open(opts['output'], 'w') as handle:
-            csv.writer(handle, delimiter='\t').writerows(output)
+            csv.writer(handle, delimiter='\t', lineterminator='\n').writerows(output)
     else:
         input_df = pd.read_csv(opts['input'], sep='\t')
         myargs = (set(hugo_approved.tolist()), symbols2hugo, synonyms2hugo)
