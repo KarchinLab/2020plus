@@ -1,6 +1,7 @@
 20/20+ Classifier
 -----------------
 
+Next-generation DNA sequencing of the exome has rapidly detected small somatic variants (SSV) in cancer. However, distinguishing genes containing driving mutations rather than simply passenger SSVs from a cohort sequenced cancer samples requires sophisticated computational approaches.
 20/20+ integrates many features indicative of positive selection to predict oncogenes and tumor suppressor genes from small somatic variants. 
 The features capture mutational clustering, conservation, mutation *in silico* pathogenicity scores, mutation consequence types, protein interaction network connectivity, and other covariates (e.g. replication timing).
 Contrary to methods based on mutation rate, 20/20+ uses ratio-metric features of mutations by normalizing for the total number of mutations in a gene. This decouples the genes from gene-level differences in background mutation rate. 20/20+ uses monte carlo simulations to evaluate the significance of random forest scores based on an estimated p-value from an empirical null distribution.
@@ -9,7 +10,7 @@ Contrary to methods based on mutation rate, 20/20+ uses ratio-metric features of
 Installation
 ------------
 
-[![Build Status](https://travis-ci.com/ctokheim/2020plusClassifier.svg?token=KhnctpTdxNuuZ9Z1kcsg&branch=master)](https://travis-ci.com/ctokheim/2020plusClassifier)
+[![Build Status](https://travis-ci.org/KarchinLab/2020plus.svg?branch=master)](https://travis-ci.org/KarchinLab/2020plus)
 
 Because 20/20+ internally uses the random forest package in R, you will both need [R](https://www.r-project.org/) and the randomForest library installed. Once R is installed, you can install the random forest package:
 
