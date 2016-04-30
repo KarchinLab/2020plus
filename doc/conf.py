@@ -42,7 +42,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'20/20+ Classifier'
+project = u'20/20+'
 copyright = u'2013-16, Collin Tokheim'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -166,7 +166,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = '2020plusClassifierdoc'
+htmlhelp_basename = '2020plusdoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -185,7 +185,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', '2020plusClassifier.tex', u'20/20+ Classifier Documentation',
+  ('index', '2020plus.tex', u'20/20+ Documentation',
    u'Collin Tokheim', 'manual'),
 ]
 
@@ -215,7 +215,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', '2020plusclassifier', u'20/20+ Classifier Documentation',
+    ('index', '2020plus', u'20/20+ Documentation',
      [u'Collin Tokheim'], 1)
 ]
 
@@ -229,8 +229,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', '2020plusClassifier', u'20/20+ Classifier Documentation',
-   u'Collin Tokheim', '2020plusClassifier', 'One line description of project.',
+  ('index', '2020plus', u'20/20+ Documentation',
+   u'Collin Tokheim', '2020plus', 'One line description of project.',
    'Miscellaneous'),
 ]
 
