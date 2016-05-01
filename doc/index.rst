@@ -3,13 +3,13 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-20/20+
-======
+20/20+: Ratio-metric prediction of cancer driver genes
+======================================================
 
 :Author: Collin Tokheim
 :Contact: ctokheim@jhu.edu
 :License: To be Decided
-:Source code: `GitHub <https://github.com/KarchinLab/2020plus`_
+:Source code: `GitHub <https://github.com/KarchinLab/2020plus>`_
 :Q&A: `Biostars (tag: 2020+) <https://www.biostars.org/t/2020+/>`_ 
 
 Next-generation DNA sequencing of the exome has detected hundreds of thousands of small somatic variants (SSV) in cancer. However, distinguishing genes containing driving mutations rather than simply passenger SSVs from a cohort sequenced cancer samples requires sophisticated computational approaches.
