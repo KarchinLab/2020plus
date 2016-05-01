@@ -4,34 +4,35 @@ Quick Start
 This provides a quick start to running 20/20+ with
 the minimum number of steps to execute the statistical test.
 It serves as an introction to the workflow for running 20/20+,
-with a more detailed tutorial `here <>`_.
+see the :ref:`tut-ref` for a more detailed example.
 
 Creating Features
 -----------------
 
 Creating the features for 20/20+ combines output from
-the probabilistic2020 framework. First, download
+the  `probabilistic2020 <http://probabilistic2020.readthedocs.io/>`_
+package. First, download
 the data files.
 
 .. code-block:: bash
 
-    $ wget /path/to/og_test
-    $ wget /path/to/tsg_test
-    $ wget /path/to/summary_file
+    $ wget http://karchinlab.org/data/2020+/pancan_example.tar.gz
+    $ tar xvzf pancan_example.tar.gz
+    $ cd pancan_example
 
-Where XXX is the probabilistic2020 oncogene output, XXX is the
-output of probabilistic2020 tsg, and the summary file
+Where oncogene.txt is probabilistic2020 oncogene output, inactivating.txt is the
+output of probabilistic2020 tsg, and the summary file named summary_pancan.txt
 describes many non p-value features.
 
-To create the features, the **features** sub-command for the
-2020plus.py script is used.
+To create the features, use the **features** sub-command for the
+2020plus.py script.
 
 .. code-block:: bash
 
    $ python 2020plus.py features \
-        -og-test og_file \
-        -tsg-test tsg_file \
-        --summary summary_file \
+        -og-test oncogene.txt \
+        -tsg-test inactivating.txt \
+        --summary summary_pancan.txt \
         -o features_pancan.txt
 
 Prediction
@@ -39,16 +40,17 @@ Prediction
 
 The first step is to obtain the empirical null distribution for
 the random forest scores. The **empricial null distribution** 
-relates the classifier score to a p-value.
-You can obtain an already computed file for this example.
+relates the classifier score to a p-value. An example null distribution
+specific to this pan-cancer dataset is simulated_null_dist.txt.
 
-.. code-block:: bash
-
-   $ wget /path/to/nulldist
-
+The **classify** sub-command performs the 20/20+ predictions of driver genes.
+This step needs the 20/20+ features file already created, and the emprirical 
+null distribution file to additionally report p-values/FDR. If an
+empirical null distribution file is not provided then only the random
+forest scores for prediction.
 
 .. code-block:: bash
 
    $ python 2020plus.py --out-dir=output_dir classify \
         -f features_pancan.txt \
-        -nd nulldist.txt \
+        -nd simulated_null_dist.txt 
