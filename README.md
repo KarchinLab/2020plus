@@ -7,6 +7,18 @@ Next-generation DNA sequencing of the exome has detected hundreds of thousands o
 The features capture mutational clustering, conservation, mutation *in silico* pathogenicity scores, mutation consequence types, protein interaction network connectivity, and other covariates (e.g. replication timing).
 Contrary to methods based on mutation rate, 20/20+ uses ratio-metric features of mutations by normalizing for the total number of mutations in a gene. This decouples the genes from gene-level differences in background mutation rate. 20/20+ uses monte carlo simulations to evaluate the significance of random forest scores based on an estimated p-value from an empirical null distribution.
 
+## Documentation
+
+[![Documentation Status](http://readthedocs.org/projects/2020plus/badge/?version=latest)](http://2020plus.readthedocs.io/en/latest/?badge=latest)
+
+Please see the [documentation](http://2020plus.readthedocs.io/) on readthedocs.
+
+## Releases
+
+You can download [releases](https://github.com/KarchinLab/2020plus/releases) on github.
+
+* 2020plus v1.0.0 - 5/1/2016 - Initial release
+
 ## Installation
 
 [![Build Status](https://travis-ci.org/KarchinLab/2020plus.svg?branch=master)](https://travis-ci.org/KarchinLab/2020plus)
