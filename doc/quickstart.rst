@@ -11,8 +11,8 @@ Creating Features
 
 Creating the features for 20/20+ combines output from
 the  `probabilistic2020 <http://probabilistic2020.readthedocs.org/>`_
-package. First, download
-the data files.
+package. First, download the data files since the output from 
+the probabilistic2020 package has already been prepared for you.
 
 .. code-block:: bash
 
