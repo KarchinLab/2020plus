@@ -20,7 +20,7 @@ the data files.
     $ tar xvzf pancan_example.tar.gz
     $ cd pancan_example
 
-Where oncogene.txt is probabilistic2020 oncogene output, inactivating.txt is the
+Where oncogene.txt is probabilistic2020 oncogene output, tsg.txt is the
 output of probabilistic2020 tsg, and the summary file named summary_pancan.txt
 describes many non p-value features.
 
