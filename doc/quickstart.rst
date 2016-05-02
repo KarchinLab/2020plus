@@ -10,7 +10,7 @@ Creating Features
 -----------------
 
 Creating the features for 20/20+ combines output from
-the  `probabilistic2020 <http://probabilistic2020.readthedocs.io/>`_
+the  `probabilistic2020 <http://probabilistic2020.readthedocs.org/>`_
 package. First, download
 the data files.
 
@@ -31,7 +31,7 @@ To create the features, use the **features** sub-command for the
 
    $ python 2020plus.py features \
         -og-test oncogene.txt \
-        -tsg-test inactivating.txt \
+        -tsg-test tsg.txt \
         --summary summary_pancan.txt \
         -o features_pancan.txt
 
@@ -51,6 +51,6 @@ forest scores for prediction.
 
 .. code-block:: bash
 
-   $ python 2020plus.py --out-dir=output_dir classify \
+   $ python 2020plus.py --out-dir=results classify \
         -f features_pancan.txt \
         -nd simulated_null_dist.txt 
