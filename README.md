@@ -29,7 +29,7 @@ Because 20/20+ internally uses the random forest package in R, you will both nee
 > install.packages("randomForest")
 ```
 
-If you do not have permission to install `randomFroest` on the system wide R, you can install in your local user directory by creating an `~/.Renviron` file as the following:
+If you do not have permission to install `randomForest` on the system wide R, you can install in your local user directory by creating an `~/.Renviron` file as the following:
 
 ```
 R_LIBS=~/Rlibs
