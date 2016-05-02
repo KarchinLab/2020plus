@@ -19,8 +19,8 @@ Where, in this case, the R libraries will be installed in the `~/Rlibs` director
 
 * numpy
 * scipy
-* pandas
-* scikit-learn>=0.17
+* pandas>=0.17
+* scikit-learn
 * rpy2
 
 To install these packages via `pip` you can use the following command:
