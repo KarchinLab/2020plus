@@ -8,7 +8,7 @@ Releases
 
 * `2020plus v1.0.0 <https://github.com/KarchinLab/2020plus/archive/v1.0.0.tar.gz>`_ - 5/1/2016 - Initial release
 
-Once downloaded, either add the directory to your :code:`PATH` variable or issued the fully path to 2020plus.py script.
+Once downloaded, either add the directory to your :code:`PATH` variable or issue the full path to the 2020plus.py script.
 
 Package requirements
 ~~~~~~~~~~~~~~~~~~~~
