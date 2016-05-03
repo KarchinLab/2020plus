@@ -310,6 +310,8 @@ if __name__ == '__main__':
                          verbose=args.verbose)  # start logging
 
     # log user entered command
+    import src
+    logger.info('Version: {0}'.format(src.__version__))
     logging.info('Command: {0}'.format(' '.join(sys.argv)))
 
     # import all the modules for 20/20+
