@@ -42,7 +42,37 @@ def feature_importance_barplot(mean_df,
     logger.info('Plotting feature importances from random forest . . .')
 
     # rename columns so latex doesn't complain about '_'
-    rename_dict = {col: col.replace('_', '  ') for col in mean_df.index}
+    rename_dict = {col: col.replace('_', ' ') for col in mean_df.index}
+    mean_df.rename(rename_dict, inplace=True)
+    std_df.rename(rename_dict, inplace=True)
+
+    # rename to fit Table S1
+    rename_dict = {
+        'silent': 'silent fraction',
+        'nonsense': 'nonsense fraction',
+        'splice site': 'splice site fraction',
+        'missense': 'missense fraction',
+        'recurrent missense': 'recurrent missense fraction',
+        'frameshift indel': 'frameshift indel fraction',
+        'inframe indel': 'inframe indel fraction',
+        'lost start and stop': 'lost start and stop fraction',
+        'normalized missense position entropy': 'normalized missense position entropy',
+        'missense to silent': 'missense to silent',
+        'non-silent to silent': 'non-silent to silent',
+        'normalized mutation entropy': 'Normalized mutation entropy',
+        'Mean Missense MGAEntropy': 'mean missense MGAEntropy',
+        'Mean VEST score': 'mean VEST score',
+        'inactivating p-value': 'inactivating SNV p-value',
+        'entropy p-value': 'missense entropy p-value',
+        'vest p-value': 'missense VEST p-value',
+        'combined p-value': 'missense combined p-value',
+        'gene degree': 'gene degree',
+        'gene betweenness': 'gene betweenness centrality',
+        'gene length': 'gene length',
+        'expression CCLE': 'expression CCLE',
+        'replication time': 'replication time',
+        'HiC compartment': 'HiC compartment',
+    }
     mean_df.rename(rename_dict, inplace=True)
     std_df.rename(rename_dict, inplace=True)
 
