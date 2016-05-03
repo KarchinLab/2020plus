@@ -209,12 +209,12 @@ class GenericClassifier(object):
                                                     np.mean(self.driver_precision_array, axis=0)))
 
         # log info on classifier predictions
-        self.logger.info('TSG: Precision=%s, Recall=%s, Fscore=%s' % (
-                         np.mean(self.tsg_precision), np.mean(self.tsg_recall), np.mean(self.tsg_f1_score)))
-        self.logger.info('Oncogene: Precision=%s, Recall=%s, Fscore=%s' % (
-                         np.mean(self.onco_precision), np.mean(self.onco_recall), np.mean(self.onco_f1_score)))
-        self.logger.info('Driver: Precision=%s, Recall=%s' % (
-                         np.mean(self.driver_precision), np.mean(self.driver_recall)))
+        self.logger.debug('TSG: Precision=%s, Recall=%s, Fscore=%s' % (
+                          np.mean(self.tsg_precision), np.mean(self.tsg_recall), np.mean(self.tsg_f1_score)))
+        self.logger.debug('Oncogene: Precision=%s, Recall=%s, Fscore=%s' % (
+                          np.mean(self.onco_precision), np.mean(self.onco_recall), np.mean(self.onco_f1_score)))
+        self.logger.debug('Driver: Precision=%s, Recall=%s' % (
+                          np.mean(self.driver_precision), np.mean(self.driver_recall)))
 
     def train(self):
         """Train classifier on entire data set provided."""
