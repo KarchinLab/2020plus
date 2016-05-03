@@ -197,7 +197,7 @@ def main(cli_opts):
         # read in features
         df = pd.read_csv(feature_path, sep='\t', index_col=0)
 
-        logger.info('Running R\'s Random forest . . .')
+        logger.info('Running Random forest . . .')
 
         # initialize R's random forest
         rrclf = RRandomForest(df,
@@ -252,7 +252,7 @@ def main(cli_opts):
     df = pd.read_csv(feature_path, sep='\t', index_col=0)
 
     # R's random forest
-    logger.info('Running R\'s Random forest . . .')
+    logger.info('Running Random forest . . .')
     # initialize R's random forest
     rrclf = RRandomForest(df,
                           other_sample_ratio=cli_opts['other_ratio'],
@@ -295,7 +295,7 @@ def main(cli_opts):
         novel_onco.to_csv(_utils.clf_result_dir + cfg_opts['rrf_novel_onco'], sep='\t', index=False, header=None)
         pred_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rrf_tsg'], sep='\t', index=False, header=None)
         novel_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rrf_novel_tsg'], sep='\t', index=False, header=None)
-        log_str = ('Majority vote R Random forest: {0} ({1} novel) oncogenes, '
+        log_str = ('Majority vote Random forest: {0} ({1} novel) oncogenes, '
                    '{2} ({3} novel) tsg'.format(len(pred_onco), len(novel_onco),
                                                 len(pred_tsg), len(novel_tsg)))
         logger.info(log_str)
@@ -309,7 +309,7 @@ def main(cli_opts):
         novel_onco.to_csv(_utils.clf_result_dir + cfg_opts['rrf_novel_onco'], sep='\t', index=False, header=None)
         pred_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rrf_tsg'], sep='\t', index=False, header=None)
         novel_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rrf_novel_tsg'], sep='\t', index=False, header=None)
-        log_str = ('R Random forest significance test: {0} ({1} novel) oncogenes, '
+        log_str = ('Random forest significance test: {0} ({1} novel) oncogenes, '
                    '{2} ({3} novel) tsg'.format(len(pred_onco), len(novel_onco),
                                                 len(pred_tsg), len(novel_tsg)))
         logger.info(log_str)
@@ -331,7 +331,7 @@ def main(cli_opts):
         logger.info('Finished running sub-sampled Random Forest')
 
         # dummy classifier, predict most frequent
-        logger.info('Running Dummy Classifier. . .')
+        logger.debug('Running Dummy Classifier. . .')
         dclf = DummyClf(df,
                         strategy='most_frequent',
                         min_ct=minimum_ct,
@@ -342,7 +342,7 @@ def main(cli_opts):
         dclf_tsg_tpr, dclf_tsg_fpr, dclf_tsg_mean_roc_auc = dclf.get_tsg_roc_metrics()
         dclf_tsg_precision, dclf_tsg_recall, dclf_tsg_mean_pr_auc = dclf.get_tsg_pr_metrics()
         dclf_driver_tpr, dclf_driver_fpr, dclf_driver_mean_roc_auc = dclf.get_driver_roc_metrics()
-        logger.info('Finished dummy classifier.')
+        logger.debug('Finished dummy classifier.')
 
         # plot oncogene roc figure
         rrandom_forest_str = '20/20+ Classifier (AUC = %0.3f)' % rrclf_onco_mean_roc_auc
@@ -421,7 +421,6 @@ def main(cli_opts):
         save_path = _utils.clf_plot_dir + cfg_opts['pr_plot_tsg']
         plot_data.precision_recall_curve(df, save_path, line_style,
                                         title='TSG Precision-Recall Curve')
-
 
         # plot driver gene pr figure
         r_random_forest_str = '20/20+ Classifier (AUC = %0.3f)' % rrclf_driver_mean_pr_auc
