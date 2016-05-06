@@ -99,6 +99,7 @@ if __name__ == '__main__':
     subparser = parser.add_subparsers(help='sub-command help')
 
     # savedb sub-command
+    """
     help_string = ('Concatenate tab delim gene files found in /databases/COSMIC '
                    'and then save them to a sqlite database for further use. '
                    'Gene length and information from the MutSigCV paper are also '
@@ -141,6 +142,7 @@ if __name__ == '__main__':
                                action='store_true',
                                default=False,
                                help='Don\'t use mutations from COSMIC')
+    """
 
     # features sub-command
     help_string = ('Generate the features used in classification.'
