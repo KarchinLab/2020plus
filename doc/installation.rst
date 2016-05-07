@@ -5,9 +5,6 @@ Releases
 ~~~~~~~~
 
 20/20+ can be downloaded on `github <https://github.com/KarchinLab/2020plus/releases>`_.
-
-* `2020plus v1.0.0 <https://github.com/KarchinLab/2020plus/archive/v1.0.0.tar.gz>`_ - 5/1/2016 - Initial release
-
 Once downloaded, either add the directory to your :code:`PATH` variable or issue the full path to the 2020plus.py script.
 
 Package requirements

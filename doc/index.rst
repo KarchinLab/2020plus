@@ -27,10 +27,7 @@ Contents:
    tutorial
    faq
 
-Indices and tables
-==================
+Releases
+--------
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+* `2020plus v1.0.0 <https://github.com/KarchinLab/2020plus/archive/v1.0.0.tar.gz>`_ - 5/1/2016 - Initial release
