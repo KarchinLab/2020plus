@@ -3,7 +3,7 @@ Quick Start
 
 This provides a quick start to running 20/20+ with
 the minimum number of steps to execute the statistical test.
-It serves as an introction to the workflow for running 20/20+,
+It serves as an introduction to the workflow for running 20/20+,
 see the :ref:`tut-ref` for a more detailed example.
 
 Creating Features
