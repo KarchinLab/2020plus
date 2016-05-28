@@ -1,6 +1,9 @@
 Installation
 ------------
 
+.. image:: https://travis-ci.org/KarchinLab/2020plus.svg?branch=master
+    :target: https://travis-ci.org/KarchinLab/2020plus
+
 Releases
 ~~~~~~~~
 

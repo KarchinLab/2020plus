@@ -22,10 +22,10 @@ Contents:
 .. toctree::
    :maxdepth: 3
 
+   download
    installation
    quickstart
    tutorial
-   download
    faq
 
 Releases
