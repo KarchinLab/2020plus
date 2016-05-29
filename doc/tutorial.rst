@@ -112,16 +112,28 @@ by the **2020plus.py features** command.
         --summary summary.txt \
         -o features.txt
 
-
 Predicting cancer driver genes
 ------------------------------
 
 Scores only
 +++++++++++
 
+If interested in only scoring genes, then the next step
+is prediction. This is performed with the **2020plus.py classify**
+command.
+
+.. code-block:: bash
+
+   $ python 2020plus.py --out-dir=myresult_dir classify -f features.txt 
+
+Where myresult_dir is the directory where results are saved, and features.txt
+is the feature file from the **2020plus.py features** command.
 
 Statistical significance
 ++++++++++++++++++++++++
+
+Obtaining a p-value for driver scores requires creating an empirical null distribution 
+for use in the prediction step, as diagramed below.
 
 .. image:: /images/final_result.png
     :scale: 50%
