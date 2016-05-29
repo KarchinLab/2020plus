@@ -133,7 +133,7 @@ Statistical significance
 ++++++++++++++++++++++++
 
 Obtaining a p-value for driver scores requires creating an empirical null distribution 
-for use in the prediction step, as diagramed below.
+for use in the prediction step, as diagrammed below.
 
 .. image:: /images/final_result.png
     :scale: 50%
@@ -144,13 +144,24 @@ Creating null distribution
 
 The first step is to obtain a trained classifier on the observed data.
 You can skip this step if you download an already trained classifier
-used in Tokheim et al. (`here <>`_).
+used in Tokheim et al. (`here <>`_). The procedure is diagrammed below, and
+is critical that a pan-cancer mutation data set is used for training.
 
 .. image:: /images/pancan_trained_classifier.png
     :scale: 50%
     :align: center
 
-Next, create simulated data.
+Saving a trained classifier is done using the **2020plus.py train** command.
+
+.. code-block:: bash
+
+   $ python 2020plus.py train -f features.txt -r classifier.Rdata 
+
+Where features.txt is the feature file from pan-cancer mutation data set, and
+classifier.Rdata is the trained 20/20+ classifier file.
+
+The next step is to create simulated mutations that mimic the random accumulation
+of passenger mutations. A diagram of the steps is shown below.
 
 .. image:: /images/simulated_features.png
     :align: center
@@ -160,3 +171,6 @@ Finally, score the simulations to obtain an empirical null distribution.
 .. image:: /images/null_distribution.png
     :scale: 50%
     :align: center
+
+Prediction
+##########
