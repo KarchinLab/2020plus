@@ -55,4 +55,4 @@ forest scores for prediction.
         -f features_pancan.txt \
         -nd simulated_null_dist.txt 
 
-You should see the results in the result_compare/classify/result/r_random_forest_prediction.txt file. It should be the same as the output already provided in result/ directory. Particularly, you should shoulde see 106 TSG scores, 64 oncogene scores, and 197 driver scores (208 unique genes) as significant at a Benjamini-Hochberg FDR of .1.
+You should see the results in the result_compare/result/r_random_forest_prediction.txt file. It should be the same as the output already provided in result/ directory. Particularly, you should shoulde see 106 TSG scores, 64 oncogene scores, and 197 driver scores (208 unique genes) as significant at a Benjamini-Hochberg FDR of .1.
