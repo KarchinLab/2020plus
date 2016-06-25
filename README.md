@@ -44,6 +44,7 @@ Where, in this case, the R libraries will be installed in the `~/Rlibs` director
 * pandas>=0.17.0
 * scikit-learn
 * rpy2
+* probabilistic2020
 
 To install these packages via `pip` you can use the following command:
 
@@ -51,4 +52,4 @@ To install these packages via `pip` you can use the following command:
 $ pip install -r requirements.txt
 ```
 
-If you want the exact version 20/20+ was tested on use the `requirements_dev.txt` file and python 2.7. For generating your own input features for 20/20+ please install the [probabilistic2020](https://github.com/KarchinLab/probabilistic2020) python package.
+If you want the exact version 20/20+ was tested on use the `requirements_dev.txt` file and python 2.7. The [probabilistic2020](https://github.com/KarchinLab/probabilistic2020) python package is used to generate features for 20/20+ from mutations in MAF format.
