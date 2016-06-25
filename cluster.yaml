@@ -1,0 +1,6 @@
+__default__:
+    error: sge_log
+    stdout: sge_log
+    mem: 10G
+    vmem: 11G
+    shell: /bin/zsh
