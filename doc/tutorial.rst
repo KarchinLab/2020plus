@@ -10,19 +10,59 @@ Background
 Because 20/20+ uses supervised machine learning, cancer driver gene prediction depends
 on a list of defined oncogenes and tumor suppressor genes used for training. The list is already
 pre-defined from the `Cancer Genome Landscapes <http://www.ncbi.nlm.nih.gov/pubmed/23539594>`_ paper. 
-10-fold cross-validation is performed internally within 20/20+ to avoid overfitting.
 Included in the results are a score specifically for oncogene or tumor suppressor gene,
 and a cumulative driver gene score. The score represents the fraction of decision
-trees in the random forest which voted for the particular class (oncogene, TSG, driver (either oncogene or TSG), passenger). Scores nearer one indicate stronger evidence for the gene as a cancer driver.
-
-There are two ways to use 20/20+ scores. One is to just obtain cancer driver scores for genes, which allows ranking of genes in a prioritized manner. The second way evaluates the statistical significance of 
+trees in the random forest which voted for the particular class (oncogene, TSG, driver (either oncogene or TSG), passenger). Scores nearer one indicate stronger evidence for the gene as a cancer driver.  There are two ways to use 20/20+ scores. One is to just obtain cancer driver scores for genes, which allows ranking of genes in a prioritized manner. The second way evaluates the statistical significance of 
 the cancer driver score. A p-value and associated Benjamini-Hochberg false discovery rate
 will be reported, but this requires establishing the null distribution for random forest scores.
 20/20+ uses an empirical null distribution by scoring simulated mutations in genes.
 This extra step requires additional work and computational resources.
 
+2/20+ can be applied to pan-cancer and tumor type specific data. 10-fold cross-validation is performed internally within 20/20+ to avoid overfitting.
+
+20/20+ pipeline
+---------------
+
+The easiest way to run the entire 20/20+ pipeline from somatic mutations to cancer
+driver gene prediction is to use `snakemake <https://bitbucket.org/snakemake/snakemake/wiki/Home>`_. We have created a **Snakefile** that will run the multiple steps needed to get the final results. You first will need to install snakemake (requires python 3.X): 
+
+.. code-block:: bash
+
+   $ pip install snakemake
+
+If instead you are using python 2.7, please see the section on :ref:`ind-cmd-ref`.
+
+There are two ways to perform predictions with 20/20+. Either in a pan-cancer setting where mutations from several cancer types are aggregated together, or predicting cancer type specific driver genes by using 20/20+ previously trained on pan-cancer data.
+
+Pan-cancer analysis
++++++++++++++++++++
+
+The **snakemake -s Snakefile predict** command will perform predictions on pan-cancer
+data. Here, it is assumed the Snakefile is in your current directory.
+
+However, it is generally recommended to run 20/20+ on a cluster to parallelize
+calculations.
+
+.. code-block:: bash
+
+   $ snakemake predict -w 10 -j 999 -p --max-jobs-per-second 1 \
+        --config mutations="" output_dir="" \
+        --cluster-config cluster.yaml \
+        --cluster "qsub -cwd -pe smp {threads} -l mem_free={cluster.mem},h_vmem={cluster.vmem} -S {cluster.shell} -o {cluster.stdout} -e {cluster.error} -v PATH=$PATH"
+
+Cancer type specific analysis
++++++++++++++++++++++++++++++
+
+
+.. _ind-cmd-ref:
+
+Running individual commands
+---------------------------
+
+If you use snakemake, you do not need to cover this section.
+
 Creating feature matrix
------------------------
++++++++++++++++++++++++
 
 20/20+ uses a total of 24 features encompassing mutational clustering,
 functional impact bias, evolutionary conservation, composition of mutation consequence types,
@@ -37,7 +77,7 @@ before continuing.
     :align: center
 
 Running probabilistic2020 package
-+++++++++++++++++++++++++++++++++
+#################################
 
 The first step is to compute several summary statistics of the composition of mutations in each
 gene. This is done with the **mut_annotate** command with the **--summary** flag as follows.
@@ -99,7 +139,7 @@ conservation scores is optional. However, this will result in not including some
 into 20/20+ likely decreasing performance.
 
 Merging features
-++++++++++++++++
+################
 
 A single feature file ("features.txt") containing all three of the above commands is created
 by the **2020plus.py features** command.
@@ -113,10 +153,10 @@ by the **2020plus.py features** command.
         -o features.txt
 
 Predicting cancer driver genes
-------------------------------
+++++++++++++++++++++++++++++++
 
 Scores only
-+++++++++++
+###########
 
 If interested in only scoring genes, then the next step
 is prediction. This is performed with the **2020plus.py classify**
@@ -130,7 +170,7 @@ Where myresult_dir is the directory where results are saved, and features.txt
 is the feature file from the **2020plus.py features** command.
 
 Statistical significance
-++++++++++++++++++++++++
+########################
 
 Obtaining a p-value for driver scores requires creating an empirical null distribution 
 for use in the prediction step, as diagrammed below.
@@ -140,7 +180,7 @@ for use in the prediction step, as diagrammed below.
     :align: center
 
 Creating null distribution
-##########################
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The first step is to obtain a trained classifier on the observed data.
 You can skip this step if you download an already trained classifier
@@ -173,4 +213,4 @@ Finally, score the simulations to obtain an empirical null distribution.
     :align: center
 
 Prediction
-##########
+~~~~~~~~~~
