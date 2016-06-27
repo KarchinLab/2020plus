@@ -17,8 +17,6 @@ Please see the [documentation](http://2020plus.readthedocs.io/) on readthedocs.
 
 You can download [releases](https://github.com/KarchinLab/2020plus/releases) on github.
 
-* 2020plus v1.0.0 - 5/1/2016 - Initial release
-
 ## Installation
 
 [![Build Status](https://travis-ci.org/KarchinLab/2020plus.svg?branch=master)](https://travis-ci.org/KarchinLab/2020plus)
