@@ -1,6 +1,6 @@
-mutations: data/pancan.merged.min3.hyper500.maf
-data_dir: /projects/pancan_atlas/driver/data/
-output_dir: /projects/pancan_atlas/driver/output/pancan_atlas_6_24_2016_hypermut500_min10/
+mutations: data/mutations.txt
+data_dir: data/
+output_dir: output/
 trained_classifier: 2020plus.Rdata
 NUMSIMULATIONS: 100000
 NUMITER: 10
