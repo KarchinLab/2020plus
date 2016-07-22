@@ -52,10 +52,11 @@ or cancer type specific data.
 
    $ mkdir data
    $ cd data
-   $ wget http://karchinlab.org/data/Protocol/mutations.txt.gz  # download mutations
+   $ wget http://karchinlab.org/data/Protocol/pancan-mutation-set-from-Tokheim-2016.txt.gz  # download mutations
    $ wget http://karchinlab.org/data/2020+/snvboxGenes.bed  # download transcript annotation
    $ wget http://karchinlab.org/data/2020+/scores.tar.gz  # download pre-computed scores
-   $ gunzip mutations.txt.gz
+   $ gunzip pancan-mutation-set-from-Tokheim-2016.txt.gz 
+   $ mv pancan-mutation-set-from-Tokheim-2016.txt mutations.txt  # rename file
    $ tar xvzf scores.tar.gz
    $ cd ..
 
@@ -255,7 +256,7 @@ Creating null distribution
 
 The first step is to obtain a trained classifier on the observed data.
 You can skip this step if you download an already trained classifier
-used in Tokheim et al. (`here <>`_). The procedure is diagrammed below, and
+used in Tokheim et al. (`here <http://karchinlab.org/data/2020+/2020plus.Rdata>`_). The procedure is diagrammed below, and
 is critical that a pan-cancer mutation data set is used for training.
 
 .. image:: /images/pancan_trained_classifier.png
