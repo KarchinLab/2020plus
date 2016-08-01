@@ -105,6 +105,9 @@ error. The "-j" argument can restrict the number of concurrent jobs submitted to
 The "-w 10 --max-jobs-per-second 1" parameters are issued to avoid overly quick 
 job submissions to the cluster.
 
+.. note:: You can substantially speed up run time by reducing the number of simulations.
+          This can be done by reducing the NUMSIMULATIONS variable (e.g. from 100000 to 10000) in the `config.yaml` file or specification in the command line of snakemake via `--config NUMSIMULATIONS=10000`. This might result in a slight decrease in prediction performance but may be waranted for large data.
+
 20/20+ output
 #############
 

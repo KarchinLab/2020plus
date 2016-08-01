@@ -16,3 +16,8 @@ ctokheim AT jhu dot edu.
 Yes, you can change which genes are used for the training list of well-supported oncogenes
 and tumor suppressor genes. All you need is to change the gene names found
 in **data/gene_lists/oncogenes.txt** and **data/gene_lists/tsgs.txt**.
+
+**How can I speed up the run time of 20/20+?** 
+
+You can substantially speed up run time by reducing the number of simulations.
+This can be done by reducing the NUMSIMULATIONS variable (e.g. from 100000 to 10000) in the `config.yaml` file or specification in the command line of snakemake via `--config NUMSIMULATIONS=10000`. This might result in a slight decrease in prediction performance but may be waranted for large data.
