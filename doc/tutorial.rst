@@ -3,8 +3,8 @@
 Tutorial
 ========
 
-Background
-----------
+Technical background
+--------------------
 
 20/20+ uses the random forest algorithm to predict cancer driver genes.
 Because 20/20+ uses supervised machine learning, cancer driver gene prediction depends
@@ -17,16 +17,15 @@ the cancer driver score. A p-value and associated Benjamini-Hochberg false disco
 will be reported, but this requires establishing the null distribution for random forest scores.
 20/20+ uses an empirical null distribution by scoring simulated mutations in genes.
 This extra step requires additional work and computational resources.
-
 2/20+ can be applied to pan-cancer and tumor type specific data. 10-fold cross-validation is performed internally within 20/20+ to avoid overfitting.
 
 20/20+ pipeline
 ---------------
 
 The easiest way to run the entire 20/20+ pipeline from somatic mutations to cancer
-driver gene prediction is to use `snakemake <https://bitbucket.org/snakemake/snakemake/wiki/Home>`_. We have created a **Snakefile** that will run the multiple steps needed to get the final results. You first will need to install snakemake (requires python 3.X), so please see the snakemake `installation instructions <https://bitbucket.org/snakemake/snakemake/wiki/Documentation#markdown-header-installation>`_. If instead you are using python 2.7, please see the section on :ref:`ind-cmd-ref`.
+driver gene prediction is to use `snakemake <https://bitbucket.org/snakemake/snakemake/wiki/Home>`_. We have created a **Snakefile** that will run the multiple steps needed to get the final results. You first will need to install snakemake (requires python 3.X), so please see the snakemake `installation instructions <https://bitbucket.org/snakemake/snakemake/wiki/Documentation#markdown-header-installation>`_. If instead you are using python 2.7, please see the section on :ref:`adv-tut-ref`.
 
-There are two ways to perform predictions with 20/20+. Either in a pan-cancer setting where mutations from several cancer types are aggregated together, or predicting cancer type specific driver genes by using 20/20+ previously trained on pan-cancer data.
+There are two ways to perform predictions with 20/20+. Either in a pan-cancer setting where mutations from several cancer types are aggregated together, or predicting cancer type specific driver genes by using a 20/20+ model previously trained on pan-cancer data.
 
 Pan-cancer analysis
 +++++++++++++++++++
@@ -110,7 +109,7 @@ job submissions to the cluster.
 #############
 
 Like in the quick start, you will find the result in output/results/r_random_forest_prediction.txt. There will be a p-value/q-value for the oncogene, tumor suppressor gene, and driver
-score.
+score. The file will also contain all of the features used for prediction.
 
 Cancer type specific analysis
 +++++++++++++++++++++++++++++
@@ -126,163 +125,14 @@ first step is to download the `pre-trained 20/20+ <http://karchinlab.org/data/20
 
 The difference with the previous pan-cancer command is that the mutations ("data/my_cancer_specific_mutations.txt") are from a single cancer type, and the pre-trained classifier is specified with the **trained_classifier** option. In this case the pre-trained 20/20+ classifier was assumed to be placed into the data directory.
 
-.. _ind-cmd-ref:
+Train a 20/20+ classifier
++++++++++++++++++++++++++
 
-Running individual commands
----------------------------
-
-If you use snakemake, you do not need to cover this section.
-
-Creating feature matrix
-+++++++++++++++++++++++
-
-20/20+ uses a total of 24 features encompassing mutational clustering,
-functional impact bias, evolutionary conservation, composition of mutation consequence types,
-protein interaction network, and mutation rate covariates (e.g. replication timing).
-The `probabilistic2020 package <http://probabilistic2020.readthedocs.org>`_ is used to 
-generate three files that will then be combined for all of the need features.
-In the quick start, these files were already provided for you. A flow chart diagram of the 
-steps are shown below. It is recommended that you examine the `probabilistic2020 documentation <http://probabilistic2020.readthedocs.org>`_
-before continuing.
-
-.. image:: /images/pancan_feat_matrix.png
-    :align: center
-
-Running probabilistic2020 package
-#################################
-
-The first step is to compute several summary statistics of the composition of mutations in each
-gene. This is done with the **mut_annotate** command with the **--summary** flag as follows.
+You can also train your own 20/20+ model to predict on new data (e.g. new cancer type specific data) using the **train** command. Training should be performed on a pan-cancer collection of mutations. This either could be those `mutations <http://karchinlab.org/data/Protocol/pancan-mutation-set-from-Tokheim-2016.txt.gz>`_ used in our evaluation or a new collected set. Note, the provided `pre-trained classifier <http://karchinlab.org/data/2020+/2020plus.Rdata>`_ is already trained on the mutations linked in the previous sentence. The The file format for mutations is described `here <http://probabilistic2020.readthedocs.io/en/latest/tutorial.html#mutations>`. Like above, the command can be easily modified to run on a cluster.
 
 .. code-block:: bash
 
-   $ mut_annotate --summary \
-        -i genes.fa \
-        -b genes.bed \
-        -s score_dir \
-        -m mutations.txt \
-        -o summary.txt
+   $ snakemake -s Snakefile train -p --cores 1 \
+        --config mutations="data/my_pancancer_mutations.txt" output_dir="output" 
 
-Where genes.fa is your gene FASTA file for your reference transcripts in genes.bed, mutations.txt is your MAF file containing mutations, score_dir is the directory containing the pre-computed `VEST <http://www.ncbi.nlm.nih.gov/pubmed/23819870>`_ and evolutionary conservation scores, and summary.txt is the output file containing the features. The pre-computed scores
-are based on hg19 and the reference transcript annotation from SNVBox. If you are not
-using either, then the parameter may be left empty resulting in no features for VEST or evolutionary conservation.
-
-The next two steps involve running a statistical test for features commonly associated
-with oncogenes (mutational clustering and mutation functional impact bias) and
-TSGs (high proportion of inactivating mutations). The p-values from these
-statistical tests are used as features in the 20/20+ predictions. The first 
-command performs a test for TSGs.
-
-.. code-block:: bash
-
-   $ probabilistic2020 tsg \
-        -i genes.fa \
-        -b genes.bed \
-        -m mutations.txt \
-        -p 1 \
-        -n 100000 \
-        -o tsg.txt
-
-Because evaluating statistical significance for large datasets can be computationally 
-intensive, there are a couple parameters which can speed up calculations. 
-In the above example **-p 1** indicates 1 processes should be used, but can be increased to parallelize the calculations (e.g. **-p 10** to split calculations on 10 processes). 
-Since the p-value is obtained by simulations, higher number of simulations (-n parameter) means 
-increased precision in the reported p-value, but at the cost of increased run time.
-The recommended default is **-n 100000** simulations but can be tweaked to obtain a good
-balance in run-time and precision of p-value. Generally it is recommended to run
-the command on a server with multiple processes (**-p** parameter) rather than lowering
-the number of simulations.
-
-The other command intended for oncogenes is the following.
-
-.. code-block:: bash
-
-   $ probabilistic2020 oncogene \
-        -i genes.fa \
-        -b genes.bed \
-        -m mutations.txt \
-        -s score_dir \
-        -p 1 \
-        -n 100000 \
-        -o oncogene.txt
-
-Like the mut_annotate command, providing the directory ("score_dir") for pre-computed VEST and evolutionary
-conservation scores is optional. However, this will result in not including some important features
-into 20/20+ likely decreasing performance.
-
-Merging features
-################
-
-A single feature file ("features.txt") containing all three of the above commands is created
-by the **2020plus.py features** command.
-
-.. code-block:: bash
-
-   $ python 2020plus.py features \
-        -og-test oncogene.txt \
-        -tsg-test tsg.txt \
-        --summary summary.txt \
-        -o features.txt
-
-Predicting cancer driver genes
-++++++++++++++++++++++++++++++
-
-Scores only
-###########
-
-If interested in only scoring genes, then the next step
-is prediction. This is performed with the **2020plus.py classify**
-command.
-
-.. code-block:: bash
-
-   $ python 2020plus.py --out-dir=myresult_dir classify -f features.txt 
-
-Where myresult_dir is the directory where results are saved, and features.txt
-is the feature file from the **2020plus.py features** command.
-
-Statistical significance
-########################
-
-Obtaining a p-value for driver scores requires creating an empirical null distribution 
-for use in the prediction step, as diagrammed below.
-
-.. image:: /images/final_result.png
-    :scale: 50%
-    :align: center
-
-Creating null distribution
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The first step is to obtain a trained classifier on the observed data.
-You can skip this step if you download an already trained classifier
-used in Tokheim et al. (`here <http://karchinlab.org/data/2020+/2020plus.Rdata>`_). The procedure is diagrammed below, and
-is critical that a pan-cancer mutation data set is used for training.
-
-.. image:: /images/pancan_trained_classifier.png
-    :scale: 50%
-    :align: center
-
-Saving a trained classifier is done using the **2020plus.py train** command.
-
-.. code-block:: bash
-
-   $ python 2020plus.py train -f features.txt -r classifier.Rdata 
-
-Where features.txt is the feature file from pan-cancer mutation data set, and
-classifier.Rdata is the trained 20/20+ classifier file.
-
-The next step is to create simulated mutations that mimic the random accumulation
-of passenger mutations. A diagram of the steps is shown below.
-
-.. image:: /images/simulated_features.png
-    :align: center
-
-Finally, score the simulations to obtain an empirical null distribution.
-
-.. image:: /images/null_distribution.png
-    :scale: 50%
-    :align: center
-
-Prediction
-~~~~~~~~~~
+where "data/my_pancancer_mutations.txt" is the file containing small somatic mutations and the trained 20/20+ model will be saved as "output/2020plus.Rdata".

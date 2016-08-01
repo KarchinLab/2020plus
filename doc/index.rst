@@ -26,6 +26,7 @@ Contents:
    installation
    quickstart
    tutorial
+   advanced_tutorial
    faq
 
 Releases
