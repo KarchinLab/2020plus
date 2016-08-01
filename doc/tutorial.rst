@@ -128,7 +128,7 @@ The difference with the previous pan-cancer command is that the mutations ("data
 Train a 20/20+ classifier
 +++++++++++++++++++++++++
 
-You can also train your own 20/20+ model to predict on new data (e.g. new cancer type specific data) using the **train** command. Training should be performed on a pan-cancer collection of mutations. This either could be those `mutations <http://karchinlab.org/data/Protocol/pancan-mutation-set-from-Tokheim-2016.txt.gz>`_ used in our evaluation or a new collected set. Note, the provided `pre-trained classifier <http://karchinlab.org/data/2020+/2020plus.Rdata>`_ is already trained on the mutations linked in the previous sentence. The The file format for mutations is described `here <http://probabilistic2020.readthedocs.io/en/latest/tutorial.html#mutations>`. Like above, the command can be easily modified to run on a cluster.
+You can also train your own 20/20+ model to predict on new data (e.g. new cancer type specific data) using the **train** command. Training should be performed on a pan-cancer collection of mutations. This either could be those `mutations <http://karchinlab.org/data/Protocol/pancan-mutation-set-from-Tokheim-2016.txt.gz>`_ used in our evaluation or a new collected set. Note, the provided `pre-trained classifier <http://karchinlab.org/data/2020+/2020plus.Rdata>`_ is already trained on the mutations linked in the previous sentence. The file format for mutations is described `here <http://probabilistic2020.readthedocs.io/en/latest/tutorial.html#mutations>`_. Like above, the command can be easily modified to run on a cluster.
 
 .. code-block:: bash
 
