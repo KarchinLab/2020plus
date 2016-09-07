@@ -14,6 +14,9 @@ trained_classifier=config["trained_classifier"]
 num_iter=10
 ids=list(map(str, range(1, num_iter+1)))
 
+# minimum recurrent missense
+min_recur=3
+
 ###################################
 # Top-level rules
 ###################################
@@ -43,6 +46,7 @@ rule simMaf:
     input:
         MUTATIONS=mutations
     params:
+        min_recur=min_recur,
         data_dir=config["data_dir"]
     output: 
         join(output_dir, "simulated_summary/chasm_sim_maf{iter}.txt")
@@ -50,21 +54,23 @@ rule simMaf:
         "mut_annotate --log-level=INFO "
         "  -b {params.data_dir}/snvboxGenes.bed -i {params.data_dir}/snvboxGenes.fa -c 1.5 "
         "  -m {input.MUTATIONS} -p 0 -n 1 --maf --seed=$(({wildcards.iter}*42)) "
-        "  -o {output}"
+        "  -r {params.min_recur} --unique -o {output}"
 
 # calculate summarized features for the simulated mutations
 rule simSummary:
-    input: MUTATIONS=mutations
+    input: 
+        MUTATIONS=mutations
     params:
+        min_recur=min_recur,
         data_dir=config["data_dir"]
     output: 
         join(output_dir, "simulated_summary/chasm_sim_summary{iter}.txt")
     shell:
         "mut_annotate --log-level=INFO "
         "  -b {params.data_dir}/snvboxGenes.bed -i {params.data_dir}/snvboxGenes.fa "
-        "  -c 1.5 -m {input} -p 0 -n 1 --summary --seed=$(({wildcards.iter}*42)) "
+        "  -c 1.5 -m {input.MUTATIONS} -p 0 -n 1 --summary --seed=$(({wildcards.iter}*42)) "
         "  --score-dir={params.data_dir}/scores "
-        "  -o {output}"
+        "  --unique -r {params.min_recur} -o {output}"
 
 
 # run probabilistic2020 tsg statistical test on simulated MAF
@@ -86,8 +92,9 @@ rule simTsg:
 # run probabilistic2020 oncogene statistical test on simulated MAF
 rule simOg:
     input:
-        join(output_dir, "simulated_summary/chasm_sim_maf{iter}.txt")
+        mutations=join(output_dir, "simulated_summary/chasm_sim_maf{iter}.txt")
     params:
+        min_recur=min_recur,
         num_sim=config["NUMSIMULATIONS"],
         data_dir=config["data_dir"]
     threads: 10
@@ -96,8 +103,8 @@ rule simOg:
     shell:
         "probabilistic2020 --log-level=INFO oncogene "
         "  -c 1.5 -n {params.num_sim} -b {params.data_dir}/snvboxGenes.bed "
-        "  -m {input} -i {params.data_dir}/snvboxGenes.fa -p {threads} " 
-        "  --score-dir={params.data_dir}/scores "
+        "  -m {input.mutations} -i {params.data_dir}/snvboxGenes.fa -p {threads} " 
+        "  --score-dir={params.data_dir}/scores -r {params.min_recur} "
         "  -o {output}"
 
 # Combine the results from simOg, simTsg, and simSummary
@@ -133,19 +140,20 @@ rule finishSim:
 # calculate summarized features for the observed mutations
 rule summary:
     input: 
-        mutations
+        mutations=mutations
     params:
+        min_recur=min_recur,
         data_dir=config["data_dir"]
     output: 
         join(output_dir, "summary.txt")
     shell:
         "mut_annotate --log-level=INFO "
         "  -b {params.data_dir}/snvboxGenes.bed -i {params.data_dir}/snvboxGenes.fa "
-        "  -c 1.5 -m {input} -p 0 -n 0 --summary "
+        "  -c 1.5 -m {input.mutations} -p 0 -n 0 --summary "
         "  --score-dir={params.data_dir}/scores "
-        "  -o {output}"
+        "  --unique -r {params.min_recur} -o {output}"
 
-# run probabilistic2020 tsg statistical test on simulated MAF
+# run probabilistic2020 tsg statistical test on MAF
 rule tsg:
     input:
         mutations
@@ -161,11 +169,12 @@ rule tsg:
         "  -m {input} -i {params.data_dir}/snvboxGenes.fa -p {threads} -d 1 "
         "  -o {output} "
 
-# run probabilistic2020 oncogene statistical test on simulated MAF
+# run probabilistic2020 oncogene statistical test on MAF
 rule og:
     input:
-        mutations
+        mutations=mutations
     params:
+        min_recur=min_recur,
         num_sim=config["NUMSIMULATIONS"],
         data_dir=config["data_dir"]
     threads: 10
@@ -174,8 +183,8 @@ rule og:
     shell:
         "probabilistic2020 -v --log-level=INFO oncogene "
         "  -c 1.5 -n {params.num_sim} -b {params.data_dir}/snvboxGenes.bed "
-        "  -m {input} -i {params.data_dir}/snvboxGenes.fa -p {threads} " 
-        "  --score-dir={params.data_dir}/scores "
+        "  -m {input.mutations} -i {params.data_dir}/snvboxGenes.fa -p {threads} " 
+        "  --unique --score-dir={params.data_dir}/scores -r {params.min_recur} "
         "  -o {output}"
 
 # Combine the results from og, tsg, and summary
