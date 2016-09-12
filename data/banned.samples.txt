@@ -1,4 +1,4 @@
-# colorectal
+# colorectal did not report silent mutations
 587226
 587230
 587232
@@ -71,7 +71,7 @@
 587224
 587338
 587332
-# NS samples
+# NS samples ('not specified' tumor type)
 ME018T
 PD5874a
 tumor_4163639
@@ -650,7 +650,7 @@ PD4174a
 10-016
 PD5849a
 673
-# bad small cell carcinoma, no silent mutations
+# small cell carcinoma, no silent mutations
 134430
 134413
 2334192
@@ -764,7 +764,7 @@ TLE63
 SJHYPO041-D
 SJHYPO119-D
 SJHYPO037-D and R
-# biliary tract samples
+# biliary tract samples - missing silent mutations
 W040
 T026
 U044
@@ -977,9 +977,9 @@ OCC02PT
 OCC07PT
 OCC03PT
 OCC05PT
-# suspicious liver hepatocellular with no silent mutations
+# liver hepatocellular with no silent mutations
 HX5T
-# suspicous head and neck samples with non silent mutations, maybe cosmic?
+# head and neck samples with no silent mutations
 388
 91
 1604875
@@ -1029,7 +1029,7 @@ SPN4
 SPN5
 SPN6
 SPN8
-# pancreatic adenocarcinoma likely from cosmic whith lack of reporting for silent mutations
+# pancreatic adenocarcinoma which lack of reporting for silent mutations
 21
 23
 24
