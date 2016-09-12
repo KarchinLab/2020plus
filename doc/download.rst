@@ -14,6 +14,13 @@ We have trained a 20/20+ classifier on pan-cancer data. This can be used to pred
 
 * `2020plus.Rdata <http://karchinlab.org/data/2020+/2020plus.Rdata>`_
 
+Pan-cancer mutation data
+------------------------
+
+* full `pan-cancer <http://karchinlab.org/data/Protocol/pancan-mutation-set-from-Tokheim-2016.txt.gz>`_ data set from:
+
+Tokheim C, Papdopoulis N, Kinzler KW, Vogelstein B, Karchin R (2016) Evaluating the evaluation of cancer driver genes. Submitted `[bioRxiv preprint] <http://biorxiv.org/content/early/2016/06/23/060426>`_
+
 Example data
 ------------
 
