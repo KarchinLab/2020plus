@@ -1,1 +1,0 @@
-To generate the sphinx documentation, you need to copy the contents of the doc folder to the root directory of the source code. Then you can follow the normal commands to generate the sphinx documentation. Otherwise there is an issue with import errors since the make command is not in the assumed source directory.

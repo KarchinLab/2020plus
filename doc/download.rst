@@ -21,6 +21,8 @@ Pan-cancer mutation data
 
 Tokheim C, Papdopoulis N, Kinzler KW, Vogelstein B, Karchin R (2016) Evaluating the evaluation of cancer driver genes. Submitted `[bioRxiv preprint] <http://biorxiv.org/content/early/2016/06/23/060426>`_
 
+Details about how the mutations were filtered is available `here <https://github.com/KarchinLab/2020plus/blob/master/data/README.rst>`_.
+
 Example data
 ------------
 
