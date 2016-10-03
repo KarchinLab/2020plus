@@ -66,6 +66,9 @@ of gene sequences by the following `these instructions <http://probabilistic2020
 Running 20/20+
 ##############
 
+.. note:: You can substantially speed up run time by reducing the number of simulations.
+          This can be done by reducing the NUMSIMULATIONS variable (e.g. from 100000 to 10000) in the `config.yaml` file or specification in the command line of snakemake via `--config NUMSIMULATIONS=10000`. This might result in a slight decrease in prediction performance but may be waranted for large data.
+
 By default, the data is assumed to be located in the "data/" directory and mutations are
 "data/mutations.txt". You can change the default by editing the config.yaml file.
 However you can also override the default from the command line by specifying
@@ -105,8 +108,6 @@ error. The "-j" argument can restrict the number of concurrent jobs submitted to
 The "-w 10 --max-jobs-per-second 1" parameters are issued to avoid overly quick 
 job submissions to the cluster.
 
-.. note:: You can substantially speed up run time by reducing the number of simulations.
-          This can be done by reducing the NUMSIMULATIONS variable (e.g. from 100000 to 10000) in the `config.yaml` file or specification in the command line of snakemake via `--config NUMSIMULATIONS=10000`. This might result in a slight decrease in prediction performance but may be waranted for large data.
 
 20/20+ output
 #############
