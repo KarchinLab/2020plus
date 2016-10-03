@@ -62,7 +62,7 @@ def recursive_gene_length(fasta_dir):
     gene_length_dict = {}
     mydirs = ['0-9'] + list(string.ascii_uppercase)
     for mydir in mydirs:
-        print mydir
+        print(mydir)
         dir_path = fasta_dir + mydir + '/'
         for file_name in os.listdir(dir_path):
             if '_protein' in file_name and '_ENST' not in file_name:
