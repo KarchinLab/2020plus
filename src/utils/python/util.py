@@ -71,7 +71,10 @@ def start_logging(log_file='', log_level='INFO', verbose=False):
 
     # ignore warnings if not in debug
     if log_level.upper() != 'DEBUG':
-        warnings.filterwarnings('ignore')
+        warnings.filterwarnings('ignore', category=DeprecationWarning)
+        # scikit-learn ignores warning so need to alter
+        # warning function to always return None
+        warnings.warn = lambda x: None
 
     # define logging format
     if verbose:
