@@ -8,11 +8,11 @@ Releases
 ~~~~~~~~
 
 20/20+ can be downloaded on `github <https://github.com/KarchinLab/2020plus/releases>`_.
-Once downloaded, either add the directory to your :code:`PATH` variable or issue the full path to the 2020plus.py script.
 
 Package requirements
 ~~~~~~~~~~~~~~~~~~~~
 
+Once downloaded, please add the directory to your :code:`PATH` variable.
 Because 20/20+ internally uses the random forest package in R, you will both need `R <https://www.r-project.org/>`_ and the randomForest library installed. Once R is installed, you can install the random forest package:
 
 .. code-block:: R
