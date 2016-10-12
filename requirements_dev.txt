@@ -4,4 +4,4 @@ matplotlib==1.5.1
 pandas==0.17.0
 rpy2==2.7.8
 scikit-learn==0.16.1
-probabilistic2020==1.0.0
+probabilistic2020==1.0.5
