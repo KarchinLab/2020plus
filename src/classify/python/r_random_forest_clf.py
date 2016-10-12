@@ -10,7 +10,6 @@ import src.features.python.feature_utils as futils
 import os
 import logging
 
-
 class MyClassifier(object):
     """
     The MyClassifier class is intended to only be used by RRandomForest.

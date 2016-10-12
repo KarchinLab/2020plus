@@ -74,7 +74,8 @@ def start_logging(log_file='', log_level='INFO', verbose=False):
         warnings.filterwarnings('ignore', category=DeprecationWarning)
         # scikit-learn ignores warning so need to alter
         # warning function to always return None
-        warnings.warn = lambda x: None
+        def noerror(*arg, **kwargs): return None
+        warnings.warn = noerror
 
     # define logging format
     if verbose:
