@@ -131,12 +131,12 @@ class MyClassifier(object):
 
     def append_cv_result(self):
         """Append result for cross-validation."""
-        ro.r("trained.genes <- append(trained.genes, tmp.trained.genes); tmp.trained.genes <- list()")
-        ro.r("trained.models <- append(trained.models, tmp.trained.models); tmp.trained.models <- list()")
+        ro.r("trained.genes <- append(trained.genes, list(tmp.trained.genes)); tmp.trained.genes <- list()")
+        ro.r("trained.models <- append(trained.models, list(tmp.trained.models)); tmp.trained.models <- list()")
 
     def append_fold_result(self):
         """Append result for each cross-validation fold."""
-        ro.r("tmp.trained.genes <- append(tmp.trained.genes, row.names(trainData))")
+        ro.r("tmp.trained.genes <- append(tmp.trained.genes, list(row.names(trainData)))")
         ro.r("tmp.trained.models <- append(tmp.trained.models, rf_clf)")
 
     def set_classes(self, oncogene, tsg):
