@@ -112,7 +112,7 @@ class MyClassifier(object):
         ytrain.index = xtrain.index  # ensure indexes match
         xtrain['true_class'] = ytrain
         r_xtrain = com.convert_to_r_dataframe(xtrain)
-        ro.globalenv['trainData'] <- r_xtrain
+        ro.globalenv['trainData'] = r_xtrain
         #r_xtrain = pandas2ri.py2ri(xtrain)
         self.rf = self.rf_fit(r_xtrain, self.ntrees, self.sample_size)
         r_imp = self.rf_imp(self.rf)  # importance dataframe in R
