@@ -50,7 +50,7 @@ class GenericClassifier(object):
         self.x, self.y = futils.randomize(self.x, self.prng)
         self.clf.fit(self.x, self.y)
 
-    def train_cv(self, k):
+    def train_cv(self, k=10):
         """Train classifier on entire data set provided, but done in cross-validation."""
         # generate indices for kfold cross validation
         self.num_pred = 0  # number of predictions
