@@ -1,13 +1,9 @@
 from __future__ import division
-from src.classify.python.vogelstein_classifier import VogelsteinClassifier
-from src.classify.python.multinomial_nb_clf import MultinomialNaiveBayes
 from src.classify.python.dummy_clf import DummyClf
 from src.classify.python.r_random_forest_clf import RRandomForest
 import src.utils.python.util as _utils
 import pandas as pd
 import numpy as np
-import glob
-import re
 import bisect
 import logging
 
@@ -318,16 +314,16 @@ def main(cli_opts):
     try:
         # plot r random forest results
         plot_data.prob_scatter(result_df,
-                            plot_path=_utils.clf_plot_dir + cfg_opts['rrand_forest_plot'],
-                            title='Sub-sampled Random Forest Predictions')
+                               plot_path=_utils.clf_plot_dir + cfg_opts['rrand_forest_plot'],
+                               title='Sub-sampled Random Forest Predictions')
         plot_data.prob_kde(result_df,
-                        col_name='oncogene score',
-                        save_path=_utils.clf_plot_dir + cfg_opts['onco_kde_rrand_forest'],
-                        title='Distribution of Oncogene Scores (sub-sampled random forest)')
+                           col_name='oncogene score',
+                           save_path=_utils.clf_plot_dir + cfg_opts['onco_kde_rrand_forest'],
+                           title='Distribution of Oncogene Scores (sub-sampled random forest)')
         plot_data.prob_kde(result_df,
-                        col_name='tsg score',
-                        save_path=_utils.clf_plot_dir + cfg_opts['tsg_kde_rrand_forest'],
-                        title='Distribution of TSG Scores (sub-sampled random forest)')
+                           col_name='tsg score',
+                           save_path=_utils.clf_plot_dir + cfg_opts['tsg_kde_rrand_forest'],
+                           title='Distribution of TSG Scores (sub-sampled random forest)')
         logger.info('Finished running sub-sampled Random Forest')
 
         # dummy classifier, predict most frequent
@@ -354,8 +350,8 @@ def main(cli_opts):
                         dummy_str: dclf_onco_mean_tpr},
                         index=rrclf_onco_fpr)
         line_style = {dummy_str: '--',
-                    rrandom_forest_str: '-',
-                    }
+                      rrandom_forest_str: '-',
+                     }
         save_path = _utils.clf_plot_dir + cfg_opts['roc_plot_oncogene']
         plot_data.receiver_operator_curve(df, save_path, line_style)
 
@@ -364,13 +360,12 @@ def main(cli_opts):
         dummy_str = 'dummy (AUC = %0.3f)' % dclf_tsg_mean_roc_auc
         rrclf_tsg_mean_tpr = np.mean(rrclf_tsg_tpr, axis=0)
         dclf_tsg_mean_tpr = np.mean(dclf_tsg_tpr, axis=0)
-        df = pd.DataFrame({
-                        r_random_forest_str: rrclf_tsg_mean_tpr,
-                        dummy_str: dclf_tsg_mean_tpr},
-                        index=rrclf_tsg_fpr)
+        df = pd.DataFrame({r_random_forest_str: rrclf_tsg_mean_tpr,
+                           dummy_str: dclf_tsg_mean_tpr},
+                          index=rrclf_tsg_fpr)
         line_style = {dummy_str: '--',
-                    r_random_forest_str: '-',
-                    }
+                      r_random_forest_str: '-',
+                     }
         save_path = _utils.clf_plot_dir + cfg_opts['roc_plot_tsg']
         plot_data.receiver_operator_curve(df, save_path, line_style)
 
@@ -379,13 +374,12 @@ def main(cli_opts):
         dummy_str = 'dummy (AUC = %0.3f)' % dclf_driver_mean_roc_auc
         rrclf_driver_mean_tpr = np.mean(rrclf_driver_tpr, axis=0)
         dclf_driver_mean_tpr = np.mean(dclf_driver_tpr, axis=0)
-        df = pd.DataFrame({
-                        r_random_forest_str: rrclf_driver_mean_tpr,
-                        dummy_str: dclf_driver_mean_tpr},
-                        index=rrclf_driver_fpr)
+        df = pd.DataFrame({r_random_forest_str: rrclf_driver_mean_tpr,
+                           dummy_str: dclf_driver_mean_tpr},
+                          index=rrclf_driver_fpr)
         line_style = {dummy_str: '--',
-                    r_random_forest_str: '-',
-                    }
+                      r_random_forest_str: '-',
+                     }
         save_path = _utils.clf_plot_dir + cfg_opts['roc_plot_driver']
         plot_data.receiver_operator_curve(df, save_path, line_style)
 
@@ -394,13 +388,11 @@ def main(cli_opts):
         dummy_str = 'dummy (AUC = %0.3f)' % dclf_onco_mean_pr_auc
         rrclf_onco_mean_precision = np.mean(rrclf_onco_precision, axis=0)
         dclf_onco_mean_precision = np.mean(dclf_onco_precision, axis=0)
-        df = pd.DataFrame({
-                        rrandom_forest_str: rrclf_onco_mean_precision,
-                        },
-                        index=rrclf_onco_recall)
+        df = pd.DataFrame({rrandom_forest_str: rrclf_onco_mean_precision,},
+                          index=rrclf_onco_recall)
         line_style = {dummy_str: '--',
-                    rrandom_forest_str: '-',
-                    }
+                      rrandom_forest_str: '-',
+                     }
         save_path = _utils.clf_plot_dir + cfg_opts['pr_plot_oncogene']
         plot_data.precision_recall_curve(df, save_path, line_style,
                                         #sem_df,
