@@ -54,6 +54,7 @@ class GenericClassifier(object):
         """Train classifier on entire data set provided, but done in cross-validation."""
         # generate indices for kfold cross validation
         self.num_pred = 0  # number of predictions
+        self.test_fold_df = pd.DataFrame({l+1: 0 for l in range(self.total_iter)}, index=self.x.index)
 
         for i in range(self.total_iter):
             # randomize for another round
@@ -64,9 +65,13 @@ class GenericClassifier(object):
                                                       n_folds=k)
 
             # obtain predictions from single round of kfold validation
-            for train_ix, test_ix in k_fold:
+            for nfold, (train_ix, test_ix) in enumerate(k_fold):
                 # retreive indices from pandas dataframe using row number
                 tmp_train_ix = self.x.iloc[train_ix].index
+
+                # save which genes are in the test fold
+                tmp_test_ix = self.x.iloc[test_ix].index
+                self.test_fold_df.loc[tmp_test_ix, i] = nfold + 1
 
                 if self.is_weighted_sample:
                     # figure out sample weights
@@ -91,6 +96,7 @@ class GenericClassifier(object):
             self.clf.append_cv_result()  # add the training result for a single CV to the R variable
 
             self.num_pred += 1
+        self.clf.set_cv_fold(self.test_fold_df)
 
 
     def predict(self):

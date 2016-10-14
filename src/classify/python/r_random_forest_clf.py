@@ -112,7 +112,7 @@ class MyClassifier(object):
         ytrain.index = xtrain.index  # ensure indexes match
         xtrain['true_class'] = ytrain
         r_xtrain = com.convert_to_r_dataframe(xtrain)
-        ro.globalenv['trainData'] = r_xtrain
+        #ro.globalenv['trainData'] = r_xtrain
         #r_xtrain = pandas2ri.py2ri(xtrain)
         self.rf = self.rf_fit(r_xtrain, self.ntrees, self.sample_size)
         r_imp = self.rf_imp(self.rf)  # importance dataframe in R
@@ -121,7 +121,7 @@ class MyClassifier(object):
 
     def save(self, path):
         ro.r('''save(rf_clf, rf_pred_prob, rf_pred,
-                     rf_imp, rf_fit, trained.genes, trained.models, file="{0}")'''.format(path))
+                     rf_imp, rf_fit, cvFoldDf, trained.models, file="{0}")'''.format(path))
 
     def load(self, path):
         set_wd_str = 'setwd("{0}")'.format(os.getcwd())
@@ -131,13 +131,17 @@ class MyClassifier(object):
 
     def append_cv_result(self):
         """Append result for cross-validation."""
-        ro.r("trained.genes <- append(trained.genes, list(tmp.trained.genes)); tmp.trained.genes <- list()")
+        # ro.r("trained.genes <- append(trained.genes, list(tmp.trained.genes)); tmp.trained.genes <- list()")
         ro.r("trained.models <- append(trained.models, list(tmp.trained.models)); tmp.trained.models <- list()")
 
     def append_fold_result(self):
         """Append result for each cross-validation fold."""
-        ro.r("tmp.trained.genes <- append(tmp.trained.genes, list(row.names(trainData)))")
+        # ro.r("tmp.trained.genes <- append(tmp.trained.genes, list(row.names(trainData)))")
         ro.r("tmp.trained.models <- append(tmp.trained.models, rf_clf)")
+
+    def set_cv_fold(self, df):
+        r_df = com.convert_to_r_dataframe(df)
+        ro.globalenv['cvFoldDf'] = r_df
 
     def set_classes(self, oncogene, tsg):
         """Sets the integers used to represent classes in classification."""
