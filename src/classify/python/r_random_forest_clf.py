@@ -33,8 +33,8 @@ class MyClassifier(object):
 
         # set up lists holding trained models and what genes
         # were trained on
-        ro.r("trained.models <- list() ; trained.genes <- list()")
-        ro.r("tmp.trained.models <- list() ; tmp.trained.genes <- list()")
+        ro.r("trained.models <- list()")
+        ro.r("tmp.trained.models <- list()")
 
         # R function for fitting a random forest
         ro.r('''rf_fit <- function(df, ntree, sampSize){
@@ -131,13 +131,11 @@ class MyClassifier(object):
 
     def append_cv_result(self):
         """Append result for cross-validation."""
-        # ro.r("trained.genes <- append(trained.genes, list(tmp.trained.genes)); tmp.trained.genes <- list()")
         ro.r("trained.models <- append(trained.models, list(tmp.trained.models)); tmp.trained.models <- list()")
 
     def append_fold_result(self):
         """Append result for each cross-validation fold."""
-        # ro.r("tmp.trained.genes <- append(tmp.trained.genes, list(row.names(trainData)))")
-        ro.r("tmp.trained.models <- append(tmp.trained.models, rf_clf)")
+        ro.r("tmp.trained.models <- append(tmp.trained.models, list(rf_clf))")
 
     def set_cv_fold(self, df):
         r_df = com.convert_to_r_dataframe(df)
