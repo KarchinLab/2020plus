@@ -71,7 +71,7 @@ class GenericClassifier(object):
 
                 # save which genes are in the test fold
                 tmp_test_ix = self.x.iloc[test_ix].index
-                self.test_fold_df.loc[tmp_test_ix, i] = nfold + 1
+                self.test_fold_df.loc[tmp_test_ix, i+1] = nfold + 1
 
                 if self.is_weighted_sample:
                     # figure out sample weights
