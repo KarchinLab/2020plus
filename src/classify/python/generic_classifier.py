@@ -50,6 +50,49 @@ class GenericClassifier(object):
         self.x, self.y = futils.randomize(self.x, self.prng)
         self.clf.fit(self.x, self.y)
 
+    def train_cv(self, k):
+        """Train classifier on entire data set provided, but done in cross-validation."""
+        # generate indices for kfold cross validation
+        self.num_pred = 0  # number of predictions
+
+        for i in range(self.total_iter):
+            # randomize for another round
+            self.x, self.y = futils.randomize(self.x, self.prng)
+
+            # set up stratified kfold iterator
+            k_fold = cross_validation.StratifiedKFold(self.y,
+                                                      n_folds=k)
+
+            # obtain predictions from single round of kfold validation
+            for train_ix, test_ix in k_fold:
+                # retreive indices from pandas dataframe using row number
+                tmp_train_ix = self.x.iloc[train_ix].index
+
+                if self.is_weighted_sample:
+                    # figure out sample weights
+                    num_train = len(train_ix)
+                    sample_weight = np.zeros(num_train)
+                    onco_ix = np.nonzero(self.y.ix[tmp_train_ix]==self.onco_num)[0]
+                    tsg_ix = np.nonzero(self.y.ix[tmp_train_ix]==self.tsg_num)[0]
+                    other_ix = np.nonzero(self.y.ix[tmp_train_ix]==self.other_num)[0]
+                    sample_weight[onco_ix] = 1. / len(onco_ix)
+                    sample_weight[tsg_ix] = 1. / len(tsg_ix)
+                    sample_weight[other_ix] = 1. / len(other_ix)
+
+                    # do training with sample weighting
+                    self.clf.fit(self.x.ix[tmp_train_ix].copy(),
+                                 self.y.ix[tmp_train_ix].copy(),
+                                 sample_weight=sample_weight)
+                else:
+                    # do training without weighting
+                    self.clf.fit(self.x.ix[tmp_train_ix].copy(),
+                                 self.y.ix[tmp_train_ix].copy())
+                self.clf.append_fold_result(self.num_pred)  # add the training result from each fold
+            self.clf.append_cv_result(self.num_pred)  # add the training result for a single CV to the R variable
+
+            self.num_pred += 1
+
+
     def predict(self):
         """Predict after using the train method."""
         self.num_pred = 1  # only one prediction

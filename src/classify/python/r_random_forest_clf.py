@@ -31,6 +31,11 @@ class MyClassifier(object):
         # Code for R's random forest using rpy2
         ro.r("suppressPackageStartupMessages(library(randomForest))")  # load randomForest library
 
+        # set up lists holding trained models and what genes
+        # were trained on
+        ro.r("trained.models <- list() ; trained.genes <- list()")
+        ro.r("tmp.trained.models <- list() ; tmp.trained.genes <- list()")
+
         # R function for fitting a random forest
         ro.r('''rf_fit <- function(df, ntree, sampSize){
                 df$true_class <- as.factor(df$true_class)
@@ -107,6 +112,7 @@ class MyClassifier(object):
         ytrain.index = xtrain.index  # ensure indexes match
         xtrain['true_class'] = ytrain
         r_xtrain = com.convert_to_r_dataframe(xtrain)
+        ro.globalenv['trainData'] <- r_xtrain
         #r_xtrain = pandas2ri.py2ri(xtrain)
         self.rf = self.rf_fit(r_xtrain, self.ntrees, self.sample_size)
         r_imp = self.rf_imp(self.rf)  # importance dataframe in R
@@ -115,13 +121,23 @@ class MyClassifier(object):
 
     def save(self, path):
         ro.r('''save(rf_clf, rf_pred_prob, rf_pred,
-                     rf_imp, rf_fit, file="{0}")'''.format(path))
+                     rf_imp, rf_fit, trained.genes, trained.models, file="{0}")'''.format(path))
 
     def load(self, path):
         set_wd_str = 'setwd("{0}")'.format(os.getcwd())
         ro.r(set_wd_str)
         ro.r('load("{0}")'.format(path))
         self.rf = ro.r["rf_clf"]
+
+    def append_cv_result(self):
+        """Append result for cross-validation."""
+        ro.r("trained.genes <- append(trained.genes, tmp.trained.genes); tmp.trained.genes <- list()")
+        ro.r("trained.models <- append(trained.models, tmp.trained.models); tmp.trained.models <- list()")
+
+    def append_fold_result(self):
+        """Append result for each cross-validation fold."""
+        ro.r("tmp.trained.genes <- append(tmp.trained.genes, row.names(trainData))")
+        ro.r("tmp.trained.models <- append(tmp.trained.models, rf_clf)")
 
     def set_classes(self, oncogene, tsg):
         """Sets the integers used to represent classes in classification."""
@@ -147,7 +163,8 @@ class MyClassifier(object):
     def predict(self, xtest):
         """Predicts class via majority vote.
 
-        **Parameters**
+        Parameters
+        ----------
 
         xtest : pd.DataFrame
             features for test set
@@ -167,8 +184,8 @@ class MyClassifier(object):
     def predict_proba(self, xtest):
         """Predicts the probability for each class.
 
-        **Parameters**
-
+        Parameters
+        ----------
         xtest : pd.DataFrame
             features for test set
         """
