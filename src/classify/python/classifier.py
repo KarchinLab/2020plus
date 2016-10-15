@@ -201,7 +201,7 @@ def main(cli_opts):
                               driver_sample=cli_opts['driver_rate'],
                               ntrees=cli_opts['ntrees'],
                               seed=cli_opts['random_seed'])
-        rrclf.clf.load(cli_opts['trained_classifier'])
+        rrclf.clf.load_cv(cli_opts['trained_classifier'])
 
         if cli_opts['simulated']:
             # do classification

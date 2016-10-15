@@ -21,7 +21,7 @@ class MyClassifier(object):
 
     def __init__(self,
                  ntrees=200,
-                 other_sample_ratio=3.,
+                 other_sample_ratio=1.,
                  driver_sample=.7):
         self.ntrees = ntrees
         # self.other_sample_rate = other_sample
@@ -120,14 +120,27 @@ class MyClassifier(object):
         #self.feature_importances_ = pandas2ri.ri2py(r_imp)
 
     def save(self, path):
+        """Save random forest model as a Rdata file."""
         ro.r('''save(rf_clf, rf_pred_prob, rf_pred,
-                     rf_imp, rf_fit, cvFoldDf, trained.models, file="{0}")'''.format(path))
+                     rf_imp, rf_fit, file="{0}")'''.format(path))
+
+    def save_cv(self, path):
+        """Save random forest model as a Rdata file."""
+        ro.r('''save(rf_pred_prob, rf_pred, rf_imp, rf_fit, cvFoldDf,
+                     trained.models, file="{0}")'''.format(path))
 
     def load(self, path):
         set_wd_str = 'setwd("{0}")'.format(os.getcwd())
         ro.r(set_wd_str)
         ro.r('load("{0}")'.format(path))
         self.rf = ro.r["rf_clf"]
+
+    def load_cv(self, path):
+        set_wd_str = 'setwd("{0}")'.format(os.getcwd())
+        ro.r(set_wd_str)
+        ro.r('load("{0}")'.format(path))
+        self.rf_cv = ro.r["trained.models"]
+        self.cv_folds = ro.r["cvFoldDf"]
 
     def append_cv_result(self):
         """Append result for cross-validation."""
@@ -138,6 +151,7 @@ class MyClassifier(object):
         ro.r("tmp.trained.models <- append(tmp.trained.models, list(rf_clf))")
 
     def set_cv_fold(self, df):
+        """Send which genes are valid test sets for each CV fold."""
         r_df = com.convert_to_r_dataframe(df)
         ro.globalenv['cvFoldDf'] = r_df
 
@@ -167,7 +181,26 @@ class MyClassifier(object):
 
         Parameters
         ----------
+        xtest : pd.DataFrame
+            features for test set
+        """
+        r_xtest = com.convert_to_r_dataframe(xtest)
+        #r_xtest = pandas2ri.py2ri(xtest)
+        pred = self.rf_pred(self.rf, r_xtest)
+        py_pred = com.convert_robj(pred)
+        #py_pred = pandas2ri.ri2py(pred)
+        genes, pred_class = zip(*py_pred.items())
+        tmp_df = pd.DataFrame({'pred_class': pred_class},
+                              index=genes)
+        tmp_df = tmp_df.reindex(xtest.index)
+        tmp_df -= 1  # for some reason the class numbers start at 1
+        return tmp_df
 
+    def predict_cv(self, xtest):
+        """Predicts class via majority vote.
+
+        Parameters
+        ----------
         xtest : pd.DataFrame
             features for test set
         """
@@ -184,6 +217,21 @@ class MyClassifier(object):
         return tmp_df
 
     def predict_proba(self, xtest):
+        """Predicts the probability for each class.
+
+        Parameters
+        ----------
+        xtest : pd.DataFrame
+            features for test set
+        """
+        r_xtest = com.convert_to_r_dataframe(xtest)
+        #r_xtest = pandas2ri.ri2py(xtest)
+        pred_prob = self.rf_pred_prob(self.rf, r_xtest)
+        py_pred_prob = com.convert_robj(pred_prob)
+        #py_pred_prob = pandas2ri.ri2py(pred_prob)
+        return py_pred_prob.values
+
+    def predict_proba_cv(self, xtest):
         """Predicts the probability for each class.
 
         Parameters

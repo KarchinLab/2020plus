@@ -29,7 +29,7 @@ def main(cli_opts):
     rrclf.train_cv()  # train on entire data
     logger.info('Finished training.')
     logger.info('Saving classifier to . . .')
-    rrclf.clf.save(cli_opts['output'])
+    rrclf.clf.save_cv(cli_opts['output'])
     logger.info('Finished saving classifier.')
 
 
