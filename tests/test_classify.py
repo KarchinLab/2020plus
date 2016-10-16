@@ -8,7 +8,7 @@ import src.classify.python.classifier as clf
 import src.utils.python.util as _utils
 
 def test_trained_classifier():
-    trained_clf = os.path.join(file_dir, 'data/pancan.Rdata')
+    trained_clf = os.path.join(file_dir, 'data/test_train.Rdata')
     example_features = os.path.join(file_dir, 'data/example_sim_features.txt')
     null_dist = os.path.join(file_dir, 'data/example_null_dist.txt')
     opts = {
@@ -48,4 +48,3 @@ def test_regular_classifier():
     # now with an empirical null
     opts['null_distribution'] = null_dist
     clf.main(opts)
-
