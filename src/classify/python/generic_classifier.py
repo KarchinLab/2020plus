@@ -118,9 +118,6 @@ class GenericClassifier(object):
         # generate indices for kfold cross validation
         self.num_pred = 0  # number of predictions
 
-        # full data
-        self.x, self.y = futils.randomize(self.x, self.prng)
-
         # initialize variables for prediction results
         prediction = pd.Series(index=self.x.index)  # predicted class
         onco_prob = pd.Series(index=self.x.index).fillna(0)
@@ -149,9 +146,11 @@ class GenericClassifier(object):
                 tmp_test_ix = self.x.index.intersection(good_ix)
 
                 # predict test data in kfold validation
-                tmp_prob = self.clf.predict_proba(self.x.ix[tmp_test_ix])
-                onco_prob.ix[tmp_test_ix] += tmp_prob[:, self.onco_num]
-                tsg_prob.ix[tmp_test_ix] += tmp_prob[:, self.tsg_num]
+                test_feat = self.x.ix[tmp_test_ix]
+                if not test_feat.empty:
+                    tmp_prob = self.clf.predict_proba(test_feat)
+                    onco_prob.ix[tmp_test_ix] += tmp_prob[:, self.onco_num]
+                    tsg_prob.ix[tmp_test_ix] += tmp_prob[:, self.tsg_num]
 
             self.num_pred += 1
 
