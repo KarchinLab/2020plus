@@ -137,8 +137,8 @@ class GenericClassifier(object):
             if not test_feat.empty:
                 self.clf.set_model(i+1, 1)
                 tmp_prob = self.clf.predict_proba(test_feat)
-                onco_prob.ix[tmp_test_ix] += tmp_prob[:, self.onco_num]
-                tsg_prob.ix[tmp_test_ix] += tmp_prob[:, self.tsg_num]
+                onco_prob.ix[new_genes] += tmp_prob[:, self.onco_num]
+                tsg_prob.ix[new_genes] += tmp_prob[:, self.tsg_num]
 
             # obtain predictions from single round of kfold validation
             col = 'X{0}'.format(i+1)
@@ -162,7 +162,6 @@ class GenericClassifier(object):
 
         # return prediction.astype(int), prob
         return onco_prob, tsg_prob, other_prob
-
 
     def kfold_validation(self, k=10):
         """Records the performance in terms of ROC and PR AUC for cross-validation.
