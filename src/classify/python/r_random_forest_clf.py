@@ -140,7 +140,24 @@ class MyClassifier(object):
         ro.r(set_wd_str)
         ro.r('load("{0}")'.format(path))
         self.rf_cv = ro.r["trained.models"]
-        self.cv_folds = ro.r["cvFoldDf"]
+        self.cv_folds = com.convert_robj(ro.r["cvFoldDf"])
+
+    def set_model(self, num_iter, num_fold):
+        """Set which random forest model is currently active.
+
+        Whith cross-validation there may be many models saved.
+        There will be one for each iteration and fold for cross-validation.
+
+        Note: due to rpy2 indexing, indexes should start from 1
+
+        Parameters
+        ----------
+        num_iter : int
+            Iteration index amongst repeated cross-validations
+        num_fold : int
+            The particular fold for each cross-validation
+        """
+        self.rf = self.rf_cv.rx2(num_iter).rx2(num_fold)
 
     def append_cv_result(self):
         """Append result for cross-validation."""
@@ -196,42 +213,7 @@ class MyClassifier(object):
         tmp_df -= 1  # for some reason the class numbers start at 1
         return tmp_df
 
-    def predict_cv(self, xtest):
-        """Predicts class via majority vote.
-
-        Parameters
-        ----------
-        xtest : pd.DataFrame
-            features for test set
-        """
-        r_xtest = com.convert_to_r_dataframe(xtest)
-        #r_xtest = pandas2ri.py2ri(xtest)
-        pred = self.rf_pred(self.rf, r_xtest)
-        py_pred = com.convert_robj(pred)
-        #py_pred = pandas2ri.ri2py(pred)
-        genes, pred_class = zip(*py_pred.items())
-        tmp_df = pd.DataFrame({'pred_class': pred_class},
-                              index=genes)
-        tmp_df = tmp_df.reindex(xtest.index)
-        tmp_df -= 1  # for some reason the class numbers start at 1
-        return tmp_df
-
     def predict_proba(self, xtest):
-        """Predicts the probability for each class.
-
-        Parameters
-        ----------
-        xtest : pd.DataFrame
-            features for test set
-        """
-        r_xtest = com.convert_to_r_dataframe(xtest)
-        #r_xtest = pandas2ri.ri2py(xtest)
-        pred_prob = self.rf_pred_prob(self.rf, r_xtest)
-        py_pred_prob = com.convert_robj(pred_prob)
-        #py_pred_prob = pandas2ri.ri2py(pred_prob)
-        return py_pred_prob.values
-
-    def predict_proba_cv(self, xtest):
         """Predicts the probability for each class.
 
         Parameters

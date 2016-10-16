@@ -126,7 +126,7 @@ def trained_rand_forest_pred(clf, data, result_path, null_dist=None):
         random forest results (already saved to file)
     """
     # perform prediction
-    onco_prob, tsg_prob, other_prob = clf.predict()
+    onco_prob, tsg_prob, other_prob = clf.trained_prediction_cv()
     true_class = clf.y
 
     # save features/prediction results

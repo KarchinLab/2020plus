@@ -35,7 +35,6 @@ class GenericClassifier(object):
         self.vogelsteins_oncogenes = _utils.oncogene_set
         self.vogelsteins_tsg = _utils.tsg_set
 
-
     def set_total_iter(self, myiterations):
         self.total_iter = myiterations
 
@@ -98,7 +97,6 @@ class GenericClassifier(object):
             self.num_pred += 1
         self.clf.set_cv_fold(self.test_fold_df)
 
-
     def predict(self):
         """Predict after using the train method."""
         self.num_pred = 1  # only one prediction
@@ -107,7 +105,6 @@ class GenericClassifier(object):
         num_genes = len(self.y)
 
         # do predictions
-        y_pred = self.clf.predict(self.x)
         proba_ = self.clf.predict_proba(self.x)
 
         # update information
@@ -116,6 +113,56 @@ class GenericClassifier(object):
         other_prob = 1 - (onco_prob + tsg_prob)
 
         return onco_prob, tsg_prob, other_prob
+
+    def trained_prediction_cv(self, k=10):
+        # generate indices for kfold cross validation
+        self.num_pred = 0  # number of predictions
+
+        # full data
+        self.x, self.y = futils.randomize(self.x, self.prng)
+
+        # initialize variables for prediction results
+        prediction = pd.Series(index=self.x.index)  # predicted class
+        onco_prob = pd.Series(index=self.x.index).fillna(0)
+        tsg_prob = pd.Series(index=self.x.index).fillna(0)
+
+        # figure out which genes may have not been trained on before
+        new_genes = self.x.index.difference(self.clf.cv_folds.index)
+
+        # perform total_iter number of cross-validations
+        for i in range(self.total_iter):
+            # predict on genes never found in training data, so there
+            # is no worry about overfitting.
+            test_feat = self.x.ix[new_genes]
+            if not test_feat.empty:
+                self.clf.set_model(i+1, 1)
+                tmp_prob = self.clf.predict_proba(test_feat)
+                onco_prob.ix[tmp_test_ix] += tmp_prob[:, self.onco_num]
+                tsg_prob.ix[tmp_test_ix] += tmp_prob[:, self.tsg_num]
+
+            # obtain predictions from single round of kfold validation
+            col = 'X{0}'.format(i+1)
+            for j in range(k):
+                self.clf.set_model(i+1, j+1)
+                # figure out which genes should be tested
+                good_ix = self.clf.cv_folds[self.clf.cv_folds[col]==j+1].index
+                tmp_test_ix = self.x.index.intersection(good_ix)
+
+                # predict test data in kfold validation
+                tmp_prob = self.clf.predict_proba(self.x.ix[tmp_test_ix])
+                onco_prob.ix[tmp_test_ix] += tmp_prob[:, self.onco_num]
+                tsg_prob.ix[tmp_test_ix] += tmp_prob[:, self.tsg_num]
+
+            self.num_pred += 1
+
+        # convert number of trees to fraction of trees
+        onco_prob /= self.num_pred
+        tsg_prob /= self.num_pred
+        other_prob = 1 - (onco_prob + tsg_prob)
+
+        # return prediction.astype(int), prob
+        return onco_prob, tsg_prob, other_prob
+
 
     def kfold_validation(self, k=10):
         """Records the performance in terms of ROC and PR AUC for cross-validation.
@@ -402,7 +449,6 @@ class GenericClassifier(object):
                           np.mean(self.onco_precision), np.mean(self.onco_recall), np.mean(self.onco_f1_score)))
         self.logger.debug('Driver: Precision=%s, Recall=%s' % (
                           np.mean(self.driver_precision), np.mean(self.driver_recall)))
-
 
     def get_onco_roc_metrics(self):
         """Simple get method for oncogene ROC metrics."""
