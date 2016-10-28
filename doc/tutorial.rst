@@ -122,12 +122,18 @@ When performing predictions on cancer type specific mutations, a pre-trained
 20/20+ classifier based on pan-cancer data is used to make predictions. The 
 first step is to download the `pre-trained 20/20+ <http://karchinlab.org/data/2020+/2020plus.Rdata>`_. Associated data should be collected like for the pan-cancer :ref:`prep-data-ref` section. Instead of using the **predict** command, the **snakemake -s Snakefile pretrained_predict** command should be used. In the below example command, we use the command for a local machine, but as like in the previous example, it can be adopted to run on a cluster.
 
+.. note:: Care should be taken if you intend to predict on samples which were
+          used for training the 20/20+ random forest (e.g. predicting on TCGA data).
+          This could result in over-fitting, and may require training a 20/20+ random forest yourself (see :ref:`train-ref`) without the overlapping samples.
+
 .. code-block:: bash
 
    $ snakemake -s Snakefile pretrained_predict -p --cores 1 \
         --config mutations="data/my_cancer_specific_mutations.txt" output_dir="output" trained_classifier="data/2020plus.Rdata"
 
 The difference with the previous pan-cancer command is that the mutations ("data/my_cancer_specific_mutations.txt") are from a single cancer type, and the pre-trained classifier is specified with the **trained_classifier** option. In this case the pre-trained 20/20+ classifier was assumed to be placed into the data directory.
+
+.. _train-ref:
 
 Train a 20/20+ classifier
 +++++++++++++++++++++++++
