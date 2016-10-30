@@ -17,7 +17,7 @@ the cancer driver score. A p-value and associated Benjamini-Hochberg false disco
 will be reported, but this requires establishing the null distribution for random forest scores.
 20/20+ uses an empirical null distribution by scoring simulated mutations in genes.
 This extra step requires additional work and computational resources.
-2/20+ can be applied to pan-cancer and tumor type specific data. 10-fold cross-validation is performed internally within 20/20+ to avoid overfitting.
+20/20+ can be applied to pan-cancer and tumor type specific data. 10-fold cross-validation is performed internally within 20/20+ to avoid overfitting.
 
 20/20+ pipeline
 ---------------
