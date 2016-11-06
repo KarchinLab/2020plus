@@ -26,15 +26,77 @@ rule all:
 
 # same rule is "all", but semantically more meaningful
 rule predict:
+    """
+    Predict on a pan-cancer set of somatic mutations from multiple cancer types.
+    This command will simultaneous train 20/20+ and make predictions using
+    gene hold-out cross-validation. The predict command uses the following parameters:
+
+    Input
+    -----
+    mutations : MAF file
+        MAF file containing mutations. Please see http://probabilistic2020.readthedocs.io/en/latest/tutorial.html#mutations for details on file format.
+
+    Output
+    ------
+    output_dir : directory
+        Path of directory to save output. The results are save in the 
+        "output/results/r_random_forest_prediction.txt" file.
+    """
     input: join(output_dir, "output/results/r_random_forest_prediction.txt")
 
 # top-level rule to only train the 20/20+ random forest
 rule train:
+    """
+    Train a 20/20+ model to predict cancer driver genes. The trained model can
+    be used for subsequent prediction. The train command uses the following parameters:
+
+    Input
+    -----
+    mutations : MAF file
+        MAF file containing mutations. Please see http://probabilistic2020.readthedocs.io/en/latest/tutorial.html#mutations for details on file format.
+
+    Output
+    ------
+    output_dir : directory
+        Path to file directory to save output. The saved model file from 
+        20/20+ will be named 2020plus.Rdata by default.
+    """
     input: join(output_dir, "2020plus.Rdata")
 
 # use an already trained 20/20+ random forest to predict new data
 rule pretrained_predict:
+    """
+    Predict cancer driver genes using a pre-trained 20/20+ model from the "train" command. The pretrained_predict command uses the following parameters:
+
+    Input
+    -----
+    mutations : MAF file
+        MAF file containing mutations. Please see http://probabilistic2020.readthedocs.io/en/latest/tutorial.html#mutations for details on file format.
+
+    trained_classifier : .Rdata file
+        File path of saved R workspace containing the trained 20/20+ model.
+
+    Output
+    ------
+    output_dir : directory
+        File path of directory to save output. The results are save in the 
+        "pretrained_output/results/r_random_forest_prediction.txt" file.
+    """
     input: join(output_dir, "pretrained_output/results/r_random_forest_prediction.txt")
+
+rule help:
+    """
+    Print list of all targets with help.
+    """
+    run:
+        print('See "snakemake --help" for additional snakemake command line help documentation.\n')
+        myhelp = ['predict', 'train', 'pretrained_predict', 'help']
+        for myrule in workflow.rules:
+            if myrule.name in myhelp:
+                print('='*len(myrule.name))
+                print(myrule.name)
+                print('='*len(myrule.name))
+                print(myrule.docstring)
 
 ###################################
 # Code for calculating empirical null
