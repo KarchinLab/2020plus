@@ -213,6 +213,10 @@ if __name__ == '__main__':
                               default=500,
                               help='Number of decision trees for random forests. '
                               '(default: 500)')
+    parser_train.add_argument('-c', '--cv',
+                              action='store_true',
+                              default=False,
+                              help='Train a gene hold-out cross-validated classifier')
     parser_train.add_argument('-m', '--min-count',
                               type=int,
                               action='store',
@@ -288,6 +292,11 @@ if __name__ == '__main__':
                                  default=200,
                                  help='Number of decision trees for random forests. '
                                  '(default: 200)')
+    parser_classify.add_argument('-c', '--cv',
+                                 action='store_true',
+                                 default=False,
+                                 help='Classify using a gene hold-out cross '
+                                 'validated classifier (from the trained_clasifier option)')
     parser_classify.add_argument('-rs', '--random-seed',
                                  type=int, action='store',
                                  default=71,
