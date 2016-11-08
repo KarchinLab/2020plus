@@ -108,7 +108,7 @@ def rand_forest_pred(clf, data, result_path, null_dist=None):
     return tmp_df
 
 
-def trained_rand_forest_pred(clf, data, result_path, null_dist=None):
+def trained_rand_forest_pred(clf, data, result_path, null_dist=None, is_cv=False):
     """Makes gene predictions using a previously trained random forest.
 
     Parameters
@@ -126,7 +126,10 @@ def trained_rand_forest_pred(clf, data, result_path, null_dist=None):
         random forest results (already saved to file)
     """
     # perform prediction
-    onco_prob, tsg_prob, other_prob = clf.trained_prediction_cv()
+    if is_cv:
+        onco_prob, tsg_prob, other_prob = clf.predict_cv()
+    else:
+        onco_prob, tsg_prob, other_prob = clf.predict()
     true_class = clf.y
 
     # save features/prediction results
@@ -201,11 +204,16 @@ def main(cli_opts):
                               driver_sample=cli_opts['driver_rate'],
                               ntrees=cli_opts['ntrees'],
                               seed=cli_opts['random_seed'])
-        rrclf.clf.load_cv(cli_opts['trained_classifier'])
+        # load classifier depending on whether it uses CV
+        is_cv = cli_opts['cv']
+        if is_cv:
+            rrclf.clf.load_cv(cli_opts['trained_classifier'])
+        else:
+            rrclf.clf.load(cli_opts['trained_classifier'])
 
         if cli_opts['simulated']:
             # do classification
-            result_df = trained_rand_forest_pred(rrclf, df, None, null_pvals)
+            result_df = trained_rand_forest_pred(rrclf, df, None, null_pvals, is_cv)
 
             # driver scores
             driver_score_cts = result_df['driver score'].value_counts()
@@ -239,7 +247,7 @@ def main(cli_opts):
             # do classification
             pred_results_path = _utils.clf_result_dir + cfg_opts['rrand_forest_pred']
             logger.info('Saving results to {0}'.format(pred_results_path))
-            result_df = trained_rand_forest_pred(rrclf, df, pred_results_path, null_pvals)
+            result_df = trained_rand_forest_pred(rrclf, df, pred_results_path, null_pvals, is_cv)
             result_df.to_csv(pred_results_path, sep='\t')
 
         logger.info('Finished classification.')

@@ -114,7 +114,8 @@ class GenericClassifier(object):
 
         return onco_prob, tsg_prob, other_prob
 
-    def trained_prediction_cv(self, k=10):
+    def predict_cv(self, k=10):
+        """Predict after using the gene hold-out cross-validated train method."""
         # generate indices for kfold cross validation
         self.num_pred = 0  # number of predictions
 

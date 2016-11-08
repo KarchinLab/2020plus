@@ -235,7 +235,7 @@ class RRandomForest(GenericClassifier):
                  total_iter=5,
                  weight=False,
                  ntrees=200,
-                 other_sample_ratio=3.,
+                 other_sample_ratio=1.,
                  driver_sample=.7,
                  seed=None):
         self.logger = logging.getLogger(__name__)
