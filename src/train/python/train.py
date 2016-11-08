@@ -26,10 +26,17 @@ def main(cli_opts):
                           driver_sample=cli_opts['driver_rate'],
                           ntrees=cli_opts['ntrees'],
                           seed=cli_opts['random_seed'])
-    rrclf.train_cv()  # train on entire data
+    # train on entire data
+    if cli_opts['cv']:
+        rrclf.train_cv()
+    else:
+        rrclf.train()
     logger.info('Finished training.')
     logger.info('Saving classifier to . . .')
-    rrclf.clf.save_cv(cli_opts['output'])
+    if cli_opts['cv']:
+        rrclf.clf.save_cv(cli_opts['output'])
+    else:
+        rrclf.clf.save(cli_opts['output'])
     logger.info('Finished saving classifier.')
 
 
