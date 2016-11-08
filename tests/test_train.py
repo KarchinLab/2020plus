@@ -12,6 +12,7 @@ def test_training():
     """Test the training of a random forest model."""
     example_features = os.path.join(file_dir, 'data/features_pancan_subset.txt')
     test_train = os.path.join(file_dir, 'data/test_train.Rdata')
+    test_train_cv = os.path.join(file_dir, 'data/test_train_cv.Rdata')
     opts = {
         'features': example_features,
         'driver_rate': .7,
@@ -19,6 +20,13 @@ def test_training():
         'ntrees': 200,
         'min_count': 0,
         'random_seed': 71,
+        'cv': False,
         'output': test_train
     }
+    # train non cross validated
+    train.main(opts)
+
+    # train cross-validated
+    opts['cv'] = True
+    opts['output'] = test_train_cv
     train.main(opts)

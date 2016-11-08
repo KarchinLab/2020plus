@@ -9,6 +9,7 @@ import src.utils.python.util as _utils
 
 def test_trained_classifier():
     trained_clf = os.path.join(file_dir, 'data/test_train.Rdata')
+    trained_clf_cv = os.path.join(file_dir, 'data/test_train_cv.Rdata')
     example_features = os.path.join(file_dir, 'data/example_sim_features.txt')
     null_dist = os.path.join(file_dir, 'data/example_null_dist.txt')
     opts = {
@@ -19,9 +20,14 @@ def test_trained_classifier():
         'min_count': 0,
         'driver_rate': .7,
         'other_ratio': 1.0,
-        'ntrees': 500,
+        'ntrees': 200,
+        'cv': False,
         'random_seed': 71
     }
+    clf.main(opts)
+
+    opts['cv'] = True
+    opts['trained_classifier'] = trained_clf_cv
     clf.main(opts)
 
 
