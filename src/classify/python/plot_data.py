@@ -1,17 +1,23 @@
 import src.utils.python.plot as myplt
 import src.utils.python.util as _utils
+import src.utils.python.p_value as pval
 import matplotlib
 matplotlib.use('agg', warn=False)
 import matplotlib.pyplot as plt
 import pandas as pd
 import logging
+import numpy as np
 
 logger = logging.getLogger(__name__)
+
+# genes to remove for MLFC calculation
 
 
 def feature_importance_barplot(mean_df,
                                std_df,
                                save_path):
+    """Creates a feature import barplot based on the mean decrease in the
+    gini index."""
     logger.info('Plotting feature importances from random forest . . .')
 
     # rename columns so latex doesn't complain about '_'
@@ -209,3 +215,75 @@ def sample_boxplot(pred_onco,
                   xlabel=xlabel,
                   ylabel=ylabel,
                   title=title)
+
+
+def qqplot(data,
+           ax=None, log=False, title=None,
+           use_xlabel=True, use_ylabel=True,
+           **kwargs):
+    """Function for qq-plot with uniform distribution.
+
+    Parameters
+    ----------
+    data : pd.Series
+        p-values for a method
+    ax : matplotlib axis
+        provided matplotlib axis object to plot on
+    log : bool
+        indicator to use log scale
+    """
+    # sort p-values
+    tmp = data.copy()
+    tmp.sort_values(inplace=True)
+
+    # expected p-values
+    dist_quant = np.arange(1, len(tmp)+1)/float(len(tmp)+1)
+    if log:
+        log_quant = -np.log10(dist_quant)
+        if ax is None:
+            plt.plot(log_quant, -np.log10(tmp),'o', markersize=3, **kwargs)
+            plt.plot([0, log_quant[0]], [0, log_quant[0]], ls="-", color='red')
+        else:
+            ax.plot(log_quant, -np.log10(tmp),'o', markersize=3, **kwargs)
+            ax.plot([0, log_quant[0]], [0, log_quant[0]], ls="-", color='red')
+        # set axis labels
+        if use_xlabel:
+            if ax is None: plt.xlabel('Theoretical ($-log_{10}(p)$)')
+            else: ax.set_xlabel('Theoretical ($-log_{10}(p)$)')
+        if use_ylabel:
+            if ax is None: plt.ylabel('Observed ($-log_{10}(p)$)')
+            else: ax.set_ylabel('Observed ($-log_{10}(p)$)')
+    else:
+        if ax is None:
+            plt.plot(dist_quant, tmp,'o', markersize=3, **kwargs)
+            plt.plot([0, 1], [0, 1], ls="-", color='red')
+        else:
+            ax.plot(dist_quant, tmp,'o', markersize=3, **kwargs)
+            ax.plot([0, 1], [0, 1], ls="-", color='red')
+            ax.set_ylabel('p-value')
+        if use_xlabel:
+            if ax is None: plt.xlabel('Theoretical p-value')
+            else: ax.set_xlabel('Theoretical p-value')
+        if use_ylabel:
+            if ax is None: plt.ylabel('Observed p-value')
+            else: ax.set_ylabel('Observed p-value')
+    if title:
+        ax.set_title(title)
+
+    return ax
+
+
+def create_qqplots(pval_df, pval_col, save_path):
+    """Create qq plots for oncogene, tsg, and driver p-value."""
+    keep_cols = ['gene', pval_col]
+    plot_df = pval_df[keep_cols].copy()
+    plot_df = plot_df[~plot_df['gene'].isin(pval.mlfc_remove_genes)]
+    fig, ax = plt.subplots(1, 1)
+    qqplot(pval_df[pval_col], ax)
+    mlfc = pval.mean_log_fold_change(plot_df[pval_col], plot_df['gene'])
+    ax.text(.025, .95, 'MLFC = {0:.2f}'.format(mlfc))
+    ax.set_xlim((0, 1))
+    ax.set_ylim((0, 1))
+    plt.tight_layout()
+    plt.savefig(save_path)
+    plt.close()
