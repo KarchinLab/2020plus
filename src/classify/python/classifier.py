@@ -18,6 +18,20 @@ logger = logging.getLogger(__name__)
 def compute_p_value(scores, null_p_values):
     """Get the p-value for each score by examining the list null distribution
     where scores are obtained by a certain probability.
+    
+    NOTE: uses score2pval function
+    
+    Parameters
+    ----------
+    scores : pd.Series
+        series of observed scores
+    null_p_values: pd.Series
+        Empirical null distribution, index are scores and values are p values
+    
+    Returns
+    -------
+    pvals : pd.Series
+        Series of p values for scores
     """
     num_scores = len(scores)
     pvals = pd.Series(np.zeros(num_scores))
@@ -29,7 +43,24 @@ def compute_p_value(scores, null_p_values):
 
 
 def score2pval(score, null_scores, null_pvals):
-    """NOTE: null_scores and null_pvals should be sorted in ascending order.
+    """Looks up the P value from the empirical null distribution based on the provided
+    score.
+    
+    NOTE: null_scores and null_pvals should be sorted in ascending order.
+    
+    Parameters
+    ----------
+    score : float
+        score to look up P value for
+    null_scores : list
+        list of scores that have a non-NA value
+    null_pvals : pd.Series
+        a series object with the P value for the scores found in null_scores
+    
+    Returns
+    -------
+    pval : float
+        P value for requested score
     """
     # find position in simulated null distribution
     pos = bisect.bisect_right(null_scores, score)
@@ -119,6 +150,8 @@ def trained_rand_forest_pred(clf, data, result_path, null_dist=None, is_cv=False
         data frame containing feature information
     result_path : str
         path to save text file result
+    null_dist : pd.DataFrame (default: None)
+        dataframe relating scores to p values
 
     Returns
     -------
