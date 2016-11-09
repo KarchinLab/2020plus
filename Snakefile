@@ -9,6 +9,8 @@ output_dir=config["output_dir"]
 mutations=config["mutations"]
 # pre-trained classifier
 trained_classifier=config["trained_classifier"]
+# flag for CV
+cv=config['cv']
 
 # params for simulations
 num_iter=10
@@ -279,10 +281,10 @@ rule cv_predict:
         join(output_dir, "output/results/r_random_forest_prediction.txt")
     shell:
         """
-        python `which 2020plus.py` --log-level=INFO train -d .7 -o 1.0 -n {{params.ntrees}} -r {outdir}/trained.Rdata --features={{input.features}} --random-seed 71
-        python `which 2020plus.py` --log-level=INFO classify --trained-classifier {outdir}/trained.Rdata --null-distribution {outdir}/simulated_null_dist.txt --features {{input.sim_features}} --simulated
+        python `which 2020plus.py` --log-level=INFO train -d .7 -o 1.0 -n {{params.ntrees}} -r {outdir}/trained.Rdata --features={{input.features}} --random-seed 71 {cv}
+        python `which 2020plus.py` --log-level=INFO classify --trained-classifier {outdir}/trained.Rdata --null-distribution {outdir}/simulated_null_dist.txt --features {{input.sim_features}} --simulated {cv}
         python `which 2020plus.py` --out-dir {outdir}/output --log-level=INFO classify -n {{params.ntrees}} -d .7 -o 1.0 --features {{input.features}} --null-distribution {outdir}/simulated_null_dist.txt --random-seed 71
-        """.format(outdir=output_dir)
+        """.format(outdir=output_dir, cv=cv)
 
 #############################
 # Rules for just training on
@@ -299,8 +301,8 @@ rule train_pancan:
         join(output_dir, "2020plus.Rdata")
     shell:
         """
-        python `which 2020plus.py` --log-level=INFO train -d .7 -o 1.0 -n {{params.ntrees}} --features={{input.features}} --random-seed 71 -r {outdir}/2020plus.Rdata 
-        """.format(outdir=output_dir)
+        python `which 2020plus.py` --log-level=INFO train -d .7 -o 1.0 -n {{params.ntrees}} --features={{input.features}} {cv} --random-seed 71 -r {outdir}/2020plus.Rdata 
+        """.format(outdir=output_dir, cv=cv)
 
 #############################
 # Rules for predicting using
@@ -318,6 +320,6 @@ rule predict_test:
         join(output_dir, "pretrained_output/results/r_random_forest_prediction.txt")
     shell:
         """
-        python `which 2020plus.py` --log-level=INFO classify --trained-classifier {{input.trained_classifier}} --null-distribution {outdir}/simulated_null_dist.txt --features {{input.sim_features}} --simulated
+        python `which 2020plus.py` --log-level=INFO classify --trained-classifier {{input.trained_classifier}} --null-distribution {outdir}/simulated_null_dist.txt --features {{input.sim_features}} --simulated {cv}
         python `which 2020plus.py` --out-dir {outdir}/pretrained_output --log-level=INFO classify -n {{params.ntrees}} --trained-classifier {{input.trained_classifier}} -d .7 -o 1.0 --features {{input.features}} --null-distribution {outdir}/simulated_null_dist.txt --random-seed 71
-        """.format(outdir=output_dir)
+        """.format(outdir=output_dir, cv=cv)
