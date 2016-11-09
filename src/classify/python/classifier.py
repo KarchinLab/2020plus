@@ -1,10 +1,10 @@
 from __future__ import division
 from src.classify.python.dummy_clf import DummyClf
 from src.classify.python.r_random_forest_clf import RRandomForest
+from src.utils.python.p_value import score2pval, compute_p_value, bh_fdr
 import src.utils.python.util as _utils
 import pandas as pd
 import numpy as np
-import bisect
 import logging
 
 # skip plotting if they don't have matplotlib
@@ -14,68 +14,6 @@ except ImportError:
     pass
 
 logger = logging.getLogger(__name__)
-
-def compute_p_value(scores, null_p_values):
-    """Get the p-value for each score by examining the list null distribution
-    where scores are obtained by a certain probability.
-    
-    NOTE: uses score2pval function
-    
-    Parameters
-    ----------
-    scores : pd.Series
-        series of observed scores
-    null_p_values: pd.Series
-        Empirical null distribution, index are scores and values are p values
-    
-    Returns
-    -------
-    pvals : pd.Series
-        Series of p values for scores
-    """
-    num_scores = len(scores)
-    pvals = pd.Series(np.zeros(num_scores))
-    null_p_val_scores = list(reversed(null_p_values.index.tolist()))
-    #null_p_values = null_p_values.ix[null_p_val_scores].copy()
-    null_p_values.sort_values(inplace=True, ascending=False)
-    pvals = scores.apply(lambda x: score2pval(x, null_p_val_scores, null_p_values))
-    return pvals
-
-
-def score2pval(score, null_scores, null_pvals):
-    """Looks up the P value from the empirical null distribution based on the provided
-    score.
-    
-    NOTE: null_scores and null_pvals should be sorted in ascending order.
-    
-    Parameters
-    ----------
-    score : float
-        score to look up P value for
-    null_scores : list
-        list of scores that have a non-NA value
-    null_pvals : pd.Series
-        a series object with the P value for the scores found in null_scores
-    
-    Returns
-    -------
-    pval : float
-        P value for requested score
-    """
-    # find position in simulated null distribution
-    pos = bisect.bisect_right(null_scores, score)
-
-    # if the score is beyond any simulated values, then report
-    # a p-value of zero
-    if pos == null_pvals.size and score > null_scores[-1]:
-        return 0
-    # condition needed to prevent an error
-    # simply get last value, if it equals the last value
-    elif pos == null_pvals.size:
-        return null_pvals.iloc[pos-1]
-    # normal case, just report the corresponding p-val from simulations
-    else:
-        return null_pvals.iloc[pos]
 
 
 def rand_forest_pred(clf, data, result_path, null_dist=None):
@@ -89,6 +27,9 @@ def rand_forest_pred(clf, data, result_path, null_dist=None):
         data frame containing feature information
     result_path : str
         path to save text file result
+    null_dist : pd.DataFrame (default: None)
+        dataframe relating scores to p values. P values will added
+        to the results.
 
     Returns
     -------
@@ -118,21 +59,21 @@ def rand_forest_pred(clf, data, result_path, null_dist=None):
         onco_score.sort_values(inplace=True, ascending=False)
         tmp_df['oncogene p-value'] = compute_p_value(onco_score,
                                                      null_dist['oncogene p-value'].dropna())
-        tmp_df['oncogene q-value'] = _utils.bh_fdr(tmp_df['oncogene p-value'])
+        tmp_df['oncogene q-value'] = bh_fdr(tmp_df['oncogene p-value'])
 
         # add tsg p-value
         tsg_score = tmp_df['tsg score'].copy()
         tsg_score.sort_values(inplace=True, ascending=False)
         tmp_df['tsg p-value'] = compute_p_value(tsg_score,
                                                 null_dist['tsg p-value'].dropna())
-        tmp_df['tsg q-value'] = _utils.bh_fdr(tmp_df['tsg p-value'])
+        tmp_df['tsg q-value'] = bh_fdr(tmp_df['tsg p-value'])
 
         # add driver p-values
         driver_score = tmp_df['driver score'].copy()
         driver_score.sort_values(inplace=True, ascending=False)
         tmp_df['driver p-value'] = compute_p_value(driver_score,
                                                    null_dist['driver p-value'].dropna())
-        tmp_df['driver q-value'] = _utils.bh_fdr(tmp_df['driver p-value'])
+        tmp_df['driver q-value'] = bh_fdr(tmp_df['driver p-value'])
 
     tmp_df.to_csv(result_path, sep='\t')
 
@@ -185,21 +126,21 @@ def trained_rand_forest_pred(clf, data, result_path, null_dist=None, is_cv=False
         onco_score.sort_values(inplace=True, ascending=False)
         tmp_df['oncogene p-value'] = compute_p_value(onco_score,
                                                      null_dist['oncogene p-value'].dropna())
-        tmp_df['oncogene q-value'] = _utils.bh_fdr(tmp_df['oncogene p-value'])
+        tmp_df['oncogene q-value'] = bh_fdr(tmp_df['oncogene p-value'])
 
         # add tsg p-value
         tsg_score = tmp_df['tsg score'].copy()
         tsg_score.sort_values(inplace=True, ascending=False)
         tmp_df['tsg p-value'] = compute_p_value(tsg_score,
                                                 null_dist['tsg p-value'].dropna())
-        tmp_df['tsg q-value'] = _utils.bh_fdr(tmp_df['tsg p-value'])
+        tmp_df['tsg q-value'] = bh_fdr(tmp_df['tsg p-value'])
 
         # add driver p-value
         driver_score = tmp_df['driver score'].copy()
         driver_score.sort_values(inplace=True, ascending=False)
         tmp_df['driver p-value'] = compute_p_value(driver_score,
                                                    null_dist['driver p-value'].dropna())
-        tmp_df['driver q-value'] = _utils.bh_fdr(tmp_df['driver p-value'])
+        tmp_df['driver q-value'] = bh_fdr(tmp_df['driver p-value'])
     else:
         tmp_df.to_csv(result_path, sep='\t')
 
