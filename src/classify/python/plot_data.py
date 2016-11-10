@@ -273,17 +273,21 @@ def qqplot(data,
     return ax
 
 
-def create_qqplots(pval_df, pval_col, save_path):
+def create_qqplots(pval_df, save_path):
     """Create qq plots for oncogene, tsg, and driver p-value."""
-    keep_cols = ['gene', pval_col]
+    pval_cols = ['oncogene p-value', 'tsg p-value', 'driver p-value']
+    keep_cols = ['gene'] + pval_cols
     plot_df = pval_df[keep_cols].copy()
     plot_df = plot_df[~plot_df['gene'].isin(pval.mlfc_remove_genes)]
-    fig, ax = plt.subplots(1, 1)
-    qqplot(pval_df[pval_col], ax)
-    mlfc = pval.mean_log_fold_change(plot_df[pval_col], plot_df['gene'])
-    ax.text(.025, .95, 'MLFC = {0:.2f}'.format(mlfc))
-    ax.set_xlim((0, 1))
-    ax.set_ylim((0, 1))
+    fig, ax = plt.subplots(1, 3,
+                           subplot_kw={'aspect': 'equal'})
+    fig.set_size_inches(9, 3)
+    for i, pval_col in enumerate(pval_cols):
+        qqplot(pval_df[pval_col], ax[i], title=pval_col.split(' ')[0])
+        mlfc = pval.mean_log_fold_change(plot_df[pval_col], plot_df['gene'])
+        ax[i].text(.05, .85, 'MLFC = {0:.2f}'.format(mlfc))
+        ax[i].set_xlim((0, 1))
+        ax[i].set_ylim((0, 1))
     plt.tight_layout()
     plt.savefig(save_path)
     plt.close()
