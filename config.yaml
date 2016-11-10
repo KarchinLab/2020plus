@@ -5,3 +5,4 @@ trained_classifier: 2020plus.Rdata
 NUMSIMULATIONS: 100000
 NUMITER: 10
 cv: --cv
+ntrees: 200

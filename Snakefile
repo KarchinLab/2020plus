@@ -11,6 +11,9 @@ mutations=config["mutations"]
 trained_classifier=config["trained_classifier"]
 # flag for CV
 cv=config['cv']
+# number of trees in RF
+ntrees=config['ntrees']
+ntrees2=5*ntrees
 
 # params for simulations
 num_iter=10
@@ -274,14 +277,15 @@ rule cv_predict:
         features=join(output_dir, "features.txt"),
         sim_features=join(output_dir, "simulated_summary/simulated_features.txt"),
     params:
-        ntrees=200,
+        ntrees=ntrees,
+        ntrees2=ntrees2,
         data_dir=config["data_dir"],
         output_dir=config["output_dir"]
     output: 
         join(output_dir, "output/results/r_random_forest_prediction.txt")
     shell:
         """
-        python `which 2020plus.py` --log-level=INFO train -d .7 -o 1.0 -n {{params.ntrees}} -r {outdir}/trained.Rdata --features={{input.features}} --random-seed 71 {cv}
+        python `which 2020plus.py` --log-level=INFO train -d .7 -o 1.0 -n {{params.ntrees2}} -r {outdir}/trained.Rdata --features={{input.features}} --random-seed 71 {cv}
         python `which 2020plus.py` --log-level=INFO classify --trained-classifier {outdir}/trained.Rdata --null-distribution {outdir}/simulated_null_dist.txt --features {{input.sim_features}} --simulated {cv}
         python `which 2020plus.py` --out-dir {outdir}/output --log-level=INFO classify -n {{params.ntrees}} -d .7 -o 1.0 --features {{input.features}} --null-distribution {outdir}/simulated_null_dist.txt --random-seed 71
         """.format(outdir=output_dir, cv=cv)
@@ -294,7 +298,7 @@ rule train_pancan:
     input:
         features=join(output_dir, "features.txt")
     params:
-        ntrees=200,
+        ntrees=ntrees,
         data_dir=config["data_dir"],
         output_dir=config["output_dir"]
     output:
@@ -315,11 +319,11 @@ rule predict_test:
         features=join(output_dir, "features.txt"),
         sim_features=join(output_dir, "simulated_summary/simulated_features.txt"),
     params:
-        ntrees=200,
+        ntrees=ntrees,
     output: 
         join(output_dir, "pretrained_output/results/r_random_forest_prediction.txt")
     shell:
         """
         python `which 2020plus.py` --log-level=INFO classify --trained-classifier {{input.trained_classifier}} --null-distribution {outdir}/simulated_null_dist.txt --features {{input.sim_features}} --simulated {cv}
-        python `which 2020plus.py` --out-dir {outdir}/pretrained_output --log-level=INFO classify -n {{params.ntrees}} --trained-classifier {{input.trained_classifier}} -d .7 -o 1.0 --features {{input.features}} --null-distribution {outdir}/simulated_null_dist.txt --random-seed 71
+        python `which 2020plus.py` --out-dir {outdir}/pretrained_output --log-level=INFO classify -n {{params.ntrees}} --trained-classifier {{input.trained_classifier}} -d .7 -o 1.0 --features {{input.features}} --null-distribution {outdir}/simulated_null_dist.txt --random-seed 71 {cv}
         """.format(outdir=output_dir, cv=cv)
