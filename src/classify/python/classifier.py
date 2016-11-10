@@ -224,6 +224,13 @@ def main(cli_opts):
             result_df = trained_rand_forest_pred(rrclf, df, pred_results_path, null_pvals, is_cv)
             result_df.to_csv(pred_results_path, sep='\t')
 
+            # create qq plot
+            try:
+                qq_plot_path = _utils.clf_plot_dir + cfg_opts['qq_plot']
+                plot_data.create_qqplots(result_df, qq_plot_path)
+            except:
+                pass
+
         logger.info('Finished classification.')
         return
 
@@ -307,6 +314,10 @@ def main(cli_opts):
                            save_path=_utils.clf_plot_dir + cfg_opts['tsg_kde_rrand_forest'],
                            title='Distribution of TSG Scores (sub-sampled random forest)')
         logger.info('Finished running sub-sampled Random Forest')
+
+        # make qq plot
+        qq_plot_path = _utils.clf_plot_dir + cfg_opts['qq_plot']
+        plot_data.create_qqplots(result_df, qq_plot_path)
 
         # dummy classifier, predict most frequent
         logger.debug('Running Dummy Classifier. . .')
