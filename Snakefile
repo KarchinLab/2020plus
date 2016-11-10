@@ -285,10 +285,10 @@ rule cv_predict:
         join(output_dir, "output/results/r_random_forest_prediction.txt")
     shell:
         """
-        python `which 2020plus.py` --log-level=INFO train -d .7 -o 1.0 -n {{params.ntrees2}} -r {outdir}/trained.Rdata --features={{input.features}} --random-seed 71 {cv}
-        python `which 2020plus.py` --log-level=INFO classify --trained-classifier {outdir}/trained.Rdata --null-distribution {outdir}/simulated_null_dist.txt --features {{input.sim_features}} --simulated {cv}
+        python `which 2020plus.py` --log-level=INFO train -d .7 -o 1.0 -n {{params.ntrees2}} -r {outdir}/trained.Rdata --features={{input.features}} --random-seed 71
+        python `which 2020plus.py` --log-level=INFO classify --trained-classifier {outdir}/trained.Rdata --null-distribution {outdir}/simulated_null_dist.txt --features {{input.sim_features}} --simulated
         python `which 2020plus.py` --out-dir {outdir}/output --log-level=INFO classify -n {{params.ntrees}} -d .7 -o 1.0 --features {{input.features}} --null-distribution {outdir}/simulated_null_dist.txt --random-seed 71
-        """.format(outdir=output_dir, cv=cv)
+        """.format(outdir=output_dir)
 
 #############################
 # Rules for just training on
