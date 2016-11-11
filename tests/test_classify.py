@@ -26,8 +26,14 @@ def test_trained_classifier():
     }
     clf.main(opts)
 
+    # setup directory
+    _utils.make_result_dir('tests/data/result')
+
+    # test non-silmutated predictions
     opts['cv'] = True
+    opts['simulated'] = False
     opts['trained_classifier'] = trained_clf_cv
+    opts['out_dir'] = os.path.join(file_dir, 'data/results')
     clf.main(opts)
 
 
