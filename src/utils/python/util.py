@@ -358,7 +358,6 @@ def get_gene_length():
     return df
 
 
-
 # set up vogelstein oncogenes/tsgs
 oncogene_list = read_oncogenes()
 tsg_list = read_tsgs()

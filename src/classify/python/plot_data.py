@@ -274,10 +274,14 @@ def qqplot(data,
 
 
 def create_qqplots(pval_df, save_path):
-    """Create qq plots for oncogene, tsg, and driver p-value."""
+    """Create qq plots for oncogene, tsg, and driver p-value.
+
+    NOTE: gene names should be the index of the dataframe
+    """
     pval_cols = ['oncogene p-value', 'tsg p-value', 'driver p-value']
-    keep_cols = ['gene'] + pval_cols
-    plot_df = pval_df[keep_cols].copy()
+    #keep_cols = ['gene'] + pval_cols
+    plot_df = pval_df[pval_cols].copy()
+    plot_df['gene'] = pval_df.index
     plot_df = plot_df[~plot_df['gene'].isin(pval.mlfc_remove_genes)]
     fig, ax = plt.subplots(1, 3,
                            subplot_kw={'aspect': 'equal'})

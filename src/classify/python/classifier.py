@@ -221,7 +221,8 @@ def main(cli_opts):
             # do classification
             pred_results_path = _utils.clf_result_dir + cfg_opts['rrand_forest_pred']
             logger.info('Saving results to {0}'.format(pred_results_path))
-            result_df = trained_rand_forest_pred(rrclf, df, pred_results_path, null_pvals, is_cv)
+            result_df = trained_rand_forest_pred(rrclf, df, pred_results_path,
+                                                 null_pvals, is_cv)
             result_df.to_csv(pred_results_path, sep='\t')
 
             # create qq plot
@@ -314,10 +315,6 @@ def main(cli_opts):
                            save_path=_utils.clf_plot_dir + cfg_opts['tsg_kde_rrand_forest'],
                            title='Distribution of TSG Scores (sub-sampled random forest)')
         logger.info('Finished running sub-sampled Random Forest')
-
-        # make qq plot
-        qq_plot_path = _utils.clf_plot_dir + cfg_opts['qq_plot']
-        plot_data.create_qqplots(result_df, qq_plot_path)
 
         # dummy classifier, predict most frequent
         logger.debug('Running Dummy Classifier. . .')
@@ -429,6 +426,10 @@ def main(cli_opts):
                 ['Driver', rrclf_driver_mean_roc_auc, rrclf_driver_mean_pr_auc]]
         perf_df = pd.DataFrame(metrics, columns=['Type', 'ROC AUC', 'PR AUC'])
         perf_df.to_csv(save_path, sep='\t', index=False)
+
+        # make qq plot
+        qq_plot_path = _utils.clf_plot_dir + cfg_opts['qq_plot']
+        plot_data.create_qqplots(result_df, qq_plot_path)
     except:
         pass
 
