@@ -23,12 +23,19 @@ This extra step requires additional work and computational resources.
 ---------------
 
 The easiest way to run the entire 20/20+ pipeline from somatic mutations to cancer
-driver gene prediction is to use `snakemake <https://bitbucket.org/snakemake/snakemake/wiki/Home>`_. We have created a **Snakefile** that will run the multiple steps needed to get the final results. You first will need to install snakemake (requires python 3.X), so please see the snakemake `installation instructions <https://bitbucket.org/snakemake/snakemake/wiki/Documentation#markdown-header-installation>`_. If instead you are using python 2.7, please see the section on :ref:`adv-tut-ref`.
+driver gene prediction is to use `snakemake <https://bitbucket.org/snakemake/snakemake/wiki/Home>`_. We have created a **Snakefile** that will run the multiple steps needed to get the final results. You first will need to install snakemake (requires python 3.X), so please see the snakemake `installation instructions <https://bitbucket.org/snakemake/snakemake/wiki/Documentation#markdown-header-installation>`_. You should be able to see the snakemake help, if you are in the 2020plus directory and it is installed correctly.
+
+.. code-block:: bash
+
+   $ snakemake --help  # help using snakemake 
+   $ snakemake -q help  # help for 2020plus commands
 
 There are two ways to perform predictions with 20/20+. Either in a pan-cancer setting where mutations from several cancer types are aggregated together, or predicting cancer type specific driver genes by using a 20/20+ model previously trained on pan-cancer data.
 
 Cancer type specific analysis
 +++++++++++++++++++++++++++++
+
+.. _prep-cancer-data-ref:
 
 Preparing data
 ##############
@@ -44,6 +51,7 @@ or cancer type specific data.
    $ wget http://karchinlab.org/data/Protocol/bladder.txt.gz  # download mutations
    $ wget http://karchinlab.org/data/2020+/snvboxGenes.bed  # download transcript annotation
    $ wget http://karchinlab.org/data/2020+/scores.tar.gz  # download pre-computed scores
+   $ wget http://karchinlab.org/data/2020+/2020plus_100k.Rdata  # download pre-computed scores
    $ gunzip bladder.txt.gz 
    $ tar xvzf scores.tar.gz
    $ cd ..
@@ -56,8 +64,8 @@ Running 20/20+
 ##############
 
 When performing predictions on cancer type specific mutations, a pre-trained
-20/20+ classifier based on pan-cancer data is used to make predictions. The 
-first step is to download the `pre-trained 20/20+ <http://karchinlab.org/data/2020+/2020plus.Rdata>`_. Associated data should be collected like for the pan-cancer :ref:`prep-data-ref` section. Instead of using the **predict** command, the **snakemake -s Snakefile pretrained_predict** command should be used. In the below example command, we use the command for a local machine, but it can be adopted to run on a cluster.
+20/20+ classifier based on pan-cancer data is used to make predictions.
+Available pre-trained 20/20+ classifiers are shown on the :ref:`download-ref` page. Associated data should be collected like in the above :ref:`prep-cancer-data-ref` section. When using a pre-trained classifier, the **snakemake -s Snakefile pretrained_predict** command should be used. In the below example command, we use the command for a local machine, but it can be adopted to run on a cluster.
 
 .. note:: Care should be taken if you intend to predict on samples which were
           used for training the 20/20+ random forest (e.g. predicting on TCGA data).
@@ -66,14 +74,14 @@ first step is to download the `pre-trained 20/20+ <http://karchinlab.org/data/20
 .. code-block:: bash
 
    $ snakemake -s Snakefile pretrained_predict -p --cores 1 \
-        --config mutations="data/bladder.txt" output_dir="output_bladder" trained_classifier="data/2020plus.Rdata"
+        --config mutations="data/bladder.txt" output_dir="output_bladder" trained_classifier="data/2020plus_100k.Rdata"
 
 In this example, the output will be saved in the "output_bladder" directory as specified by the output_dir parameter (also changeable in config.yaml). 
 
 .. code-block:: bash
 
    $ snakemake -s Snakefile pretrained_predict -p -j 999 -w 10 --max-jobs-per-second 1 \
-        --config mutations="data/bladder.txt" output_dir="output_bladder" trained_classifier="data/2020plus.Rdata" \
+        --config mutations="data/bladder.txt" output_dir="output_bladder" trained_classifier="data/2020plus_100k.Rdata" \
         --cluster-config cluster.yaml \
         --cluster "qsub -cwd -pe smp {threads} -l mem_free={cluster.mem},h_vmem={cluster.vmem} -v PATH=$PATH"
 
@@ -91,13 +99,13 @@ job submissions to the cluster.
 The difference with the next pan-cancer tutorial is that the mutations ("data/bladder.txt") are from a single cancer type, and the pre-trained classifier is specified with the **trained_classifier** option. In this case the pre-trained 20/20+ classifier was assumed to be placed into the data directory.
 
 .. note:: You can substantially speed up run time by reducing the number of simulations.
-          This can be done by reducing the NUMSIMULATIONS variable (e.g. from 100000 to 10000) in the `config.yaml` file or specification in the command line of snakemake via `--config NUMSIMULATIONS=10000`. This might result in a slight decrease in prediction performance but may be waranted for large data.
+          This can be done by reducing the NUMSIMULATIONS variable (e.g. from 100000 to 10000) in the `config.yaml` file or specification in the command line of snakemake via `--config NUMSIMULATIONS=10000`. This might result in a slight decrease in prediction performance but may be waranted for large data. Make sure you use the correct trained classifier based on your NUMSIMULATIONS option, by using 2020plus_100k.Rdata for NUMSIMULATIONS=100000 and 2020plus_10k.Rdata for NUMSIMULATIONS=10000.
 
 20/20+ output
 #############
 
 Like in the quick start, you will find the result in output_bladder/results/r_random_forest_prediction.txt. There will be a p-value/q-value for the oncogene, tumor suppressor gene, and driver
-score. At a false discovery rate of 0.1, you should get 9 significant oncogene scores, 35 significant TSG scores, and 50 significant driver scores. The file will also contain all of the features used for prediction. Examine the QQ plot of p-values as a diagnostic check on the reported p-values (output_bladder/plots/qq_plot.png). The observed p-values (blue line) should be close to the theoretically expected p-values (red line).  In this case, the mean absolute log2 fold change (MLFC) indicates that the p-values are in good agreement with expectations.
+score. At a false discovery rate of 0.1, you should get 9 significant oncogene scores, 35 significant TSG scores, and 50 significant driver scores. The file will also contain all of the features used for prediction. Examine the QQ plot of p-values as a diagnostic check on the reported p-values (output_bladder/plots/qq_plot.png). The observed p-values (blue line) should be close to the theoretically expected p-values (red line).  In this case, the mean absolute log2 fold change (MLFC) indicates that the p-values are in good agreement with expectations. Please see `our paper <http://biorxiv.org/content/early/2016/06/23/060426>`_ for more discussion on the MLFC.
 
 .. image:: /images/mlfc.png
     :align: center
@@ -160,7 +168,7 @@ In this example, the output will be saved in the "output_pancan" directory as sp
 
 It is generally recommended to run 20/20+ on a cluster to parallelize
 calculations. The below command will execute
-the 20/20+ pipeline on an SGE computer cluster using qsub, like in the previous cancer type specific analysis.
+the 20/20+ pipeline on an SGE computer cluster using qsub, like in the previous cancer type specific analysis. The cluster submission command can be changed to fit your particular cluster scheduler.
 
 .. code-block:: bash
 
@@ -180,7 +188,7 @@ score. The file will also contain all of the features used for prediction.
 Train a 20/20+ classifier
 +++++++++++++++++++++++++
 
-You can also train your own 20/20+ model to predict on new data (e.g. new cancer type specific data) using the **train** command. Training should be performed on a pan-cancer collection of mutations. This either could be those `mutations <http://karchinlab.org/data/Protocol/pancan-mutation-set-from-Tokheim-2016.txt.gz>`_ used in our evaluation or a new collected set. Note, the provided `pre-trained classifier <http://karchinlab.org/data/2020+/2020plus.Rdata>`_ is already trained on the mutations linked in the previous sentence. The file format for mutations is described `here <http://probabilistic2020.readthedocs.io/en/latest/tutorial.html#mutations>`_. Like above, the command can be easily modified to run on a cluster.
+You can also train your own 20/20+ model to predict on new data (e.g. new cancer type specific data) using the **train** command. Training should be performed on a pan-cancer collection of mutations. This either could be those `mutations <http://karchinlab.org/data/Protocol/pancan-mutation-set-from-Tokheim-2016.txt.gz>`_ used in our evaluation or a new collected set. Note, the provided pre-trained classifier on the downloads page is already trained on the mutations linked in the previous sentence. The file format for mutations is described `here <http://probabilistic2020.readthedocs.io/en/latest/tutorial.html#mutations>`_. Like above, the command can be easily modified to run on a cluster.
 
 .. code-block:: bash
 
