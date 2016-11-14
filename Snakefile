@@ -10,7 +10,7 @@ mutations=config["mutations"]
 # pre-trained classifier
 trained_classifier=config["trained_classifier"]
 # flag for CV
-cv=config['cv']
+cv="--cv"
 # number of trees in RF
 ntrees=config['ntrees']
 ntrees2=5*ntrees
