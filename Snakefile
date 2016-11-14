@@ -94,7 +94,7 @@ rule help:
     Print list of all targets with help.
     """
     run:
-        print('See "snakemake --help" for additional snakemake command line help documentation.\n')
+        print('Input and output parameters are specified via the command line or in the config.yaml file. If done via the command line, e.g., the "trained_classifier" option would be specified by the following argument:\n\n--config trained_classifier="data/2020plus_100k.Rdata"\n\nMultiple options can follow after the --config flag.\n')
         myhelp = ['predict', 'train', 'pretrained_predict', 'help']
         for myrule in workflow.rules:
             if myrule.name in myhelp:
@@ -102,6 +102,7 @@ rule help:
                 print(myrule.name)
                 print('='*len(myrule.name))
                 print(myrule.docstring)
+        print('See "snakemake --help" for additional snakemake command line help documentation.\n')
 
 ###################################
 # Code for calculating empirical null
