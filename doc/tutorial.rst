@@ -98,8 +98,9 @@ The "-w 10 --max-jobs-per-second 1" parameters are issued to avoid overly quick
 job submissions to the cluster.
 The difference with the next pan-cancer tutorial is that the mutations ("data/bladder.txt") are from a single cancer type, and the pre-trained classifier is specified with the **trained_classifier** option. In this case the pre-trained 20/20+ classifier was assumed to be placed into the data directory.
 
-.. note:: You can substantially speed up run time by reducing the number of simulations.
-          This can be done by reducing the NUMSIMULATIONS variable (e.g. from 100000 to 10000) in the `config.yaml` file or specification in the command line of snakemake via `--config NUMSIMULATIONS=10000`. This might result in a slight decrease in prediction performance but may be waranted for large data. Make sure you use the correct trained classifier based on your NUMSIMULATIONS option, by using 2020plus_100k.Rdata for NUMSIMULATIONS=100000 and 2020plus_10k.Rdata for NUMSIMULATIONS=10000.
+.. note:: The run time of 20/20+ depends on the number of simulations.
+          By default, the NUMSIMULATIONS is set at 10000, which is lower than used in the original 20/20+ paper.
+          This can be increased via the NUMSIMULATIONS variable (e.g. from 10000 to 100000) in the `config.yaml` file or specification in the command line of snakemake via `--config NUMSIMULATIONS=100000`. This might result in a slight increase in prediction performance but may be too time consuming for large data. Make sure you use the correct trained classifier based on your NUMSIMULATIONS option, by using 2020plus_100k.Rdata for NUMSIMULATIONS=100000 and 2020plus_10k.Rdata for NUMSIMULATIONS=10000.
 
 20/20+ output
 #############
