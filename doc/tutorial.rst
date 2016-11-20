@@ -51,7 +51,7 @@ or cancer type specific data.
    $ wget http://karchinlab.org/data/Protocol/bladder.txt.gz  # download mutations
    $ wget http://karchinlab.org/data/2020+/snvboxGenes.bed  # download transcript annotation
    $ wget http://karchinlab.org/data/2020+/scores.tar.gz  # download pre-computed scores
-   $ wget http://karchinlab.org/data/2020+/2020plus_100k.Rdata  # download pre-computed scores
+   $ wget http://karchinlab.org/data/2020+/2020plus_10k.Rdata  # download pre-computed scores
    $ gunzip bladder.txt.gz 
    $ tar xvzf scores.tar.gz
    $ cd ..
@@ -74,14 +74,14 @@ Available pre-trained 20/20+ classifiers are shown on the :ref:`download-ref` pa
 .. code-block:: bash
 
    $ snakemake -s Snakefile pretrained_predict -p --cores 1 \
-        --config mutations="data/bladder.txt" output_dir="output_bladder" trained_classifier="data/2020plus_100k.Rdata"
+        --config mutations="data/bladder.txt" output_dir="output_bladder" trained_classifier="data/2020plus_10k.Rdata"
 
 In this example, the output will be saved in the "output_bladder" directory as specified by the output_dir parameter (also changeable in config.yaml). 
 
 .. code-block:: bash
 
    $ snakemake -s Snakefile pretrained_predict -p -j 999 -w 10 --max-jobs-per-second 1 \
-        --config mutations="data/bladder.txt" output_dir="output_bladder" trained_classifier="data/2020plus_100k.Rdata" \
+        --config mutations="data/bladder.txt" output_dir="output_bladder" trained_classifier="data/2020plus_10k.Rdata" \
         --cluster-config cluster.yaml \
         --cluster "qsub -cwd -pe smp {threads} -l mem_free={cluster.mem},h_vmem={cluster.vmem} -v PATH=$PATH"
 
