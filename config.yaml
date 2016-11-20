@@ -2,6 +2,6 @@ mutations: data/mutations.txt
 data_dir: data/
 output_dir: output/
 trained_classifier: 2020plus.Rdata
-NUMSIMULATIONS: 100000
+NUMSIMULATIONS: 10000
 NUMITER: 10
 ntrees: 200
