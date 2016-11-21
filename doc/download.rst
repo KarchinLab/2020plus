@@ -18,10 +18,12 @@ Pre-trained classifier
 We have trained a 20/20+ classifier on pan-cancer data. This can be used to predict on cancer type specific mutations.
 
 Current trained classifier (>= v1.1.0):
+
 * `2020plus_10k.Rdata <http://karchinlab.org/data/2020+/2020plus_10k.Rdata>`_ (NUMSIMULATIONS=10,000, default)
 * `2020plus_100k.Rdata <http://karchinlab.org/data/2020+/2020plus_100k.Rdata>`_ (NUMSIMULATIONS=100,000)
 
 Trained classifier for versions 1.0.0-1.0.3 (old):
+
 * `2020plus.Rdata <http://karchinlab.org/data/2020+/2020plus.Rdata>`_
 
 Pan-cancer mutation data
