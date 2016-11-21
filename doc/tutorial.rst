@@ -76,7 +76,7 @@ Available pre-trained 20/20+ classifiers are shown on the :ref:`download-ref` pa
    $ snakemake -s Snakefile pretrained_predict -p --cores 1 \
         --config mutations="data/bladder.txt" output_dir="output_bladder" trained_classifier="data/2020plus_10k.Rdata"
 
-In this example, the output will be saved in the "output_bladder" directory as specified by the output_dir parameter (also changeable in config.yaml). 
+The *–cores* argument specifies the number of computer cores that are allowable to be used at a given time. In this example, the output will be saved in the "output_bladder" directory as specified by the output_dir parameter (also changeable in config.yaml). 
 
 .. code-block:: bash
 
