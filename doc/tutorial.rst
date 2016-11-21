@@ -106,7 +106,7 @@ The difference with the next pan-cancer tutorial is that the mutations ("data/bl
 #############
 
 Like in the quick start, you will find the result in output_bladder/results/r_random_forest_prediction.txt. There will be a p-value/q-value for the oncogene, tumor suppressor gene, and driver
-score. At a false discovery rate of 0.1, you should get 9 significant oncogene scores, 35 significant TSG scores, and 50 significant driver scores. The file will also contain all of the features used for prediction. Examine the QQ plot of p-values as a diagnostic check on the reported p-values (output_bladder/plots/qq_plot.png). The observed p-values (blue line) should be close to the theoretically expected p-values (red line).  In this case, the mean absolute log2 fold change (MLFC) indicates that the p-values are in good agreement with expectations. Please see `our paper <http://biorxiv.org/content/early/2016/06/23/060426>`_ for more discussion on the MLFC.
+score. At a false discovery rate of 0.1, you should get 9 significant oncogene scores, 34 significant TSG scores, and 46 significant driver scores. The file will also contain all of the features used for prediction. Examine the QQ plot of p-values as a diagnostic check on the reported p-values (output_bladder/plots/qq_plot.png). The observed p-values (blue line) should be close to the theoretically expected p-values (red line).  In this case, the mean absolute log2 fold change (MLFC) indicates that the p-values are in good agreement with expectations. Please see `our paper <http://biorxiv.org/content/early/2016/06/23/060426>`_ for more discussion on the MLFC.
 
 .. image:: /images/mlfc.png
     :align: center
