@@ -16,7 +16,6 @@ Next-generation DNA sequencing of the exome has detected hundreds of thousands o
 The features capture mutational clustering, conservation, mutation *in silico* pathogenicity scores, mutation consequence types, protein interaction network connectivity, and other covariates (e.g. replication timing).
 Contrary to methods based on mutation rate, 20/20+ uses ratiometric features of mutations by normalizing for the total number of mutations in a gene. This decouples the genes from gene-level differences in background mutation rate. 
 
-
 Contents:
 
 .. toctree::

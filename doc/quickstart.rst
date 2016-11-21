@@ -29,7 +29,7 @@ To create the features, use the **features** sub-command for the
 
 .. code-block:: bash
 
-   $ python 2020plus.py features \
+   $ python `which 2020plus.py` features \
         -og-test oncogene.txt \
         -tsg-test tsg.txt \
         --summary summary_pancan.txt \
@@ -51,7 +51,7 @@ forest scores for prediction.
 
 .. code-block:: bash
 
-   $ python 2020plus.py --out-dir=result_compare classify \
+   $ python `which 2020plus.py` --out-dir=result_compare classify \
         -f features_pancan.txt \
         -nd simulated_null_dist.txt 
 
