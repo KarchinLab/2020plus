@@ -34,16 +34,15 @@ To create the features, use the **features** sub-command for the
 Prediction
 ----------
 
-The first step is to obtain the empirical null distribution for
-the random forest scores. The **empricial null distribution** 
+The command for prediction in this quick start example is for pan-cancer data encompassing many cancer types and samples.  
+The **classify** sub-command performs the 20/20+ predictions of driver genes.
+This step needs the 20/20+ features file already created (features_pancan.txt), and the emprirical 
+null distribution file to additionally report p-values/FDR. If an
+empirical null distribution file is not provided then only the random
+forest scores for prediction. The **empricial null distribution** 
 relates the classifier score to a p-value. An example null distribution
 **specific** to this pan-cancer dataset is simulated_null_dist.txt.
 
-The **classify** sub-command performs the 20/20+ predictions of driver genes.
-This step needs the 20/20+ features file already created, and the emprirical 
-null distribution file to additionally report p-values/FDR. If an
-empirical null distribution file is not provided then only the random
-forest scores for prediction.
 
 .. code-block:: bash
 
