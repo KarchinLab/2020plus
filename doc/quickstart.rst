@@ -2,7 +2,7 @@ Quick Start
 ===========
 
 This quick start is only meant as a test to check whether 20/20+ has been **properly installed**.
-Please see the :ref:`tut-ref` for a more detailed example on the full pipeline that you can modify for your own data.
+Please see the :ref:`tut-ref` for a more detailed example on the full pipeline that you can modify to use for your own data.
 
 Creating Features
 -----------------

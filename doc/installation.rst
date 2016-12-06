@@ -56,7 +56,7 @@ If you want the exact version 20/20+ was tested on use the requirements_dev.txt 
 Check your PATH variable
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Make sure that you have add the 20/20+ directory to your `PATH` variable. If you have done this correctly, the following command should print the location of the 2020plus.py sciprt.
+Make sure that you have add the 20/20+ directory to your `PATH` variable. If you have done this correctly, the following command should print the location of the 2020plus.py script.
 
 .. code-block:: bash
 
