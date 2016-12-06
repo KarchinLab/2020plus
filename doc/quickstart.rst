@@ -1,18 +1,14 @@
 Quick Start
 ===========
 
-This provides a quick start to running 20/20+ with
-the minimum number of steps to execute the statistical test.
-It serves as a test to make sure 20/20+ is running/installed correctly,
-see the :ref:`tut-ref` for a more detailed example.
+This quick start is only meant as a test to check whether 20/20+ has been **properly installed**.
+Please see the :ref:`tut-ref` for a more detailed example on the full pipeline that you can modify for your own data.
 
 Creating Features
 -----------------
 
-Creating the features for 20/20+ combines output from
-the  `probabilistic2020 <http://probabilistic2020.readthedocs.org/>`_
-package. First, download the data files since the output from 
-the probabilistic2020 package has already been prepared for you.
+First, download the intermediate data files since the output from 
+the `probabilistic2020 <http://probabilistic2020.readthedocs.io/en/latest/>`_ package has already been prepared for you.
 
 .. code-block:: bash
 
@@ -20,9 +16,9 @@ the probabilistic2020 package has already been prepared for you.
     $ tar xvzf pancan_example.tar.gz
     $ cd pancan_example
 
-Where oncogene.txt is probabilistic2020 oncogene output, tsg.txt is the
-output of probabilistic2020 tsg, and the summary file named summary_pancan.txt
-describes many non p-value features.
+You do not have to concern yourself with
+how these files were generated for the purpose of this quick start.
+You should see, however, oncogene.txt for oncogene related features, tsg.txt for tumor suppressor related features, and the summary file named summary_pancan.txt. 
 
 To create the features, use the **features** sub-command for the
 2020plus.py script.
@@ -41,7 +37,7 @@ Prediction
 The first step is to obtain the empirical null distribution for
 the random forest scores. The **empricial null distribution** 
 relates the classifier score to a p-value. An example null distribution
-specific to this pan-cancer dataset is simulated_null_dist.txt.
+**specific** to this pan-cancer dataset is simulated_null_dist.txt.
 
 The **classify** sub-command performs the 20/20+ predictions of driver genes.
 This step needs the 20/20+ features file already created, and the emprirical 
