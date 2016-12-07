@@ -11,11 +11,12 @@ Otherwise, create a new post with the 2020+ tag. We will be checking
 biostars for questions. You may also contact me directly at
 ctokheim AT jhu dot edu.
 
-**Can I use my own custom list of oncogenes/tumor suppressor genes?**
+**Can I use my own custom list of oncogenes/tumor suppressor genes for training?**
 
-Yes, you can change which genes are used for the training list of well-supported oncogenes
-and tumor suppressor genes. All you need is to change the gene names found
-in **data/gene_lists/oncogenes.txt** and **data/gene_lists/tsgs.txt**.
+Yes, you can change which genes are used for the training list of well-supported oncogenes and tumor suppressor genes. All you need is to change the gene names found
+in **data/gene_lists/oncogenes.txt** and **data/gene_lists/tsgs.txt**. This should
+only be done for advanced users as the training list of oncogenes and tumor suppressor
+genes were established from cancer experts.
 
 **How can I speed up the run time of 20/20+?** 
 
