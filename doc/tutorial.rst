@@ -78,6 +78,10 @@ Available pre-trained 20/20+ classifiers are shown on the :ref:`download-ref` pa
 
 The *–cores* argument specifies the number of computer cores that are allowable to be used at a given time. In this example, the output will be saved in the "output_bladder" directory as specified by the output_dir parameter (also changeable in config.yaml). 
 
+It is generally recommended to run 20/20+ on a cluster to parallelize
+calculations. The below command will execute
+the 20/20+ pipeline on an SGE computer cluster using qsub. The cluster submission command can be changed to fit your particular cluster scheduler.
+
 .. code-block:: bash
 
    $ snakemake -s Snakefile pretrained_predict -p -j 999 -w 10 --max-jobs-per-second 1 \
