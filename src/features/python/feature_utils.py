@@ -3,6 +3,7 @@ import src.utils.python.util as _utils
 import numpy as np
 import pandas as pd
 import logging
+import sys
 
 logger = logging.getLogger(__name__)
 
@@ -155,6 +156,14 @@ def random_sort(df, prng=None):
 
     return random_df
 
+
+def check_num_classes(class_labels):
+    num_uniq = class_labels.nunique()
+    if num_uniq < 3:
+        sys.exit('ERROR: There were either no mutated oncogenes or tumor suppressor genes '
+                 'found in your data! Did you supply a full pan-cancer dataset? '
+                 'Or have you modified the training list of oncogenes or '
+                 'tumor suppressor genes?')
 
 
 ############################################

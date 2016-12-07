@@ -47,6 +47,7 @@ class GenericClassifier(object):
     def train(self):
         """Train classifier on entire data set provided."""
         self.x, self.y = futils.randomize(self.x, self.prng)
+        futils.check_num_classes(self.y) # warn user if not 3 classes
         self.clf.fit(self.x, self.y)
 
     def train_cv(self, k=10):
@@ -58,6 +59,7 @@ class GenericClassifier(object):
         for i in range(self.total_iter):
             # randomize for another round
             self.x, self.y = futils.randomize(self.x, self.prng)
+            futils.check_num_classes(self.y) # warn user if not 3 classes
 
             # set up stratified kfold iterator
             k_fold = cross_validation.StratifiedKFold(self.y,
@@ -176,6 +178,7 @@ class GenericClassifier(object):
         for i in range(self.total_iter):
             # randomize for another round
             self.x, self.y = futils.randomize(self.x, self.prng)
+            futils.check_num_classes(self.y) # warn user if not 3 classes
 
             # initialize predicted results variables
             num_genes = len(self.y)
@@ -250,6 +253,7 @@ class GenericClassifier(object):
         for i in range(self.total_iter):
             # randomize for another round
             self.x, self.y = futils.randomize(self.x, self.prng)
+            futils.check_num_classes(self.y) # warn user if not 3 classes
 
             # set up stratified kfold iterator
             k_fold = cross_validation.StratifiedKFold(self.y,
