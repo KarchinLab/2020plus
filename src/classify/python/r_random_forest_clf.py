@@ -230,8 +230,8 @@ class MyClassifier(object):
             r_xtest = com.convert_to_r_dataframe(xtest)
         #r_xtest = pandas2ri.py2ri(xtest)
         pred = self.rf_pred(self.rf, r_xtest)
-        tmp_genes = pred['mynames']
-        tmp_pred_class = pred['pred']
+        tmp_genes = pred[1]
+        tmp_pred_class = pred[0]
         if new_pandas_flag:
             #py_pred = pandas2ri.ri2py(pred)
             genes = pandas2ri.ri2py(tmp_genes)
