@@ -15,6 +15,7 @@ try:
     new_pandas_flag = False
 except:
     new_pandas_flag = True
+    pandas2ri.activate()
 
 class MyClassifier(object):
     """
