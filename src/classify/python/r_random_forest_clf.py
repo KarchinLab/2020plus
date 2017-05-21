@@ -74,7 +74,7 @@ class MyClassifier(object):
         # R function for predicting class
         ro.r('''rf_pred <- function(rf, xtest){
                 prob <- predict(rf, xtest)
-                return(prob)
+                return(as.character(prob))
              }''')
         self.rf_pred = ro.r['rf_pred']
 
@@ -231,7 +231,6 @@ class MyClassifier(object):
             py_pred = pandas2ri.ri2py(pred)
         else:
             py_pred = com.convert_robj(pred)
-        #py_pred = pandas2ri.ri2py(pred)
         genes, pred_class = zip(*py_pred.items())
         tmp_df = pd.DataFrame({'pred_class': pred_class},
                               index=genes)
@@ -257,8 +256,9 @@ class MyClassifier(object):
             py_pred_prob = pandas2ri.ri2py(pred_prob)
         else:
             py_pred_prob = com.convert_robj(pred_prob)
+            py_pred_prob = py_pred_prob.values
         #py_pred_prob = pandas2ri.ri2py(pred_prob)
-        return py_pred_prob.values
+        return py_pred_prob
 
 
 class RRandomForest(GenericClassifier):
