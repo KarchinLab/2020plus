@@ -3,12 +3,18 @@ RPy2 is used to interface with R."""
 import readline  # hopefully fix libreadline error
 import rpy2.robjects as ro
 from rpy2.robjects import pandas2ri
-import pandas.rpy.common as com
 import pandas as pd
 from src.classify.python.generic_classifier import GenericClassifier
 import src.features.python.feature_utils as futils
 import os
 import logging
+
+# check if old pandas version, if not then use new conversion methods
+try:
+    import pandas.rpy.common as com
+    new_pandas_flag = False
+except:
+    new_pandas_flag = True
 
 class MyClassifier(object):
     """
@@ -111,9 +117,13 @@ class MyClassifier(object):
         self.set_sample_size(sampsize)
         ytrain.index = xtrain.index  # ensure indexes match
         xtrain['true_class'] = ytrain
-        r_xtrain = com.convert_to_r_dataframe(xtrain)
+
+        # convert
+        if new_pandas_flag:
+            r_xtrain = pandas2ri.py2ri(xtrain)
+        else:
+            r_xtrain = com.convert_to_r_dataframe(xtrain)
         #ro.globalenv['trainData'] = r_xtrain
-        #r_xtrain = pandas2ri.py2ri(xtrain)
         self.rf = self.rf_fit(r_xtrain, self.ntrees, self.sample_size)
         r_imp = self.rf_imp(self.rf)  # importance dataframe in R
         self.feature_importances_ = com.convert_robj(r_imp)
@@ -140,7 +150,10 @@ class MyClassifier(object):
         ro.r(set_wd_str)
         ro.r('load("{0}")'.format(path))
         self.rf_cv = ro.r["trained.models"]
-        self.cv_folds = com.convert_robj(ro.r["cvFoldDf"])
+        if new_pandas_flag:
+            self.cv_folds = pandas2ri.ri2py(ro.r["cvFoldDf"])
+        else:
+            self.cv_folds = com.convert_robj(ro.r["cvFoldDf"])
 
     def set_model(self, num_iter, num_fold):
         """Set which random forest model is currently active.
@@ -169,7 +182,10 @@ class MyClassifier(object):
 
     def set_cv_fold(self, df):
         """Send which genes are valid test sets for each CV fold."""
-        r_df = com.convert_to_r_dataframe(df)
+        if new_pandas_flag:
+            r_df = pandas2ri.py2ri(df)
+        else:
+            r_df = com.convert_to_r_dataframe(df)
         ro.globalenv['cvFoldDf'] = r_df
 
     def set_classes(self, oncogene, tsg):
@@ -201,10 +217,16 @@ class MyClassifier(object):
         xtest : pd.DataFrame
             features for test set
         """
-        r_xtest = com.convert_to_r_dataframe(xtest)
+        if new_pandas_flag:
+            r_xtest = pandas2ri.py2ri(xtest)
+        else:
+            r_xtest = com.convert_to_r_dataframe(xtest)
         #r_xtest = pandas2ri.py2ri(xtest)
         pred = self.rf_pred(self.rf, r_xtest)
-        py_pred = com.convert_robj(pred)
+        if new_pandas_flag:
+            py_pred = pandas2ri.ri2py(pred)
+        else:
+            py_pred = com.convert_robj(pred)
         #py_pred = pandas2ri.ri2py(pred)
         genes, pred_class = zip(*py_pred.items())
         tmp_df = pd.DataFrame({'pred_class': pred_class},
@@ -221,10 +243,16 @@ class MyClassifier(object):
         xtest : pd.DataFrame
             features for test set
         """
-        r_xtest = com.convert_to_r_dataframe(xtest)
+        if new_pandas_flag:
+            r_xtest = pandas2ri.py2ri(xtest)
+        else:
+            r_xtest = com.convert_to_r_dataframe(xtest)
         #r_xtest = pandas2ri.ri2py(xtest)
         pred_prob = self.rf_pred_prob(self.rf, r_xtest)
-        py_pred_prob = com.convert_robj(pred_prob)
+        if new_pandas_flag:
+            py_pred_prob = pandas2ri.ri2py(pred_prob)
+        else:
+            py_pred_prob = com.convert_robj(pred_prob)
         #py_pred_prob = pandas2ri.ri2py(pred_prob)
         return py_pred_prob.values
 
