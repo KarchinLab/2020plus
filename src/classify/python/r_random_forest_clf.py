@@ -127,7 +127,10 @@ class MyClassifier(object):
         #ro.globalenv['trainData'] = r_xtrain
         self.rf = self.rf_fit(r_xtrain, self.ntrees, self.sample_size)
         r_imp = self.rf_imp(self.rf)  # importance dataframe in R
-        self.feature_importances_ = com.convert_robj(r_imp)
+        if new_pandas_flag:
+            self.feature_importances_ = pandas2ri.ri2py(r_imp)
+        else:
+            self.feature_importances_ = com.convert_robj(r_imp)
         #self.feature_importances_ = pandas2ri.ri2py(r_imp)
 
     def save(self, path):
