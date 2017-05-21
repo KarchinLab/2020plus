@@ -75,7 +75,7 @@ class MyClassifier(object):
         ro.r('''rf_pred <- function(rf, xtest){
                 prob <- predict(rf, xtest)
                 tmp <- as.character(prob)
-                result.list <- list(pred=tmp, mynames=names(tmp))
+                result.list <- list(pred=tmp, mynames=row.names(xtest))
                 return(result.list)
              }''')
         self.rf_pred = ro.r['rf_pred']
