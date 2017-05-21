@@ -74,7 +74,7 @@ class MyClassifier(object):
         # R function for predicting class
         ro.r('''rf_pred <- function(rf, xtest){
                 prob <- predict(rf, xtest)
-                tmp <- as.character(prob)
+                tmp <- as.integer(prob)
                 result.list <- list(pred=tmp, mynames=row.names(xtest))
                 return(result.list)
              }''')
