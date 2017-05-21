@@ -74,7 +74,9 @@ class MyClassifier(object):
         # R function for predicting class
         ro.r('''rf_pred <- function(rf, xtest){
                 prob <- predict(rf, xtest)
-                return(as.character(prob))
+                tmp <- as.character(prob)
+                result.list <- list(pred=tmp, mynames=names(tmp))
+                return(result.list)
              }''')
         self.rf_pred = ro.r['rf_pred']
 
@@ -228,11 +230,17 @@ class MyClassifier(object):
             r_xtest = com.convert_to_r_dataframe(xtest)
         #r_xtest = pandas2ri.py2ri(xtest)
         pred = self.rf_pred(self.rf, r_xtest)
+        tmp_genes = pred['mynames']
+        tmp_pred_class = pred['pred']
         if new_pandas_flag:
-            py_pred = pandas2ri.ri2py(pred)
+            #py_pred = pandas2ri.ri2py(pred)
+            genes = pandas2ri.ri2py(tmp_genes)
+            pred_class = pandas2ri.ri2py(tmp_pred_class)
         else:
-            py_pred = com.convert_robj(pred)
-        genes, pred_class = zip(*py_pred.items())
+            #py_pred = com.convert_robj(pred)
+            genes = com.convert_robj(tmp_genes)
+            pred_class = com.convert_robj(tmp_pred_class)
+        #genes, pred_class = zip(*py_pred.items())
         tmp_df = pd.DataFrame({'pred_class': pred_class},
                               index=genes)
         tmp_df = tmp_df.reindex(xtest.index)
