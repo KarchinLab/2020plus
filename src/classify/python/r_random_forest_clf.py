@@ -72,11 +72,17 @@ class MyClassifier(object):
         self.rf_pred_prob = ro.r['rf_pred_prob']
 
         # R function for predicting class
-        ro.r('''rf_pred <- function(rf, xtest){
+        if new_pandas_flag:
+            ro.r('''rf_pred <- function(rf, xtest){
+                    prob <- predict(rf, xtest)
+                    tmp <- as.integer(prob)
+                    result.list <- list(pred=tmp, mynames=row.names(xtest))
+                    return(result.list)
+                }''')
+        else:
+            ro.r('''rf_pred <- function(rf, xtest){
                 prob <- predict(rf, xtest)
-                tmp <- as.integer(prob)
-                result.list <- list(pred=tmp, mynames=row.names(xtest))
-                return(result.list)
+                return(prob)
              }''')
         self.rf_pred = ro.r['rf_pred']
 
@@ -230,17 +236,17 @@ class MyClassifier(object):
             r_xtest = com.convert_to_r_dataframe(xtest)
         #r_xtest = pandas2ri.py2ri(xtest)
         pred = self.rf_pred(self.rf, r_xtest)
-        tmp_genes = pred[1]
-        tmp_pred_class = pred[0]
         if new_pandas_flag:
             #py_pred = pandas2ri.ri2py(pred)
+            tmp_genes = pred[1]
+            tmp_pred_class = pred[0]
             genes = pandas2ri.ri2py(tmp_genes)
             pred_class = pandas2ri.ri2py(tmp_pred_class)
         else:
-            #py_pred = com.convert_robj(pred)
-            genes = com.convert_robj(tmp_genes)
-            pred_class = com.convert_robj(tmp_pred_class)
-        #genes, pred_class = zip(*py_pred.items())
+            py_pred = com.convert_robj(pred)
+            genes, pred_class = zip(*py_pred.items())
+            #genes = com.convert_robj(tmp_genes)
+            #pred_class = com.convert_robj(tmp_pred_class)
         tmp_df = pd.DataFrame({'pred_class': pred_class},
                               index=genes)
         tmp_df = tmp_df.reindex(xtest.index)
