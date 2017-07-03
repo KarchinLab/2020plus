@@ -251,7 +251,7 @@ class MyClassifier(object):
                               index=genes)
         tmp_df = tmp_df.reindex(xtest.index)
         tmp_df -= 1  # for some reason the class numbers start at 1
-        return tmp_df
+        return tmp_df['pred_class']
 
     def predict_proba(self, xtest):
         """Predicts the probability for each class.
