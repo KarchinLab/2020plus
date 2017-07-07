@@ -14,6 +14,12 @@ Download
 * `2020plus v1.0.1 <https://github.com/KarchinLab/2020plus/archive/v1.0.1.tar.gz>`_ - 6/26/2016 - Added ability to run 20/20+ as a pipeline
 * `2020plus v1.0.0 <https://github.com/KarchinLab/2020plus/archive/v1.0.0.tar.gz>`_ - 5/1/2016 - Initial release
 
+Necessary data files
+--------------------
+
+* `Pre-computed scores <http://karchinlab.org/data/2020+/scores.tar.gz>`_ data set
+* `Reference SNVBox transcripts <http://karchinlab.org/data/2020+/snvboxGenes.bed>`_ in BED format
+
 Pre-trained classifier
 ----------------------
 
