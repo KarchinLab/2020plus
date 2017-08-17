@@ -3,6 +3,7 @@ RPy2 is used to interface with R."""
 import readline  # hopefully fix libreadline error
 import rpy2.robjects as ro
 from rpy2.robjects import pandas2ri
+from rpy2.robjects import numpy2ri
 import pandas as pd
 from src.classify.python.generic_classifier import GenericClassifier
 import src.features.python.feature_utils as futils
@@ -163,8 +164,14 @@ class MyClassifier(object):
         ro.r('load("{0}")'.format(path))
         self.rf_cv = ro.r["trained.models"]
         if new_pandas_flag:
-            self.cv_folds = pandas2ri.ri2py_dataframe(ro.r["cvFoldDf"])
-            #self.cv_folds = ro.r["cvFoldDf"]
+            # rpy2 is a complete joke of a package
+            try:
+                # use this way for conversion for bugged rpy2 versions
+                self.cv_folds = pandas2ri.ri2py(ro.r["cvFoldDf"])
+            except:
+                # this should be the correct way to convert
+                # but several versions of rpy2 have a bug
+                self.cv_folds = ro.r["cvFoldDf"]
         else:
             self.cv_folds = com.convert_robj(ro.r["cvFoldDf"])
 
