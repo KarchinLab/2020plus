@@ -1,4 +1,5 @@
 language: python 
+dist: precise
 R:
   - "3.2.4"
 python:
