@@ -163,7 +163,7 @@ class MyClassifier(object):
         ro.r('load("{0}")'.format(path))
         self.rf_cv = ro.r["trained.models"]
         if new_pandas_flag:
-            self.cv_folds = pandas2ri.ri2py(ro.r["cvFoldDf"])
+            self.cv_folds = pandas2ri.ri2py_dataframe(ro.r["cvFoldDf"])
             #self.cv_folds = ro.r["cvFoldDf"]
         else:
             self.cv_folds = com.convert_robj(ro.r["cvFoldDf"])
