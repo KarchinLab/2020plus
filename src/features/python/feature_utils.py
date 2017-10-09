@@ -158,12 +158,13 @@ def random_sort(df, prng=None):
 
 
 def check_num_classes(class_labels):
-    num_uniq = class_labels.nunique()
-    if num_uniq < 3:
-        sys.exit('ERROR: There were either no mutated oncogenes or tumor suppressor genes '
+    class_cts = class_labels.value_counts()
+    num_sufficient_uniq = (class_cts > 5).sum()
+    if num_sufficient_uniq < 3:
+        sys.exit('ERROR: There were either no or very few mutated oncogenes or tumor suppressor genes '
                  'found in your data! Did you supply a full pan-cancer dataset? '
                  'Or have you modified the training list of oncogenes or '
-                 'tumor suppressor genes?')
+                 'tumor suppressor genes? Or did you subset your mutations to not include oncogenes/tumor suppressor genes in the training list?')
 
 
 ############################################
