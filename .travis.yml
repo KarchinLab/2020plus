@@ -1,5 +1,5 @@
 language: python 
-dist: precise
+#dist: precise
 R:
   - "3.2.4"
 python:
@@ -10,8 +10,8 @@ branches:
     - master
 addons:
   apt:
-    sources:
-    - r-packages-precise
+    #sources:
+    #- r-packages-precise
     packages:
     - r-base-dev
     - r-recommended
@@ -22,7 +22,7 @@ cache:
 # Setup anaconda
 install: 
   # - sudo apt-get update
-  - export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libgfortran.so.3
+  #- export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libgfortran.so.3
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
@@ -47,5 +47,8 @@ install:
   - Rscript -e 'if(!"covr" %in% rownames(installed.packages())) { install.packages("covr", dependencies = TRUE) }'
   - Rscript -e 'if(!"randomForest" %in% rownames(installed.packages())) { install.packages("randomForest", dependencies = TRUE) }'
   - Rscript -e 'update.packages(ask = FALSE, instlib = "~/Rlib")'
-  - pip install rpy2==2.8.4
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      pip install rpy2==2.8.4;
+    else
+      pip install rpy2;
 script: "nosetests tests/test_train.py tests/test_classify.py tests/test_features.py"
