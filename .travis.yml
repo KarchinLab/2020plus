@@ -3,7 +3,6 @@ language: python
 #R:
   #- "3.3.3"
 python:
-  - "3.5"
   - "3.6"
 branches:
   only:
