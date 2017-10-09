@@ -51,7 +51,7 @@ install:
   #- Rscript -e 'if(!"randomForest" %in% rownames(installed.packages())) { install.packages("randomForest", dependencies = TRUE) }'
   #- Rscript -e 'update.packages(ask = FALSE, instlib = "~/Rlib")'
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      conda install rpy2==2.8.4;
+      conda install rpy2=2.8.4;
     else
       conda install rpy2;
     fi
