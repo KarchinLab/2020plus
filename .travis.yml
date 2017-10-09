@@ -51,4 +51,5 @@ install:
       pip install rpy2==2.8.4;
     else
       pip install rpy2;
+    fi
 script: "nosetests tests/test_train.py tests/test_classify.py tests/test_features.py"
