@@ -3,8 +3,8 @@ language: python
 #R:
   #- "3.3.3"
 python:
-  - "2.7"
   - "3.5"
+  - "3.6"
 branches:
   only:
     - master
@@ -19,17 +19,14 @@ addons:
 cache:
   directories: 
     - ~/Rlib
+    - $HOME/miniconda
 # Setup anaconda
 install: 
   # - sudo apt-get update
   #- export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libgfortran.so.3
   # We do this conditionally because it saves us some downloading if the
   # version is the same.
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
-    else
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
@@ -42,17 +39,5 @@ install:
   - conda install -c r r-essentials
   - conda install -c r r-randomForest
   - R --version
-  #- mkdir -p ~/Rlib
-  #- echo 'R_LIBS=~/Rlib' > .Renviron
-  #- echo 'options(repos = "http://cran.rstudio.com")' > .Rprofile
-  #- echo '.travis.yml' > .Rbuildignore
-  #- Rscript -e 'if(!"devtools" %in% rownames(installed.packages())) { install.packages("devtools", dependencies = TRUE) }'
-  #- Rscript -e 'if(!"covr" %in% rownames(installed.packages())) { install.packages("covr", dependencies = TRUE) }'
-  #- Rscript -e 'if(!"randomForest" %in% rownames(installed.packages())) { install.packages("randomForest", dependencies = TRUE) }'
-  #- Rscript -e 'update.packages(ask = FALSE, instlib = "~/Rlib")'
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      conda install rpy2=2.8.4;
-    else
-      conda install rpy2;
-    fi
+  - conda install rpy2;
 script: "nosetests tests/test_train.py tests/test_classify.py tests/test_features.py"
