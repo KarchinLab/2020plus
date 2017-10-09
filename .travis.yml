@@ -40,7 +40,6 @@ install:
   - conda create -q -n test-environment numpy scipy nose pandas scikit-learn 
   - source activate test-environment
   - conda install -c r r-essentials
-  - conda install -c r r-covr
   - conda install -c r r-randomForest
   - R --version
   #- mkdir -p ~/Rlib
