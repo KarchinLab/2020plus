@@ -19,7 +19,6 @@ addons:
 cache:
   directories: 
     - ~/Rlib
-    - $HOME/miniconda
 # Setup anaconda
 install: 
   # - sudo apt-get update
