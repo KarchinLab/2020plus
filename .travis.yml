@@ -1,7 +1,7 @@
 language: python 
 #dist: precise
-R:
-  - "3.3.3"
+#R:
+  #- "3.3.3"
 python:
   - "2.7"
   - "3.5"
@@ -39,17 +39,21 @@ install:
   - conda info -a
   - conda create -q -n test-environment numpy scipy nose pandas scikit-learn 
   - source activate test-environment
-  - mkdir -p ~/Rlib
-  - echo 'R_LIBS=~/Rlib' > .Renviron
-  - echo 'options(repos = "http://cran.rstudio.com")' > .Rprofile
-  - echo '.travis.yml' > .Rbuildignore
+  - conda install -c r r-essentials
+  - conda install -c r r-covr
+  - conda install -c r r-randomForest
+  - R --version
+  #- mkdir -p ~/Rlib
+  #- echo 'R_LIBS=~/Rlib' > .Renviron
+  #- echo 'options(repos = "http://cran.rstudio.com")' > .Rprofile
+  #- echo '.travis.yml' > .Rbuildignore
   #- Rscript -e 'if(!"devtools" %in% rownames(installed.packages())) { install.packages("devtools", dependencies = TRUE) }'
-  - Rscript -e 'if(!"covr" %in% rownames(installed.packages())) { install.packages("covr", dependencies = TRUE) }'
-  - Rscript -e 'if(!"randomForest" %in% rownames(installed.packages())) { install.packages("randomForest", dependencies = TRUE) }'
-  - Rscript -e 'update.packages(ask = FALSE, instlib = "~/Rlib")'
+  #- Rscript -e 'if(!"covr" %in% rownames(installed.packages())) { install.packages("covr", dependencies = TRUE) }'
+  #- Rscript -e 'if(!"randomForest" %in% rownames(installed.packages())) { install.packages("randomForest", dependencies = TRUE) }'
+  #- Rscript -e 'update.packages(ask = FALSE, instlib = "~/Rlib")'
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      pip install rpy2==2.8.4;
+      conda install rpy2==2.8.4;
     else
-      pip install rpy2;
+      conda install rpy2;
     fi
 script: "nosetests tests/test_train.py tests/test_classify.py tests/test_features.py"
