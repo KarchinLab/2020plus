@@ -43,26 +43,6 @@ def _train():
     src.train.python.train.main(opts)  # run code
 
 
-def _savedb():
-    """Wrapper function to call gene_tsv/gene_features main function.
-
-    Saves information mostly from COSMIC into a database. Additional
-    information from the MutSigCV paper is also stored in the gene_features
-    table.
-    """
-    src.savedb.python.gene_tsv.main(args.hypermutator,
-                                    # args.cell_line,
-                                    args.input,
-                                    args.output,
-                                    args.no_cosmic,
-                                    vars(args))  # populate the nucleotide table
-    src.savedb.python.gene_features.main(args.output)  # populate the gene_features table
-    src.savedb.python.gene_maf.main(args.maf,
-                                    args.output,
-                                    args.hypermutator)
-    src.savedb.python.merge_mutations.main(args.output)
-
-
 def _features():
     """Wrapper function to call the features main function."""
     opts = vars(args)  # make CLI options a dictionary
@@ -97,52 +77,6 @@ if __name__ == '__main__':
                         default=False,
                         help='Flag for more verbose log output')
     subparser = parser.add_subparsers(help='sub-command help')
-
-    # savedb sub-command
-    """
-    help_string = ('Concatenate tab delim gene files found in /databases/COSMIC '
-                   'and then save them to a sqlite database for further use. '
-                   'Gene length and information from the MutSigCV paper are also '
-                   'stored in the database.')
-    parser_savedb = subparser.add_parser('savedb',
-                                         help=help_string)
-    parser_savedb.set_defaults(func=_savedb)
-    help_str = ('Save sqlite db to non-standard location which'
-                ' will NOT be used for further analysis (optional)')
-    parser_savedb.add_argument('-o', '--output',
-                               type=str, default='',
-                               help=help_str)
-    help_str = ('Mutations from COSMIC. Either a directory unpacked from genes.tgz file or '
-                'CosmicMutantExport.tsv (optional)')
-    parser_savedb.add_argument('-i', '--input',
-                               type=str, default='',
-                               help=help_str)
-    help_str = 'Flag indicating whether to only use genome wide screens in COSMIC'
-    parser_savedb.add_argument('--only-genome-wide',
-                               action='store_true',
-                               default=False,
-                               help=help_str)
-    help_str = 'Include variants with unknown somatic status (potentially germline)'
-    parser_savedb.add_argument('--use-unknown-status',
-                               action='store_true',
-                               default=False,
-                               help=help_str)
-    parser_savedb.add_argument('-hm', '--hypermutator',
-                               type=int,
-                               action='store',
-                               default=500,
-                               help='Number of mutations to define a sample '
-                               'as a hypermutator. Hypermutator samples are filtered '
-                               ' from further analysis. (default: 500)')
-    parser_savedb.add_argument('-m', '--maf',
-                               type=str, default='',
-                               help='MAF file to augment mutations '
-                               'found in COSMIC')
-    parser_savedb.add_argument('-nc', '--no-cosmic',
-                               action='store_true',
-                               default=False,
-                               help='Don\'t use mutations from COSMIC')
-    """
 
     # features sub-command
     help_string = ('Generate the features used in classification.'

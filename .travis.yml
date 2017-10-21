@@ -1,7 +1,4 @@
 language: python 
-#dist: precise
-#R:
-  #- "3.3.3"
 python:
   - "3.6"
 branches:
@@ -9,8 +6,6 @@ branches:
     - master
 addons:
   apt:
-    #sources:
-    #- r-packages-precise
     packages:
     - r-base-dev
     - r-recommended
