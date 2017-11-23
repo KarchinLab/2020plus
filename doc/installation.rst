@@ -51,12 +51,18 @@ Note, the above command won't install the optional matplotlib package. Matplotli
 
     $ pip install matplotlib
 
-If you want the exact version 20/20+ was tested on use the requirements_dev.txt file and python 2.7. The `probabilistic2020 <https://github.com/KarchinLab/probabilistic2020>`_ python package is used to generate features used by 20/20+ from the mutations in MAF format.
+The `probabilistic2020 <https://github.com/KarchinLab/probabilistic2020>`_ python package is used to generate features used by 20/20+ from the mutations in MAF format.
 
 Check your PATH variable
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Make sure that you have add the 20/20+ directory to your `PATH` variable. If you have done this correctly, the following command should print the location of the 2020plus.py script.
+Make sure that you have add the 20/20+ directory to your `PATH` variable. We recommend you add this line to your bashrc file.
+
+.. code-block:: bash
+
+    export PATH=$PATH:/path/to/2020plus
+
+Where "/path/to/2020plus" represents the path where **you** placed 20/20+. If you have done this correctly, the following command should print the location of the 2020plus.py script.
 
 .. code-block:: bash
 
