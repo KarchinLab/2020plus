@@ -38,6 +38,7 @@ def process_features(df):
         tot_vest_score = df[sum_cols].sum(axis=1).astype(float)
         num_muts = df[all_muts].sum(axis=1).astype(float)
         df['Mean VEST Score'] = tot_vest_score / num_muts
+        df.loc[np.isinf(df['Mean VEST Score']), 'Mean VEST Score'] = np.nan  # hack to prevent infinity
         #df['Missense VEST Score'] = df['Total Missense VEST Score'] / num_muts
         #df['VEST normalized missense position entropy'] = df['normalized missense position entropy'] * (1.-df['Missense VEST Score'])
         del df['Total Missense VEST Score']
