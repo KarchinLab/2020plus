@@ -1,7 +1,7 @@
 from os.path import join
 
 # configuration file
-configfile: "config.yaml"
+#configfile: "config.yaml"
 
 # output directory
 output_dir=config["output_dir"]
@@ -117,7 +117,7 @@ rule simMaf:
         min_recur=min_recur,
         data_dir=config["data_dir"]
     output: 
-        join(output_dir, "simulated_summary/chasm_sim_maf{iter}.txt")
+        join(output_dir, "simulated_summary/chasm_sim_maf{iter,[0-9]+}.txt")
     shell:
         "mut_annotate --log-level=INFO "
         "  -b {params.data_dir}/snvboxGenes.bed -i {params.data_dir}/snvboxGenes.fa -c 1.5 "
@@ -188,7 +188,7 @@ rule simFeatures:
     shell:
         "python `which 2020plus.py` features "
         "  -s {input.summary} --tsg-test {input.tsg} -og-test {input.og} "
-        "  --permute-biogrid -o {output}"
+        "  -o {output}"
 
 # final processing of the simulation results
 rule finishSim:
@@ -283,7 +283,8 @@ rule cv_predict:
         data_dir=config["data_dir"],
         output_dir=config["output_dir"]
     output: 
-        join(output_dir, "output/results/r_random_forest_prediction.txt")
+        join(output_dir, "output/results/r_random_forest_prediction.txt"),
+        join(output_dir, "trained.Rdata")
     shell:
         """
         python `which 2020plus.py` --log-level=INFO train -d .7 -o 1.0 -n {{params.ntrees2}} -r {outdir}/trained.Rdata --features={{input.features}} --random-seed 71
