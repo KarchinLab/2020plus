@@ -1,7 +1,8 @@
 from os.path import join
 
 # configuration file
-#configfile: "config.yaml"
+if 'config' not in vars():
+    configfile: "config.yaml"
 
 # output directory
 output_dir=config["output_dir"]
