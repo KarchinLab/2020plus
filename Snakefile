@@ -1,7 +1,7 @@
 from os.path import join
 
 # configuration file
-if 'config' not in vars() or not config:
+if 'config' not in vars() or not config or 'ntrees' not in config:
     configfile: "config.yaml"
 
 # output directory
