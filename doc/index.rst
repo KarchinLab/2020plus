@@ -30,6 +30,7 @@ Contents:
 Releases
 --------
 
+* `2020plus v1.2.1 <https://github.com/KarchinLab/2020plus/archive/v1.2.1.tar.gz>`_ - 8/2/2018 - Fixed bug where configuration file would not load
 * `2020plus v1.2.0 <https://github.com/KarchinLab/2020plus/archive/v1.2.0.tar.gz>`_ - 3/21/2018 - Change to null distribution simulation
 * `2020plus v1.1.3 <https://github.com/KarchinLab/2020plus/archive/v1.1.3.tar.gz>`_ - 8/17/2017 - Bug fixes for different versions of rpy2
 * `2020plus v1.1.2 <https://github.com/KarchinLab/2020plus/archive/v1.1.2.tar.gz>`_ - 7/3/2017 - Further bug fixes for latest versions of 20/20+ dependencies
