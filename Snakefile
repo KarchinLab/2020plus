@@ -15,6 +15,14 @@ cv="--cv"
 # number of trees in RF
 ntrees=config['ntrees']
 ntrees2=5*ntrees
+# indication of whether to drop silent mutations
+drop_silent="no"
+if "drop_silent" in config:
+    drop_silent = config['drop_silent']
+if drop_silent == "yes":
+    drop_silent_flag = "--drop-silent"
+else:
+    drop_silent_flag = ""
 
 # params for simulations
 num_iter=10
@@ -116,11 +124,12 @@ rule simMaf:
         MUTATIONS=mutations
     params:
         min_recur=min_recur,
-        data_dir=config["data_dir"]
+        data_dir=config["data_dir"],
+        dropsilent=drop_silent_flag
     output: 
         join(output_dir, "simulated_summary/chasm_sim_maf{iter,[0-9]+}.txt")
     shell:
-        "mut_annotate --log-level=INFO "
+        "mut_annotate --log-level=INFO {params.dropsilent} "
         "  -b {params.data_dir}/snvboxGenes.bed -i {params.data_dir}/snvboxGenes.fa -c 1.5 "
         "  -m {input.MUTATIONS} -p 0 -n 1 --maf --seed=$(({wildcards.iter}*42)) "
         "  -r {params.min_recur} --unique -o {output}"
@@ -131,11 +140,12 @@ rule simSummary:
         MUTATIONS=mutations
     params:
         min_recur=min_recur,
-        data_dir=config["data_dir"]
+        data_dir=config["data_dir"],
+        dropsilent=drop_silent_flag
     output: 
         join(output_dir, "simulated_summary/chasm_sim_summary{iter}.txt")
     shell:
-        "mut_annotate --log-level=INFO "
+        "mut_annotate --log-level=INFO {params.dropsilent} "
         "  -b {params.data_dir}/snvboxGenes.bed -i {params.data_dir}/snvboxGenes.fa "
         "  -c 1.5 -m {input.MUTATIONS} -p 0 -n 1 --summary --seed=$(({wildcards.iter}*42)) "
         "  --score-dir={params.data_dir}/scores "
