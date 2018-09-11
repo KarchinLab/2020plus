@@ -22,3 +22,10 @@ genes were established from cancer experts.
 
 You can substantially speed up run time by reducing the number of simulations.
 This can be done by reducing the NUMSIMULATIONS variable (e.g. from 100000 to 10000) in the `config.yaml` file or specification in the command line of snakemake via `--config NUMSIMULATIONS=10000`. This might result in a slight decrease in prediction performance but may be waranted for large data.
+
+**What happens if silent mutations were not recorded in my data set?** 
+
+Ocassionally, in the literature, studies may only report non-silent mutations
+from a sequencing study. If not accounted for, this may bias estimates of 
+statistical significance. To make an adjustment for this problem, provide the `drop_silent` option
+via the command line: `--config drop_silent="yes"`.
