@@ -29,7 +29,8 @@ install:
   - conda info -a
   - conda env create -f environment.yml
   - source activate 2020plus
-  - conda install nose
+  - conda install r r-randomForest rpy2
+  - pip install nose
   #- conda create -q -n test-environment numpy scipy nose pandas scikit-learn tzlocal
   #- source activate test-environment
   #- conda install -c r r-essentials

@@ -2,7 +2,6 @@ name: 2020plus
 channels:
 - bioconda
 - defaults
-- r
 dependencies:
 - numpy
 - scipy
@@ -12,7 +11,5 @@ dependencies:
 - pyyaml
 - pysam
 - snakemake
-- r-essentials
-- rpy2
 - pip:
   - probabilistic2020==1.2.0
