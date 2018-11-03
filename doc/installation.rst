@@ -12,9 +12,7 @@ Releases
 Package requirements
 ~~~~~~~~~~~~~~~~~~~~
 
-.. note:: Upgrading the package dependency of probabilistic2020 to version >=1.0.6 is recommended.
-
-Once downloaded, please add the directory to your :code:`PATH` variable.
+Once you have downloaded the source code for 20/20+, please add the directory to your :code:`PATH` variable.
 
 We recommend that you install the dependencies for 20/20+ through `conda <https://conda.io/miniconda.html>`_. Once conda is installed, setting up the environment is done as follows:
 
