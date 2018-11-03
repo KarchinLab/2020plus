@@ -1,0 +1,18 @@
+name: 2020plus
+channels:
+- bioconda
+- defaults
+- r
+dependencies:
+- numpy
+- scipy
+- matplotlib
+- pandas
+- scikit-learn<0.20.0
+- pyyaml
+- pysam
+- snakemake
+- r-essentials
+- rpy2
+- pip:
+  - probabilistic2020==1.2.0

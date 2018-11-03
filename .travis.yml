@@ -27,10 +27,13 @@ install:
   - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
-  - conda create -q -n test-environment numpy scipy nose pandas scikit-learn tzlocal
-  - source activate test-environment
-  - conda install -c r r-essentials
-  - conda install -c r r-randomForest
+  - conda create -f environment.yml
+  - source activate 2020plus
+  - conda install nose
+  #- conda create -q -n test-environment numpy scipy nose pandas scikit-learn tzlocal
+  #- source activate test-environment
+  #- conda install -c r r-essentials
+  #- conda install -c r r-randomForest
   - R --version
-  - conda install rpy2;
+  #- conda install rpy2;
 script: "nosetests tests/test_train.py tests/test_classify.py tests/test_features.py"
