@@ -1,0 +1,7 @@
+channels:
+- defaults
+- r
+dependencies:
+- r
+- r-randomForest
+- rpy2
