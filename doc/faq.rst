@@ -9,7 +9,7 @@ Check to make sure your question has not been already answered
 by looking at posts with the tag `2020+ <https://www.biostars.org/t/2020+>`_.
 Otherwise, create a new post with the 2020+ tag. We will be checking
 biostars for questions. You may also contact me directly at
-ctokheim AT jhu dot edu.
+ctokhei1 AT alumni dot jh dot edu.
 
 **Can I use my own custom list of oncogenes/tumor suppressor genes for training?**
 

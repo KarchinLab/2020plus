@@ -7,7 +7,7 @@
 ======================================================
 
 :Author: Collin Tokheim
-:Contact: ctokheim AT jhu.edu
+:Contact: ctokhei1 AT alumni.jh.edu
 :Source code: `GitHub <https://github.com/KarchinLab/2020plus>`_
 :Q&A: `Biostars (tag: 2020+) <https://www.biostars.org/t/2020+/>`_ 
 
