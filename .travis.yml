@@ -27,7 +27,7 @@ install:
   - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
-  - conda create -f environment.yml
+  - conda env create -f environment.yml
   - source activate 2020plus
   - conda install nose
   #- conda create -q -n test-environment numpy scipy nose pandas scikit-learn tzlocal
