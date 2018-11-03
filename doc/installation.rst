@@ -15,43 +15,26 @@ Package requirements
 .. note:: Upgrading the package dependency of probabilistic2020 to version >=1.0.6 is recommended.
 
 Once downloaded, please add the directory to your :code:`PATH` variable.
-Because 20/20+ internally uses the random forest package in R, you will both need `R <https://www.r-project.org/>`_ and the randomForest library installed. Once R is installed, you can install the random forest package:
 
-.. code-block:: R
-
-    > install.packages("randomForest")
-
-If you do not have permission to install `randomForest` on the system wide R, you can install in your local user directory by creating an `~/.Renviron` file as the following:
+We recommend that you install the dependencies for 20/20+ through `conda <https://conda.io/miniconda.html>`_. Once conda is installed, setting up the environment is done as follows:
 
 .. code-block:: bash
 
-    R_LIBS=~/Rlibs
+    $ conda env create -f environment_python.yml  # install dependencies for python
+    $ source activate 2020plus  # activate the 20/20+ conda environment
+    $ conda install r r-randomForest rpy2  # install the R related dependencies
 
-Where, in this case, the R libraries will be installed in the `~/Rlibs` directory.
-
-20/20+ also requires the following python packages:
-
-* numpy
-* scipy
-* pandas>=0.17
-* scikit-learn
-* rpy2
-* probabilistic2020
-* matplotlib (optional)
-
-To install these packages via `pip` you can use the following command:
+Every time you wish to run 20/20+, you will then need to activate the "2020plus" conda environment.
 
 .. code-block:: bash
 
-    $ pip install -r requirements.txt
+    $ source activate 2020plus
 
-Note, the above command won't install the optional matplotlib package. Matplotlib is used for creating plots, if you want plotting output than issue the following command to install matplotlib:
+The 20/20+ conda environment can also be deactivated.
 
 .. code-block:: bash
 
-    $ pip install matplotlib
-
-The `probabilistic2020 <https://github.com/KarchinLab/probabilistic2020>`_ python package is used to generate features used by 20/20+ from the mutations in MAF format.
+    $ source deactivate 2020plus
 
 Check your PATH variable
 ~~~~~~~~~~~~~~~~~~~~~~~~

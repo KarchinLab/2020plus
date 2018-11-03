@@ -21,33 +21,22 @@ You can download [releases](https://github.com/KarchinLab/2020plus/releases) on 
 
 [![Build Status](https://travis-ci.org/KarchinLab/2020plus.svg?branch=master)](https://travis-ci.org/KarchinLab/2020plus)
 
-Because 20/20+ internally uses the random forest package in R, you will both need [R](https://www.r-project.org/) and the randomForest library installed. Once R is installed, you can install the random forest package:
-
-```R
-> install.packages("randomForest")
-```
-
-If you do not have permission to install `randomForest` on the system wide R, you can install in your local user directory by creating an `~/.Renviron` file as the following:
-
-```
-R_LIBS=~/Rlibs
-```
-
-Where, in this case, the R libraries will be installed in the `~/Rlibs` directory.
-
-20/20+ also requires the following python packages:
-
-* numpy
-* scipy
-* pandas>=0.17.0
-* scikit-learn
-* rpy2
-* probabilistic2020
-
-To install these packages via `pip` you can use the following command:
+We recommend that you install the dependencies for 20/20+ through [conda](https://conda.io/miniconda.html). Once conda is installed, setting up the environment is done as follows:
 
 ```bash
-$ pip install -r requirements.txt
+$ conda env create -f environment_python.yml  # install dependencies for python
+$ source activate 2020plus  # activate the 20/20+ conda environment
+$ conda install r r-randomForest rpy2  # install the R related dependencies
 ```
 
-If you want the exact version 20/20+ was tested on use the `requirements_dev.txt` file and python 2.7. The [probabilistic2020](https://github.com/KarchinLab/probabilistic2020) python package is used to generate features for 20/20+ from mutations in MAF format.
+Every time you wish to run 20/20+, you will then need to activate the "2020plus" conda environment.
+
+```bash
+$ source activate 2020plus
+```
+
+The 20/20+ conda environment can also be deactivated.
+
+```bash
+$ source deactivate 2020plus
+```
