@@ -21,6 +21,8 @@ You can download [releases](https://github.com/KarchinLab/2020plus/releases) on 
 
 [![Build Status](https://travis-ci.org/KarchinLab/2020plus.svg?branch=master)](https://travis-ci.org/KarchinLab/2020plus)
 
+20/20+ is designed to run on *linux* operating systems.
+
 We recommend that you install the dependencies for 20/20+ through [conda](https://conda.io/miniconda.html). Once conda is installed, setting up the environment is done as follows:
 
 ```bash

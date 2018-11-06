@@ -4,6 +4,8 @@ Installation
 .. image:: https://travis-ci.org/KarchinLab/2020plus.svg?branch=master
     :target: https://travis-ci.org/KarchinLab/2020plus
 
+20/20+ is designed to run on *linux* operating systems.
+
 Releases
 ~~~~~~~~
 
