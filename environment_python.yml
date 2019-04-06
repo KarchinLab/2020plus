@@ -13,4 +13,4 @@ dependencies:
 - snakemake
 - tzlocal
 - pip:
-  - probabilistic2020==1.2.0
+  - probabilistic2020
