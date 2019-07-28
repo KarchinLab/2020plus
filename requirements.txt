@@ -1,6 +1,6 @@
 numpy
-scipy
+scipy<1.0.0
 pandas>=0.17.0
-scikit-learn
+scikit-learn<0.20.0
 rpy2
 probabilistic2020
