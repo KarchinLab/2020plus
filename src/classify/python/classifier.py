@@ -277,10 +277,10 @@ def main(cli_opts):
         pred_tsg = result_df[result_df['majority vote class']==_utils.tsg_label].index.to_series()
         novel_tsg = result_df[(result_df['majority vote class']==_utils.tsg_label) & (result_df['training list class']!=_utils.tsg_label)].index.to_series()
         pred_driver = result_df[result_df['majority vote cancer gene']==1].index.to_series()
-        pred_onco.to_csv(_utils.clf_result_dir + cfg_opts['rrf_onco'], sep='\t', index=False, header=None)
-        novel_onco.to_csv(_utils.clf_result_dir + cfg_opts['rrf_novel_onco'], sep='\t', index=False, header=None)
-        pred_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rrf_tsg'], sep='\t', index=False, header=None)
-        novel_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rrf_novel_tsg'], sep='\t', index=False, header=None)
+        pred_onco.to_csv(_utils.clf_result_dir + cfg_opts['rrf_onco'], sep='\t', index=False, header=False)
+        novel_onco.to_csv(_utils.clf_result_dir + cfg_opts['rrf_novel_onco'], sep='\t', index=False, header=False)
+        pred_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rrf_tsg'], sep='\t', index=False, header=False)
+        novel_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rrf_novel_tsg'], sep='\t', index=False, header=False)
         log_str = ('Majority vote Random forest: {0} ({1} novel) oncogenes, '
                    '{2} ({3} novel) tsg'.format(len(pred_onco), len(novel_onco),
                                                 len(pred_tsg), len(novel_tsg)))
@@ -291,10 +291,10 @@ def main(cli_opts):
         pred_tsg = result_df[result_df['tsg q-value']<=.1].index.to_series()
         novel_tsg = result_df[(result_df['tsg q-value']<=.1) & (result_df['training list class']!=_utils.tsg_label)].index.to_series()
         pred_driver = result_df[result_df['driver q-value']<=.1].index.to_series()
-        pred_onco.to_csv(_utils.clf_result_dir + cfg_opts['rrf_onco'], sep='\t', index=False, header=None)
-        novel_onco.to_csv(_utils.clf_result_dir + cfg_opts['rrf_novel_onco'], sep='\t', index=False, header=None)
-        pred_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rrf_tsg'], sep='\t', index=False, header=None)
-        novel_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rrf_novel_tsg'], sep='\t', index=False, header=None)
+        pred_onco.to_csv(_utils.clf_result_dir + cfg_opts['rrf_onco'], sep='\t', index=False, header=False)
+        novel_onco.to_csv(_utils.clf_result_dir + cfg_opts['rrf_novel_onco'], sep='\t', index=False, header=False)
+        pred_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rrf_tsg'], sep='\t', index=False, header=False)
+        novel_tsg.to_csv(_utils.clf_result_dir + cfg_opts['rrf_novel_tsg'], sep='\t', index=False, header=False)
         log_str = ('Random forest significance test: {0} ({1} novel) oncogenes, '
                    '{2} ({3} novel) tsg'.format(len(pred_onco), len(novel_onco),
                                                 len(pred_tsg), len(novel_tsg)))
