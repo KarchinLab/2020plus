@@ -12,5 +12,6 @@ dependencies:
 - pysam
 - snakemake
 - tzlocal
+- pip
 - pip:
   - probabilistic2020
