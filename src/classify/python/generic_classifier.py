@@ -91,8 +91,8 @@ class GenericClassifier(object):
                                  sample_weight=sample_weight)
                 else:
                     # do training without weighting
-                    self.clf.fit(self.x.ix[tmp_train_ix].copy(),
-                                 self.y.ix[tmp_train_ix].copy())
+                    self.clf.fit(self.x.loc[tmp_train_ix].copy(),
+                                 self.y.loc[tmp_train_ix].copy())
                 self.clf.append_fold_result()  # add the training result from each fold
             self.clf.append_cv_result()  # add the training result for a single CV to the R variable
 
