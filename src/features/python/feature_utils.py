@@ -153,7 +153,7 @@ def random_sort(df, prng=None):
                                  replace=False)  # sample without replacement
 
     # change order of df
-    random_df = df.iloc[random_indices].copy()
+    random_df = df.loc[random_indices].copy()
 
     return random_df
 
