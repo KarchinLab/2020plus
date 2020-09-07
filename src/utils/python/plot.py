@@ -5,7 +5,10 @@ to make a reasonable looking plot.
 """
 
 import matplotlib
-matplotlib.use('agg', warn=False)
+try:
+    matplotlib.use('agg')
+except ImportError:
+    pass
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as stats

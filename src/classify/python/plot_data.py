@@ -2,7 +2,10 @@ import src.utils.python.plot as myplt
 import src.utils.python.util as _utils
 import src.utils.python.p_value as pval
 import matplotlib
-matplotlib.use('agg', warn=False)
+try:
+    matplotlib.use('agg')
+except ImportError:
+    pass
 import matplotlib.pyplot as plt
 import pandas as pd
 import logging
