@@ -34,11 +34,11 @@ $ conda install r r-randomForest rpy2  # install the R related dependencies
 Every time you wish to run 20/20+, you will then need to activate the "2020plus" conda environment.
 
 ```bash
-$ source activate 2020plus
+$ conda activate 2020plus
 ```
 
 The 20/20+ conda environment can also be deactivated.
 
 ```bash
-$ source deactivate 2020plus
+$ conda deactivate 2020plus
 ```
