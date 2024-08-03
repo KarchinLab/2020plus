@@ -12,7 +12,7 @@ the `probabilistic2020 <http://probabilistic2020.readthedocs.io/en/latest/>`_ pa
 
 .. code-block:: bash
 
-    $ wget http://karchinlab.org/data/2020+/pancan_example.tar.gz
+    $ wget https://www.dropbox.com/scl/fi/phv6sidw55qwiqq0g551a/pancan_example.tar.gz?rlkey=psnmy08lcssjj60gagowhwrf8&st=u2ndd173&dl=1 -o pancan_example.tar.gz
     $ tar xvzf pancan_example.tar.gz
     $ cd pancan_example
 
