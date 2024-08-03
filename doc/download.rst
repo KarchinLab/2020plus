@@ -22,8 +22,8 @@ Download
 Necessary data files
 --------------------
 
-* `Pre-computed scores <http://karchinlab.org/data/2020+/scores.tar.gz>`_ data set
-* `Reference SNVBox transcripts <http://karchinlab.org/data/2020+/snvboxGenes.bed>`_ in BED format
+* `Pre-computed scores <https://www.dropbox.com/scl/fi/o6eaih9d3rr9ztms2pa33/scores.tar.gz?rlkey=ekih9qstzfncn8811935a7ghb&st=58ife2e0&dl=1>`_ data set
+* `Reference SNVBox transcripts <https://www.dropbox.com/scl/fi/jnucugcu4qslb8vw0s9ry/snvboxGenes.bed?rlkey=yc3gqu4msx0wgqb6wo149rpok&st=dklww6yv&dl=1>`_ in BED format
 
 Pre-trained classifier
 ----------------------
@@ -32,17 +32,17 @@ We have trained a 20/20+ classifier on pan-cancer data. This can be used to pred
 
 Current trained classifier (>= v1.1.0):
 
-* `2020plus_10k.Rdata <http://karchinlab.org/data/2020+/2020plus_10k.Rdata>`_ (NUMSIMULATIONS=10,000, default)
-* `2020plus_100k.Rdata <http://karchinlab.org/data/2020+/2020plus_100k.Rdata>`_ (NUMSIMULATIONS=100,000)
+* `2020plus_10k.Rdata <https://www.dropbox.com/scl/fi/zv3twjeii2ghxtgy4f9o5/2020plus_10k.Rdata?rlkey=yu8i09tuuf6bbgfzsm7dcynp8&st=yhr9091b&dl=1>`_ (NUMSIMULATIONS=10,000, default)
+* `2020plus_100k.Rdata <https://www.dropbox.com/scl/fi/kouu7021tn2zr7l55ws10/2020plus_100k.Rdata?rlkey=ravsamve3zwfa642yxdifm5i3&st=tigmaqba&dl=1>`_ (NUMSIMULATIONS=100,000)
 
 Trained classifier for versions 1.0.0-1.0.3 (old):
 
-* `2020plus.Rdata <http://karchinlab.org/data/2020+/2020plus.Rdata>`_
+* `2020plus.Rdata <https://www.dropbox.com/scl/fi/oaspjxao9fm70wx9tmscm/2020plus.Rdata?rlkey=n82vxs1rak3y81quenoqxbaz7&st=lfdt2vwh&dl=1>`_
 
 Pan-cancer mutation data
 ------------------------
 
-* full `pan-cancer <http://karchinlab.org/data/Protocol/pancan-mutation-set-from-Tokheim-2016.txt.gz>`_ data set from:
+* full `pan-cancer <https://www.dropbox.com/scl/fi/8ob367fu9ztplyx4mmcj0/pancan-mutation-set-from-Tokheim-2016.txt.gz?rlkey=nxxwkotnuggw2ptinjbbfvp96&st=lw6ah2ip&dl=1>`_ data set from:
 
 Collin J. Tokheim, Nickolas Papadopoulos, Kenneth W. Kinzler, Bert Vogelstein, and Rachel Karchin. Evaluating the evaluation of cancer driver genes. PNAS 2016 ; published ahead of print November 22, 2016, doi:10.1073/pnas.1616440113
 
@@ -51,4 +51,4 @@ Details about how the mutations were filtered is available `here <https://github
 Example data
 ------------
 
-* Example `pan-cancer <http://karchinlab.org/data/2020+/pancan_example.tar.gz>`_ data set
+* Example `pan-cancer <https://www.dropbox.com/scl/fi/phv6sidw55qwiqq0g551a/pancan_example.tar.gz?rlkey=psnmy08lcssjj60gagowhwrf8&st=u2ndd173&dl=1>`_ data set
