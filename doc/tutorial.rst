@@ -48,10 +48,10 @@ or cancer type specific data.
 
    $ mkdir data
    $ cd data
-   $ wget http://karchinlab.org/data/Protocol/bladder.txt.gz  # download mutations
-   $ wget http://karchinlab.org/data/2020+/snvboxGenes.bed  # download transcript annotation
-   $ wget http://karchinlab.org/data/2020+/scores.tar.gz  # download pre-computed scores
-   $ wget http://karchinlab.org/data/2020+/2020plus_10k.Rdata  # download pre-computed scores
+   $ wget https://www.dropbox.com/scl/fi/qdlwws3u4s317cfvxf4f2/bladder.txt.gz?rlkey=e7ihy09c7nrbqib5cnn26pne7&st=9vr4py97&dl=1 -o bladder.txt.gz  # download mutations
+   $ wget https://www.dropbox.com/scl/fi/jnucugcu4qslb8vw0s9ry/snvboxGenes.bed?rlkey=yc3gqu4msx0wgqb6wo149rpok&st=ppij68wa&dl=1 -o snvboxGenes.bed  # download transcript annotation
+   $ wget https://www.dropbox.com/scl/fi/o6eaih9d3rr9ztms2pa33/scores.tar.gz?rlkey=ekih9qstzfncn8811935a7ghb&st=58ife2e0&dl=1 -o scores.tar.gz  # download pre-computed scores
+   $ wget https://www.dropbox.com/scl/fi/zv3twjeii2ghxtgy4f9o5/2020plus_10k.Rdata?rlkey=yu8i09tuuf6bbgfzsm7dcynp8&st=usug1aew&dl=1 -o 2020plus_10k.Rdata  # download pre-computed scores
    $ gunzip bladder.txt.gz 
    $ tar xvzf scores.tar.gz
    $ cd ..
@@ -137,9 +137,9 @@ or cancer type specific data.
 
    $ mkdir data
    $ cd data
-   $ wget http://karchinlab.org/data/Protocol/pancan-mutation-set-from-Tokheim-2016.txt.gz  # download mutations
-   $ wget http://karchinlab.org/data/2020+/snvboxGenes.bed  # download transcript annotation
-   $ wget http://karchinlab.org/data/2020+/scores.tar.gz  # download pre-computed scores
+   $ wget https://www.dropbox.com/scl/fi/8ob367fu9ztplyx4mmcj0/pancan-mutation-set-from-Tokheim-2016.txt.gz?rlkey=nxxwkotnuggw2ptinjbbfvp96&st=lw6ah2ip&dl=1 -o pancan-mutation-set-from-Tokheim-2016.txt.gz  # download mutations
+   $ wget wget https://www.dropbox.com/scl/fi/jnucugcu4qslb8vw0s9ry/snvboxGenes.bed?rlkey=yc3gqu4msx0wgqb6wo149rpok&st=ppij68wa&dl=1 -o snvboxGenes.bed  # download transcript annotation
+   $ wget https://www.dropbox.com/scl/fi/o6eaih9d3rr9ztms2pa33/scores.tar.gz?rlkey=ekih9qstzfncn8811935a7ghb&st=58ife2e0&dl=1 -o scores.tar.gz  # download pre-computed scores
    $ gunzip pancan-mutation-set-from-Tokheim-2016.txt.gz 
    $ mv pancan-mutation-set-from-Tokheim-2016.txt mutations.txt  # rename file
    $ tar xvzf scores.tar.gz
